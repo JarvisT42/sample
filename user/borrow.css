@@ -1,0 +1,15 @@
+.scrollable-table-container {
+    /* max-height: 560px; Adjust height as needed */
+    overflow-y: auto;
+    /* min-height: 200px; */
+    height: 900px;
+
+}
+
+
+.active-borrow {
+    background-color: #f0f0f0;
+    /* Example for light mode */
+    color: #000;
+    /* Example for light mode */
+}

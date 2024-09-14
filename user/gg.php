@@ -153,6 +153,9 @@ The Borrow Page is your gateway to accessing and managing book loans efficiently
     <div class="flex items-center space-x-2 mb-2">
         <div class="text-sm text-gray-600">Published</div>
         <div class="text-sm text-gray-600">2011</div>
+        <div class="text-sm text-gray-600">copies 11</div>
+        
+
     </div>
 
     <!-- Thesis bmr at the bottom -->
