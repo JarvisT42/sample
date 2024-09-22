@@ -215,53 +215,55 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             }
 
                             function displayRecords(records) {
-                                const startIndex = (currentPage - 1) * recordsPerPage;
-                                const endIndex = startIndex + recordsPerPage;
-                                const paginatedRecords = records.slice(startIndex, endIndex);
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    const paginatedRecords = records.slice(startIndex, endIndex);
 
-                                tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
-                <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
-                    <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
-                        <div class="flex-none w-12">
-                            <div class="text-lg font-semibold text-gray-800">${startIndex + index + 1}</div>
-                        </div>
-                        <div class="flex-1 border-l-2 border-black p-4">
-                            <h2 class="text-lg font-semibold mb-2">${record.title}</h2>
-                            <span class="block text-base mb-2">by ${record.author}</span>
-                            <div class="flex items-center space-x-2 mb-2">
-                                <div class="text-sm text-gray-600">Published</div>
-                                <div class="text-sm text-gray-600">${record.publicationDate}</div>
-                                <div class="text-sm text-gray-600">copies ${record.copies}</div>
-                            </div>
-                            <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
-                                ${record.table}
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0">
-                            ${record.copies <= 1
-                                ? `<span class="text-red-600">Not Available</span>`
-                                : `<a href="#" class="${record.inBag ? 'text-red-600' : 'text-green-600'} hover:underline book-bag-toggle"
-    data-id="${record.id}"  // Include the ID here
-    data-title="${record.title}" 
-    data-author="${record.author}" 
-    data-publication-date="${record.publicationDate}" 
-    data-table="${record.table}" 
-    data-cover-image="${record.coverImage}" 
-    data-copies="${record.copies}"
-    data-in-bag="${record.inBag}">
-    ${record.inBag ? '<span class="fa fa-minus"></span> Remove from Book Bag' : '<span class="fa fa-plus"></span> Add to Book Bag'}
-</a>
-`}
-                        </div>
-                        <div class="flex-shrink-0">
-                            <a href="#">
-                                <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">
-                            </a>
-                        </div>
+    tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
+        <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
+            <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
+                <div class="flex-none w-12">
+                    <div class="text-lg font-semibold text-gray-800">${startIndex + index + 1}</div>
+                </div>
+                <div class="flex-1 border-l-2 border-black p-4">
+                    <h2 class="text-lg font-semibold mb-2">${record.title}</h2>
+                    <span class="block text-base mb-2">by ${record.author}</span>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="text-sm text-gray-600">Published</div>
+                        <div class="text-sm text-gray-600">${record.publicationDate}</div>
+                        <div class="text-sm text-gray-600">copies ${record.copies}</div>
                     </div>
-                </li>
-            `).join('');
-                            }
+                    <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
+                        ${record.table}
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    ${record.copies <= 1
+                        ? `<span class="text-red-600">Not Available</span>`
+                        : record.currentlyBorrowed
+                            ? `<span class="text-yellow-600">Currently Borrowed</span>`
+                            : `<a href="#" class="${record.inBag ? 'text-red-600' : 'text-green-600'} hover:underline book-bag-toggle"
+                                data-id="${record.id}"  
+                                data-title="${record.title}" 
+                                data-author="${record.author}" 
+                                data-publication-date="${record.publicationDate}" 
+                                data-table="${record.table}" 
+                                data-cover-image="${record.coverImage}" 
+                                data-copies="${record.copies}"
+                                data-in-bag="${record.inBag}">
+                                ${record.inBag ? '<span class="fa fa-minus"></span> Remove from Book Bag' : '<span class="fa fa-plus"></span> Add to Book Bag'}
+                            </a>`
+                    }
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="#">
+                        <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">
+                    </a>
+                </div>
+            </div>
+        </li>
+    `).join('');
+}
 
                             function setupPagination(totalRecords) {
                                 const totalPages = Math.ceil(totalRecords / recordsPerPage);
