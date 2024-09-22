@@ -22,6 +22,20 @@
      
 
     </style>
+    
+<script>
+    // Clear local storage for book bag when the user visits the login page or after logging out
+    window.addEventListener('DOMContentLoaded', (event) => {
+        // Clear book bag related localStorage items
+        localStorage.removeItem('bookBagCount');
+        // Optionally, clear all items related to books
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('book-')) {
+                localStorage.removeItem(key);
+            }
+        });
+    });
+</script>
 
 </head>
 

@@ -1,4 +1,8 @@
+<?php
+# Initialize the session
+session_start();
 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +23,12 @@
 
     <style>
         /* If you prefer inline styles, you can include them directly */
-   
+        .active-dashboard {
+            background-color: #f0f0f0;
+            /* Example for light mode */
+            color: #000;
+            /* Example for light mode */
+        }
 
 
 

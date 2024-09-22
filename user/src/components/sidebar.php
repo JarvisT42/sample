@@ -1,3 +1,4 @@
+
 <button data-drawer-target="separator-sidebar" data-drawer-toggle="separator-sidebar" aria-controls="separator-sidebar" type="button" class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
     <span class="sr-only">Open sidebar</span>
     <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -12,7 +13,10 @@
         <div class="flex items-center p-2 mb-4 mt-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
     <img class="w-12 h-12 rounded-full" src="https://via.placeholder.com/100" alt="Profile Picture">
     <div class="ms-4">
-        <p class="text-gray-900 dark:text-white text-lg font-medium">John Doe</p>
+    <p class="text-gray-900 dark:text-white text-lg font-medium">
+    <?php echo htmlspecialchars($_SESSION["First_Name"]); ?>
+</p>
+        <!-- <p class="text-gray-900 dark:text-white text-lg font-medium">John Doe</p> -->
         <p class="text-gray-500 dark:text-gray-400 text-sm">Student</p>
     </div>
 </div>
@@ -20,7 +24,7 @@
         <ul class="space-y-2 font-medium">
             <!-- Other sidebar items here -->
             <li>
-                <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                <a href="dashboard.php" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group active-dashboard">
                     <svg class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
                         <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z" />
                         <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
@@ -102,14 +106,7 @@
                 </a>
             </li>
 
-            <li>
-                <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                    <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
-                        <path d="M17 5.923A1 1 0 0 0 16 5h-3V4a4 4 0 1 0-8 0v1H2a1 1 0 0 0-1 .923L.086 17.846A2 2 0 0 0 2.08 20h13.84a2 2 0 0 0 1.994-2.153L17 5.923ZM7 9a1 1 0 0 1-2 0V7h2v2Zm0-5a2 2 0 1 1 4 0v1H7V4Zm6 5a1 1 0 1 1-2 0V7h2v2Z" />
-                    </svg>
-                    <span class="flex-1 ms-3 whitespace-nowrap">Products</span>
-                </a>
-            </li>
+            
 
 
             <!-- Add other sidebar links here -->
@@ -123,7 +120,7 @@
     <div class="px-3 py-4 border-t border-gray-200 bg-gray-50 dark:border-gray-700">
         <ul class="space-y-2 font-medium">
             <li>
-                <a href="settings.php" class="flex items-center p-2 text-gray-900 transition duration-75 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
+                <a href="settings.php" class="flex items-center p-2 text-gray-900 transition duration-75 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group active-settings">
                     <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 8.5c-1.5 0-2.9.7-3.8 1.8l-1.4-1.4C6.5 8.4 7.1 7 8 6.4V5c0-1.1.9-2 2-2s2 .9 2 2v1.4c.9.6 1.5 1.7 1.2 2.7l-1.4 1.4c-.9-.8-2.3-1.3-3.2-1.3zm-1 3.8c.6-.6 1.5-.9 2.3-.6.8.2 1.4.8 1.6 1.6.2.8 0 1.7-.6 2.3-.7.6-1.6.9-2.4.6-3.4-.3-.8-1.1-1.5-2-1.5-1.1 0-2 .9-2 2s.9 2 2 2c.4 0 .8-.1 1.1-.3.5.3.9.8 1.1 1.4.1.4.2.9.1 1.4-.3.7-1.2 1.3-1.7 2.2-.3.7-.4 1.5-.3 2.2s.3 1.5.8 2.1c.7.7 1.7 1.2 2.6 1.2s2-1.1 2-2.5c0-1.4-1-2.5-2.5-2.5-.4 0-.8.1-1.2.2-.5-.4-1-1-1.3-1.7-.4-1.2.1-2.4 1.2-2.8zm-3.6 3.8c-.1.6-.4 1.1-.8 1.5s-1 .6-1.5.6c-1.1 0-2-.9-2-2s.9-2 2-2c.5 0 1.1.2 1.5.6.4.4.7.9.8 1.5zm4.6-.8c.1.3.1.6.1 1s-.1.7-.1 1.1c-1.6-.5-2.9-2.1-2.9-3.8 0-1.8 1.2-3.3 2.9-3.8-.1.4-.1.8-.1 1.1s.1.7.1 1.1c1.6-.5 2.9-2.1 2.9-3.8 0-1.8-1.2-3.3-2.9-3.8.1.3.1.7.1 1.1s-.1.7-.1 1.1c-1.6-.5-2.9-2.1-2.9-3.8s1.2-3.3 2.9-3.8c.1.3.1.7.1 1.1s-.1.7-.1 1.1c-1.6-.5-2.9-2.1-2.9-3.8 0-1.8 1.2-3.3 2.9-3.8z" />
                     </svg>
