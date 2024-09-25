@@ -27,6 +27,11 @@ session_start();
                         <tr>
                             <td class="border-b border-gray-300 px-4 py-2"><?php echo htmlspecialchars($book['id']); ?></td>
                             <td class="border-b border-gray-300 px-4 py-2"><?php echo htmlspecialchars($book['title']); ?></td>
+
+                            <td class="border-b border-gray-300 px-4 py-2"><?php echo htmlspecialchars($book['title']); ?></td>
+  <div class="flex-shrink-0">
+                                        <img src="<?php echo htmlspecialchars($book['coverImage']); ?>" alt="Book Cover" class="w-36 h-56 border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
+                                    </div>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>

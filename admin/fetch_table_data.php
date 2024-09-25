@@ -1,24 +1,4 @@
 <?php
-session_start(); // Start the session
-
-if (!isset($_SESSION['Id'])) {
-    die("Student ID not set in session.");
-}
-
-$studentId = $_SESSION['Id']; // Assuming student_id is stored in session
-
-if (!isset($_SESSION['book_bag'])) {
-    $_SESSION['book_bag'] = [];
-}
-
-$bookBag = $_SESSION['book_bag'];
-$bookBagTitles = array_map(function($book) {
-    return $book['title'] . '|' . $book['author'] . '|' . $book['publicationDate'] . '|' . $book['table'];
-}, $bookBag);
-
-// Count of items in the book bag
-$bookBagCount = count($bookBag);
-
 require '../connection2.php'; // Update with your actual path
 
 if ($conn->connect_error) {
@@ -32,9 +12,8 @@ if (!$connOg) {
 }
 
 // Check for borrowed books
-$borrowedBooksQuery = "SELECT Title, Author, Category FROM borrow WHERE student_id = ? AND status = 'pending'";
+$borrowedBooksQuery = "SELECT Title, Author, Category FROM borrow WHERE status = 'pending'";
 $stmt = $connOg->prepare($borrowedBooksQuery);
-$stmt->bind_param("i", $studentId);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -74,7 +53,6 @@ if ($table === 'All fields') {
                     $coverImageBase64 = base64_encode($coverImage);
                     $coverImageDataUrl = 'data:image/jpeg;base64,' . $coverImageBase64;
 
-                    $isInBag = in_array($tableRow['title'] . '|' . $tableRow['author'] . '|' . $tableRow['Date_Of_Publication_Copyright'] . '|' . $tableName, $bookBagTitles);
                     $isCurrentlyBorrowed = in_array($tableRow['title'] . '|' . $tableRow['author'] . '|' . $tableName, $borrowedBooks);
 
                     $allData[] = [
@@ -85,7 +63,6 @@ if ($table === 'All fields') {
                         'table' => $tableName,
                         'coverImage' => $coverImageDataUrl,
                         'copies' => $tableRow['No_Of_Copies'],
-                        'inBag' => $isInBag,
                         'currentlyBorrowed' => $isCurrentlyBorrowed
                     ];
                 }
@@ -93,7 +70,7 @@ if ($table === 'All fields') {
         }
     }
 
-    echo json_encode(['data' => $allData, 'bookBagCount' => $bookBagCount]);
+    echo json_encode(['data' => $allData]);
 } else {
     $table = $conn->real_escape_string($table);
     $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies FROM `$table`";
@@ -111,7 +88,6 @@ if ($table === 'All fields') {
             $coverImageBase64 = base64_encode($coverImage);
             $coverImageDataUrl = 'data:image/jpeg;base64,' . $coverImageBase64;
 
-            $isInBag = in_array($row['title'] . '|' . $row['author'] . '|' . $row['Date_Of_Publication_Copyright'] . '|' . $table, $bookBagTitles);
             $isCurrentlyBorrowed = in_array($row['title'] . '|' . $row['author'] . '|' . $table, $borrowedBooks);
 
             $data[] = [
@@ -122,12 +98,11 @@ if ($table === 'All fields') {
                 'table' => $table,
                 'coverImage' => $coverImageDataUrl,
                 'copies' => $row['No_Of_Copies'],
-                'inBag' => $isInBag,
                 'currentlyBorrowed' => $isCurrentlyBorrowed
             ];
         }
     }
 
-    echo json_encode(['data' => $data, 'bookBagCount' => $bookBagCount]);
+    echo json_encode(['data' => $data]);
 }
 ?>

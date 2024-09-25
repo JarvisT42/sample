@@ -8,7 +8,6 @@ $student_name = $_SESSION["First_Name"] . ' ' . $_SESSION["Last_Name"];
 $email = $_SESSION["Email_Address"];
 $selectedDate = $_SESSION["selected_date"];
 $selectedTime = $_SESSION["selected_time"];
-$SCourse = $_SESSION['S_Course'];
 
 // Save book IDs (assuming you have book IDs in your session for each book)
 $bookBag = $_SESSION['book_bag']; // Books in session
@@ -20,15 +19,14 @@ if (!empty($bookBag)) {
         $table = $book['table'];  // Assuming 'table' exists in the book session data
         $title = $book['title'];  // Assuming 'title' exists in the book session data
         $author = $book['author'];  // Assuming 'author' exists in the book session data
-        $cover_image = $book['coverImage']; // Get the cover image data
         $status = 'Pending';
 
         // Insert the data into the `borrow` table
-        $sql = "INSERT INTO borrow (student_id, student, course, book_id, Category, Title, Author, Date_to_claim, time, status, cover_image) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // Add cover_image to the SQL query
+        $sql = "INSERT INTO borrow (student_id, student, book_id, Category, Title, Author, Date_to_claim, time, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         if ($stmt = $conn->prepare($sql)) {
-            $stmt->bind_param("ississsssss", $id, $student_name, $SCourse, $book_id, $table, $title, $author, $selectedDate, $selectedTime, $status, $cover_image);
+            $stmt->bind_param("isissssss", $id, $student_name, $book_id, $table, $title, $author, $selectedDate, $selectedTime, $status);
             
             // Execute the query
             if ($stmt->execute()) {

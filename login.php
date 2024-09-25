@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $password = $_POST['password'];
 
         // Prepare the SQL statement to avoid SQL injection
-        $query = "SELECT Password, Id, First_Name, Middle_Initial, Last_Name, User_Name, Email_Address, Mobile_Number, Register_Status FROM students WHERE User_Name = ?";
+        $query = "SELECT * FROM students WHERE User_Name = ?";
         
         if ($stmt = mysqli_prepare($conn, $query)) {
             // Bind the parameter (username) to the prepared statement
@@ -37,6 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $_SESSION["Id"] = $row['Id'];
                         $_SESSION["First_Name"] = $row['First_Name'];
                         $_SESSION["Middle_Initial"] = $row['Middle_Initial'];
+                        $_SESSION["S_Course"] = $row['S_Course'];
+
                         $_SESSION["Last_Name"] = $row['Last_Name'];
                         $_SESSION["User_Name"] = $row['User_Name'];
                         $_SESSION["Email_Address"] = $row['Email_Address'];
