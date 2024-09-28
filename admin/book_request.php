@@ -2,23 +2,6 @@
 session_start();
 include '../connection.php';  // Ensure you have your database connection
 
-// Get today's date
-$today = date('Y-m-d');
-
-// Fetch all records with a claim date greater than or equal to today and group by student_id
-$sql = "SELECT Student, Course, student_id, Time, COUNT(student_id) AS borrow_count, MIN(Date_To_Claim) AS nearest_date 
-        FROM borrow 
-        WHERE Date_To_Claim >= '$today' AND status = 'pending' 
-        GROUP BY student_id";
-$result = $conn->query($sql);
-
-// Array to store records
-$records = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $records[] = $row;
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -81,40 +64,69 @@ if ($result->num_rows > 0) {
 
                             </thead>
                             <tbody>
-                                <?php if (!empty($records)): ?>
-                                    <?php foreach ($records as $record): ?>
-                                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-300">
-                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white break-words" style="max-width: 300px;">
-                                                <?php echo htmlspecialchars($record['Student']); ?>
-                                            </th>
-                                            <td class="px-6 py-4 break-words" style="max-width: 300px;">
-                                                <?php echo htmlspecialchars($record['Course']); ?>
-                                            </td>
-                                            <td class="px-6 py-4"><?php echo htmlspecialchars($record['borrow_count']); ?></td>
-                                            <td class="px-6 py-4">
-                                                <?php
-                                                // Format the nearest date
-                                                $nearestDate = new DateTime($record['nearest_date']);
-                                                // Format the date as 'F j, Y' and get the day of the week
-                                                $formattedDate = $nearestDate->format('F j, Y') . ' - ' . $nearestDate->format('l');
+                            <?php
+include '../connection.php';  // Ensure you have your database connection
 
-                                                // Output the formatted date along with the Time value if available
-                                                echo htmlspecialchars($formattedDate) . ' ' . htmlspecialchars($record['Time']);
-                                                ?>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                                    onclick="redirectToBookRequest('<?php echo htmlspecialchars($record['student_id']); ?>')">
-                                                    Next
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="5" class="px-6 py-4 text-center">No records found.</td>
-                                    </tr>
-                                <?php endif; ?>
+// Get today's date
+$today = date('Y-m-d');
+
+// //$sql = "SELECT Student, Course, student_id, Time, COUNT(student_id) AS borrow_count, MIN(Date_To_Claim) AS nearest_date 
+// FROM borrow 
+// WHERE Date_To_Claim >= '$today' AND status = 'pending' 
+// GROUP BY student_id";
+
+$sql = "SELECT s.First_Name, s.Middle_Initial, s.Last_Name, s.S_Course, b.student_id, b.Time, COUNT(b.student_id) AS borrow_count, MIN(b.Date_To_Claim) AS nearest_date 
+        FROM borrow b 
+        JOIN students s ON b.student_id = s.id  -- Assuming the primary key in students is 'id'
+        WHERE b.Date_To_Claim >= '$today' AND b.status = 'pending' 
+        GROUP BY b.student_id";
+
+
+$result = $conn->query($sql);
+
+// Array to store records
+$records = [];
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $records[] = $row;
+    }
+}
+?>
+                                <?php if (!empty($records)): ?>
+    <?php foreach ($records as $record): ?>
+        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-300">
+            <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white break-words" style="max-width: 300px;">
+            <?php echo htmlspecialchars($record['First_Name'] . ' ' . $record['Middle_Initial'] . ' ' . $record['Last_Name']); ?>
+            </th>
+            <td class="px-6 py-4 break-words" style="max-width: 300px;">
+                <?php echo htmlspecialchars($record['S_Course']); ?>
+            </td>
+            <td class="px-6 py-4"><?php echo htmlspecialchars($record['borrow_count']); ?></td>
+            <td class="px-6 py-4">
+                <?php
+                // Format the nearest date
+                $nearestDate = new DateTime($record['nearest_date']);
+                // Format the date as 'F j, Y' and get the day of the week
+                $formattedDate = $nearestDate->format('F j, Y') . ' - ' . $nearestDate->format('l');
+
+                // Output the formatted date along with the Time value if available
+                echo htmlspecialchars($formattedDate) . ' ' . htmlspecialchars($record['Time']);
+                ?>
+            </td>
+            <td class="px-6 py-4">
+                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    onclick="redirectToBookRequest('<?php echo htmlspecialchars($record['student_id']); ?>')">
+                    Next
+                </button>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+<?php else: ?>
+    <tr>
+        <td colspan="5" class="px-6 py-4 text-center">No records found.</td>
+    </tr>
+<?php endif; ?>
+
                             </tbody>
                         </table>
                     </div>

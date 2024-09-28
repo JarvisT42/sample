@@ -35,15 +35,20 @@ if (isset($_GET['student_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.js"></script>
+  
     <style>
-        .active-borrowed-books {
+        .active-book-request {
             background-color: #f0f0f0;
             color: #000;
         }
-        .drop_active{
-            display: block; /* or inline, inline-block, etc., depending on your layout needs */
-
+        .active-request {
+            background-color: #f0f0f0;
+            color: #000;
         }
+
+    
+
+     
     </style>
 </head>
 
@@ -168,6 +173,17 @@ if (isset($_GET['student_id'])) {
     </main>
 
     <script src="./src/components/header.js"></script>
+    <script>
+    // Function to automatically show the dropdown if on book_request.php
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownRequest = document.getElementById('dropdown-request');
+     
+            // Open the dropdown menu for 'Request'
+            dropdownRequest.classList.remove('hidden');
+            dropdownRequest.classList.add('block'); // Make the dropdown visible
+        
+    });
+</script>
 </body>
 
 </html>

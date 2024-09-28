@@ -79,77 +79,77 @@ if ($result->num_rows > 0) {
 
 
           <div class="slot_container p-6 rounded-lg shadow-md">
-    <div class="border-b border-gray-300 mb-4"></div>
-    <h2 class="text-2xl font-semibold text-center mb-4">Reservation Details</h2>
+            <div class="border-b border-gray-300 mb-4"></div>
+            <h2 class="text-2xl font-semibold text-center mb-4">Reservation Details</h2>
 
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-gray-200 border border-gray-500 overflow-hidden">
-            <thead class="border border-gray-500">
-                <tr>
+            <div class="overflow-x-auto">
+              <table class="min-w-full bg-gray-200 border border-gray-500 overflow-hidden">
+                <thead class="border border-gray-500">
+                  <tr>
                     <th colspan="3" class="py-2 text-lg text-center text-gray-700">General Santos City, South Cotabato</th>
-                </tr>
-                <tr>
+                  </tr>
+                  <tr>
                     <td colspan="3" id="selected-date-container" class="text-center py-2 text-gray-600 border border-gray-500"></td>
-                </tr>
-                <tr class="bg-gray-200 border border-gray-500">
+                  </tr>
+                  <tr class="bg-gray-200 border border-gray-500">
                     <th class="px-4 py-2 text-gray-600 border border-gray-500">Time</th>
                     <th class="px-4 py-2 text-gray-600 border border-gray-500">Available Slots</th>
                     <th class="px-4 py-2 text-gray-600 border border-gray-500">In Percentage</th>
-                </tr>
-            </thead>
-            <tbody class="schedule">
-                <tr class="morning-cell">
+                  </tr>
+                </thead>
+                <tbody class="schedule">
+                  <tr class="morning-cell">
                     <td class="w-1/2 px-1 sm:px-6 py-3 text-center border border-gray-500">
-                        <div class="flex items-center justify-center cursor-pointer px-4 py-2 rounded-lg font-bold bg-blue-500 text-white hover:bg-blue-600">
-                            <svg class="lucide lucide-sun mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="5"></circle>
-                                <path d="M12 1v2"></path>
-                                <path d="M12 21v2"></path>
-                                <path d="M4.22 4.22l1.42 1.42"></path>
-                                <path d="M18.36 18.36l1.42 1.42"></path>
-                                <path d="M1 12h2"></path>
-                                <path d="M21 12h2"></path>
-                                <path d="M4.22 19.78l1.42-1.42"></path>
-                                <path d="M18.36 5.64l1.42-1.42"></path>
-                            </svg>
-                            Morning
-                        </div>
+                      <div class="flex items-center justify-center cursor-pointer px-4 py-2 rounded-lg font-bold bg-blue-500 text-white hover:bg-blue-600">
+                        <svg class="lucide lucide-sun mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="5"></circle>
+                          <path d="M12 1v2"></path>
+                          <path d="M12 21v2"></path>
+                          <path d="M4.22 4.22l1.42 1.42"></path>
+                          <path d="M18.36 18.36l1.42 1.42"></path>
+                          <path d="M1 12h2"></path>
+                          <path d="M21 12h2"></path>
+                          <path d="M4.22 19.78l1.42-1.42"></path>
+                          <path d="M18.36 5.64l1.42-1.42"></path>
+                        </svg>
+                        Morning
+                      </div>
                     </td>
                     <td class="text-center available_slots_M border border-gray-500">10</td>
                     <td class="text-center in_percentage_M border border-gray-500">50%</td>
-                </tr>
-                <tr class="afternoon-cell">
+                  </tr>
+                  <tr class="afternoon-cell">
                     <td class="w-1/2 px-1 sm:px-6 py-3 text-center border border-gray-500">
-                        <div class="flex items-center justify-center cursor-pointer px-4 py-2 rounded-lg font-bold bg-blue-500 text-white hover:bg-blue-600">
-                            <svg class="lucide lucide-moon mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9c5.03 0 9-4.03 9-9s-4.03-9-9-9zm-2 17a7 7 0 0 1 0-14 7 7 0 0 1 0 14z"></path>
-                            </svg>
-                            Afternoon
-                        </div>
+                      <div class="flex items-center justify-center cursor-pointer px-4 py-2 rounded-lg font-bold bg-blue-500 text-white hover:bg-blue-600">
+                        <svg class="lucide lucide-moon mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9c5.03 0 9-4.03 9-9s-4.03-9-9-9zm-2 17a7 7 0 0 1 0-14 7 7 0 0 1 0 14z"></path>
+                        </svg>
+                        Afternoon
+                      </div>
                     </td>
                     <td class="text-center available_slots_A border border-gray-500">10</td>
                     <td class="text-center in_percentage_A border border-gray-500">50%</td>
-                </tr>
-                <!-- Add more rows for other time slots -->
-            </tbody>
-        </table>
-    </div>
+                  </tr>
+                  <!-- Add more rows for other time slots -->
+                </tbody>
+              </table>
+            </div>
 
-    <p id="validationMessage2" class="text-red-500 mt-4 hidden">Please select a time slot.</p>
+            <p id="validationMessage2" class="text-red-500 mt-4 hidden">Please select a time slot.</p>
 
-    <form action="schedule.php" method="post" class="mt-6">
-        <div class="flex justify-between gap-4">
-            <button type="button" class="back-button bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">
-                Back
-            </button>
-            <button type="button" class="proceed-button relative ml-2 inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 whitespace-nowrap">
-                Proceed
-            </button>
-        </div>
-    </form>
-</div>
+            <form action="schedule.php" method="post" class="mt-6">
+              <div class="flex justify-between gap-4">
+                <button type="button" class="back-button bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">
+                  Back
+                </button>
+                <button type="button" class="proceed-button relative ml-2 inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 whitespace-nowrap">
+                  Proceed
+                </button>
+              </div>
+            </form>
+          </div>
 
-<script src="https://unpkg.com/lucide@latest"></script>
+          <script src="https://unpkg.com/lucide@latest"></script>
 
 
 
@@ -196,7 +196,7 @@ if ($result->num_rows > 0) {
 
 
 
-    
+
 
     if (sessionData.selected_date) {
       const selectedDate = new Date(sessionData.selected_date);
@@ -343,7 +343,7 @@ if ($result->num_rows > 0) {
         if (selectedTimeSlot) {
           selectedTimeSlot.style.backgroundColor = '#0a56f9'; // Change to blue for the selected time slot
         }
-        
+
       }
 
 
@@ -363,32 +363,32 @@ if ($result->num_rows > 0) {
     });
 
     proceedButton.addEventListener('click', () => {
-  // Check if a time slot has not been clicked and there's no session data for selected time
-  if (!clickedTimeSlot && !sessionData.selected_time) {
-    validationMessage.classList.remove('hidden'); // Show validation message
-  } else {
-    validationMessage.classList.add('hidden'); // Hide validation message
+      // Check if a time slot has not been clicked and there's no session data for selected time
+      if (!clickedTimeSlot && !sessionData.selected_time) {
+        validationMessage.classList.remove('hidden'); // Show validation message
+      } else {
+        validationMessage.classList.add('hidden'); // Hide validation message
 
-    // Send selected date and time to the server
-    fetch('session_handler.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        date: clickedDate || sessionData.selected_date, // Use clickedDate or session data
-        time: clickedTimeSlot || sessionData.selected_time // Use clickedTimeSlot or session data
-      }),
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data); // Handle response if needed
-      // Redirect to confirm.php
-      window.location.href = "confirm.php";
-    })
-    .catch(error => console.error('Error:', error));
-  }
-});
+        // Send selected date and time to the server
+        fetch('session_handler.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              date: clickedDate || sessionData.selected_date, // Use clickedDate or session data
+              time: clickedTimeSlot || sessionData.selected_time // Use clickedTimeSlot or session data
+            }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log(data); // Handle response if needed
+            // Redirect to confirm.php
+            window.location.href = "confirm.php";
+          })
+          .catch(error => console.error('Error:', error));
+      }
+    });
 
 
 

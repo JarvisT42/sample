@@ -40,14 +40,28 @@ session_start();
 
                 <!-- Title Box -->
                 <!-- Title and Button Box -->
-                <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
-                    <h1 class="text-3xl font-semibold">Borrow</h1> <!-- Adjusted text size -->
-                    <!-- Button beside the title -->
-                </div>
+                <?php include './src/components/books.php'; ?>
 
-                <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-                    The Borrow Page is your gateway to accessing and managing book loans efficiently. On this page, you can search for and borrow books from our collection with ease. Simply browse or search for the titles you wish to borrow, select your preferred books, and follow the streamlined borrowing process. The page also provides a clear overview of the available books and their details.
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
+                <ul class="flex flex-wrap gap-2 p-5 border border-dashed rounded-md w-full">
+               
+
+										<li><a class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" href="#">All</a></li>
+                                        <br>
+										<li><a class="px-4 py-2 " href="add_books.php">Add Books</a></li>
+                                        <br>
+										<li><a href="#">Old Books</a></li>
+                                        <br>
+										<li><a href="#">Lost Books</a></li>
+                                        <br>
+										<li class="#"><a href="damage.php">Damage Books</a></li>
+                                        <br>
+										<li><a href="#">Subject for Replacement</a></li>
+									</ul>                    <!-- Button beside the title -->
+                                   
+
                 </div>
+                
 
                 <!-- Main Content Box -->
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 ">

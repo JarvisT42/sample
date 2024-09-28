@@ -1,10 +1,5 @@
 <?php
 session_start();
-if ($_SESSION["loggedin"] !== TRUE) {
-    echo "<script>window.location.href='../index.php';</script>";
-    exit;
-}
-
 
 
 ?>
@@ -215,11 +210,11 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             }
 
                             function displayRecords(records) {
-    const startIndex = (currentPage - 1) * recordsPerPage;
-    const endIndex = startIndex + recordsPerPage;
-    const paginatedRecords = records.slice(startIndex, endIndex);
+                                const startIndex = (currentPage - 1) * recordsPerPage;
+                                const endIndex = startIndex + recordsPerPage;
+                                const paginatedRecords = records.slice(startIndex, endIndex);
 
-    tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
+                                tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
         <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
             <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
                 <div class="flex-none w-12">
@@ -263,7 +258,7 @@ if ($_SESSION["loggedin"] !== TRUE) {
             </div>
         </li>
     `).join('');
-}
+                            }
 
                             function setupPagination(totalRecords) {
                                 const totalPages = Math.ceil(totalRecords / recordsPerPage);
@@ -389,7 +384,7 @@ if ($_SESSION["loggedin"] !== TRUE) {
                                                 }
                                             });
 
-                                            
+
                                     } else {
                                         fetch('remove_from_book_bag.php', {
                                                 method: 'POST',

@@ -123,10 +123,18 @@ if (isset($_GET['student_id'])) {
 
                                                         <div class="grid grid-cols-2 gap-4 mb-4">
                                                             <div>
-                                                                <p class="text-sm font-semibold">Fines:</p>
-                                                                <p class="text-sm">₱<?php echo htmlspecialchars($book['Fines']); ?></p>
+                                                                
+                                                                <!-- <p class="text-sm font-semibold">Fines: </p> -->
+                                                                
+                                                                <p class="text-sm font-semibold"> Fines: ₱<?php echo htmlspecialchars($book['Fines']); ?></p>
+                                                                <select class="border border-gray-300 rounded p-1 mr-16">
+                                                                    <option>0 Days</option>
+                                                                    <!-- Add more options as needed -->
+                                                                </select>
                                                             </div>
                                                             <div>
+                                                            <p class="text-sm font-semibold">Status</p>
+                                                                
                                                                 <select class="border border-gray-300 rounded p-1 mr-16">
                                                                     <option>0 Days</option>
                                                                     <!-- Add more options as needed -->

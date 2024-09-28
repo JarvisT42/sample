@@ -21,8 +21,8 @@ $bookBagCount = count($bookBag);
 
 require '../connection2.php'; // Update with your actual path
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($conn2->connect_error) {
+    die("Connection failed: " . $conn2->connect_error);
 }
 
 $connOg = mysqli_connect("localhost", "root", "", "GFI_Library_Database");
@@ -31,27 +31,56 @@ if (!$connOg) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Check for borrowed books
-$borrowedBooksQuery = "SELECT Title, Author, Category FROM borrow WHERE student_id = ? AND status = 'pending'";
-$stmt = $connOg->prepare($borrowedBooksQuery);
-$stmt->bind_param("i", $studentId);
-$stmt->execute();
-$result = $stmt->get_result();
+$sqlborrowedBooksQuery = "SELECT student_id, book_id, Category FROM borrow WHERE student_id = ? AND status = 'pending'";
+$stmtcheck = $connOg->prepare($sqlborrowedBooksQuery);
+$stmtcheck->bind_param("i", $studentId);
+$stmtcheck->execute();
+$result = $stmtcheck->get_result();
 
 $borrowedBooks = [];
-while ($row = $result->fetch_assoc()) {
-    $borrowedBooks[] = $row['Title'] . '|' . $row['Author'] . '|' . $row['Category'];
+
+// Create a connection to the second database
+$conn2 = mysqli_connect("localhost", "root", "", "gfi_library_database_books_records");
+if (!$conn2) {
+    die("Connection failed: " . mysqli_connect_error());
 }
-$stmt->close();
+
+// Fetch all borrowed books
+while ($row = $result->fetch_assoc()) {
+    $table = $row['Category']; // Assuming 'Category' is the table name
+    $bookId = $row['book_id']; // Use the correct column for book ID
+
+    // Prepare the query to get book details
+    $borrowedBooksQuery = "SELECT Title, Author FROM `$table` WHERE id = ?";
+    $stmt2 = $conn2->prepare($borrowedBooksQuery);
+    if ($stmt2) {
+        $stmt2->bind_param("i", $bookId);
+        $stmt2->execute();
+        $result2 = $stmt2->get_result();
+
+        // Fetch book details
+        while ($bookRow = $result2->fetch_assoc()) {
+            $borrowedBooks[] = $bookRow['Title'] . '|' . $bookRow['Author'] . '|' . $table; // Added category for checking
+        }
+
+        // Close the statement
+        $stmt2->close();
+    } else {
+        // Handle error with preparing statement
+        echo "Error preparing statement: " . $conn2->error;
+    }
+}
+
+// Now $borrowedBooks contains the titles, authors, and categories of the borrowed books
 
 $table = $_GET['table'] ?? '';
 
 if ($table === 'All fields') {
     $sql = "SHOW TABLES FROM gfi_library_database_books_records";
-    $result = $conn->query($sql);
+    $result = $conn2->query($sql);
 
     if (!$result) {
-        die("Error fetching tables: " . $conn->error);
+        die("Error fetching tables: " . $conn2->error);
     }
 
     $allData = [];
@@ -59,13 +88,13 @@ if ($table === 'All fields') {
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_array()) {
             $tableName = $row[0];
-            $tableName = $conn->real_escape_string($tableName);
-            $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies FROM `$tableName`";
+            $tableName = $conn2->real_escape_string($tableName);
+            $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status FROM `$tableName`";
 
-            $tableResult = $conn->query($sql);
+            $tableResult = $conn2->query($sql);
 
             if (!$tableResult) {
-                die("Error fetching data from table $tableName: " . $conn->error);
+                die("Error fetching data from table $tableName: " . $conn2->error);
             }
 
             if ($tableResult->num_rows > 0) {
@@ -86,7 +115,8 @@ if ($table === 'All fields') {
                         'coverImage' => $coverImageDataUrl,
                         'copies' => $tableRow['No_Of_Copies'],
                         'inBag' => $isInBag,
-                        'currentlyBorrowed' => $isCurrentlyBorrowed
+                        'currentlyBorrowed' => $isCurrentlyBorrowed,
+                        'status' => $tableRow['status']
                     ];
                 }
             }
@@ -95,13 +125,13 @@ if ($table === 'All fields') {
 
     echo json_encode(['data' => $allData, 'bookBagCount' => $bookBagCount]);
 } else {
-    $table = $conn->real_escape_string($table);
-    $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies FROM `$table`";
+    $table = $conn2->real_escape_string($table);
+    $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status FROM `$table`";
 
-    $result = $conn->query($sql);
+    $result = $conn2->query($sql);
 
     if (!$result) {
-        die("Error fetching data from table $table: " . $conn->error);
+        die("Error fetching data from table $table: " . $conn2->error);
     }
 
     $data = [];
@@ -123,7 +153,8 @@ if ($table === 'All fields') {
                 'coverImage' => $coverImageDataUrl,
                 'copies' => $row['No_Of_Copies'],
                 'inBag' => $isInBag,
-                'currentlyBorrowed' => $isCurrentlyBorrowed
+                'currentlyBorrowed' => $isCurrentlyBorrowed,
+                'status' => $row['status']
             ];
         }
     }

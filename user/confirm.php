@@ -84,9 +84,9 @@ $formattedDate = (new DateTime($selectedDate))->format('l, F j, Y');
                     ?>
                   </div>
 
-                  <div class="bg-gray-100 p-2 font-semibold flex items-center border-b border-gray-300"><i data-lucide="calendar" class="w-4 h-4 mr-2"></i>Date</div>
+                  <div class="bg-gray-100 p-2 font-semibold flex items-center border-b border-gray-300"><i data-lucide="calendar" class="w-4 h-4 mr-2"></i>Date To Claim</div>
                   <div class="p-2 border-b border-gray-300"><?php echo htmlspecialchars($selectedDate); ?></div>
-                  <div class="bg-gray-100 p-2 font-semibold flex items-center border-b border-gray-300"><i data-lucide="clock" class="w-4 h-4 mr-2"></i>Time</div>
+                  <div class="bg-gray-100 p-2 font-semibold flex items-center border-b border-gray-300"><i data-lucide="clock" class="w-4 h-4 mr-2"></i>Schedule</div>
                   <div class="p-2 border-b border-gray-300"><?php echo htmlspecialchars($selectedTime); ?></div>
                 </div>
               </div>

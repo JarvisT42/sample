@@ -54,13 +54,13 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             // Database connection
                             require '../connection2.php';
 
-                            if ($conn->connect_error) {
-                                die("Connection failed: " . $conn->connect_error);
+                            if ($conn2->connect_error) {
+                                die("Connection failed: " . $conn2->connect_error);
                             }
 
                             // Query to fetch all table names
                             $sql = "SHOW TABLES FROM gfi_library_database_books_records";
-                            $result = $conn->query($sql);
+                            $result = $conn2->query($sql);
                             ?>
 
                             <div class="relative inline-block text-left">
@@ -200,7 +200,10 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             let currentPage = 1; // To track the current page
                             const recordsPerPage = 5; // Number of records per page
 
+
+                            
                             function loadTableData(tableName) {
+                               
                                 fetch(`fetch_table_data.php?table=${encodeURIComponent(tableName)}`)
                                     .then(response => response.json())
                                     .then(data => {
@@ -232,7 +235,15 @@ if ($_SESSION["loggedin"] !== TRUE) {
                         <div class="text-sm text-gray-600">Published</div>
                         <div class="text-sm text-gray-600">${record.publicationDate}</div>
                         <div class="text-sm text-gray-600">copies ${record.copies}</div>
+                    
                     </div>
+
+                      <div class="flex items-center space-x-2 mb-2">
+                        
+                        <div class="text-sm text-gray-600">Book Status: ${record.status}</div> <!-- Add status here -->
+                    </div>
+
+
                     <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
                         ${record.table}
                     </div>
@@ -264,6 +275,7 @@ if ($_SESSION["loggedin"] !== TRUE) {
         </li>
     `).join('');
 }
+
 
                             function setupPagination(totalRecords) {
                                 const totalPages = Math.ceil(totalRecords / recordsPerPage);
@@ -389,7 +401,7 @@ if ($_SESSION["loggedin"] !== TRUE) {
                                                 }
                                             });
 
-                                            
+
                                     } else {
                                         fetch('remove_from_book_bag.php', {
                                                 method: 'POST',
