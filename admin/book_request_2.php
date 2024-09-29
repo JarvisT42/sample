@@ -6,23 +6,56 @@ include '../connection.php'; // Ensure you have your database connection
 if (isset($_GET['student_id'])) {
     $student_id = htmlspecialchars($_GET['student_id']);
 
-    // Fetch data from the database based on student_id
-    $query = "SELECT * FROM borrow WHERE student_id = ? AND status = 'pending'";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $student_id); // Assuming student_id is an integer
+    // Fetch the category based on the student_id
+    $categoryQuery = "SELECT Category FROM GFI_Library_Database.borrow WHERE student_id = ?";
+    $stmt = $conn->prepare($categoryQuery);
+    $stmt->bind_param('i', $student_id); // Assuming student_id is an integer
     $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Fetch the category
+    if ($row = $result->fetch_assoc()) {
+        $category = $row['Category']; // Get the category for the student
+    } else {
+        echo "No category found for this student.";
+        exit;
+    }
+
+    $stmt->close(); // Close the category statement
+
+    // Prepare the SQL statement safely using placeholders
+    $query = "
+    SELECT a.student_id, a.book_id, a.Category,  a.No_Of_Copies, b.First_Name, b.Middle_Initial, b.Last_Name, a.Date_To_Claim, c.Title, c.Author, c.record_cover    
+    FROM GFI_Library_Database.borrow AS a 
+    JOIN GFI_Library_Database.students AS b ON a.student_id = b.id
+    JOIN gfi_library_database_books_records.$category AS c ON a.book_id = c.id
+    WHERE a.student_id = ? AND a.status = 'pending'";
+
+    // Prepare the statement
+    $stmt = $conn->prepare($query);
+    // Bind parameters (integer type for student_id)
+    $stmt->bind_param('i', $student_id);
+
+    // Execute the statement
+    $stmt->execute();
+
+    // Get the result
     $result = $stmt->get_result();
 
     // Fetch all data into an array
     $books = $result->fetch_all(MYSQLI_ASSOC) ?: []; // Use short-circuit evaluation for empty check
 
     $stmt->close(); // Close statement
+
+
 } else {
     // Handle the case where student_id is not provided
     echo "No student ID provided.";
     exit; // Stop execution if no student_id
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -35,20 +68,17 @@ if (isset($_GET['student_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.js"></script>
-  
+
     <style>
         .active-book-request {
             background-color: #f0f0f0;
             color: #000;
         }
+
         .active-request {
             background-color: #f0f0f0;
             color: #000;
         }
-
-    
-
-     
     </style>
 </head>
 
@@ -61,15 +91,23 @@ if (isset($_GET['student_id'])) {
                     <div class="bg-white p-4 shadow-sm rounded-lg mb-2">
                         <div class="bg-gray-100 p-2 flex justify-between items-center">
                             <h1 class="m-0">Student Name: <?php
-                                                            // Display Student Name if available
-                                                            if (!empty($books)) {
-                                                                echo htmlspecialchars($books[0]['Student']); // Adjust based on how student data is structured
-                                                            }
+                                                           // Display Student Name if available
+if (!empty($books)) {
+    // Access the student's data correctly
+    $firstName = htmlspecialchars($books[0]['First_Name']);
+    $middleInitial = htmlspecialchars($books[0]['Middle_Initial']);
+    $lastName = htmlspecialchars($books[0]['Last_Name']);
+
+    // Concatenate names
+    $fullName = trim("$firstName $middleInitial $lastName"); // Trim to remove any extra spaces
+
+    echo $fullName; // Display the full name
+}
+
                                                             ?></h1>
                             <input type="checkbox" id="book-checkbox" value="" class="ml-2">
                         </div>
                     </div>
-
 
                     <?php if (!empty($books)): ?>
                         <?php
@@ -80,8 +118,8 @@ if (isset($_GET['student_id'])) {
                             $grouped_books[$date_to_claim][] = $book;
                         }
                         ?>
-
-                        <form id="book-request-form" class="space-y-6">
+                        <form id="book-request-form" class="space-y-6" method="POST" action="book_request_2_save.php">
+                            <input type="hidden" name="student_id" value="<?php echo htmlspecialchars($student_id); ?>">
                             <?php foreach ($grouped_books as $date => $books_group): ?>
                                 <div class="bg-blue-200 p-4 rounded-lg">
                                     <h3 class="text-lg font-semibold text-white">Date to Claim: <?php echo $date; ?></h3>
@@ -103,63 +141,36 @@ if (isset($_GET['student_id'])) {
                                                             <div class="font-medium bg-gray-200 p-2">Table:</div>
                                                             <div class="bg-gray-100 p-2"><?php echo htmlspecialchars($book['Category']); ?></div>
                                                             <div class="font-medium bg-gray-100 p-2">Copies:</div>
-                                                            <div class="bg-gray-200 p-2">1</div>
+                                                            <div class="bg-gray-100 p-2"><?php echo htmlspecialchars($book['book_id']); ?></div>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div class="flex-shrink-0 ml-2">
-                                                    <a href="#" class="text-green-600 hover:underline remove-book">
-                                                        <span class="fa fa-plus"></span> Remove to Book Bag
-                                                    </a>
-                                                </div>
-
-                                                
-                                                
                                                 <div class="flex-shrink-0">
-                                                <img src="<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover" class="w-36 h-56 border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
-
+                                                    <?php
+                                                    // Handle the image display
+                                                    if (!empty($book['record_cover'])) {
+                                                        $imageData = base64_encode($book['record_cover']);
+                                                        $imageSrc = 'data:image/jpeg;base64,' . $imageData;
+                                                    } else {
+                                                        $imageSrc = 'path/to/default/image.jpg'; // Provide a default image source
+                                                    }
+                                                    ?>
+                                                    <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-36 h-56 border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
                                                 </div>
 
                                                 <div class="flex-shrink-0 ml-2">
-                                                    <input type="checkbox" id="book-checkbox-<?php echo $index; ?>" name="selected_books[]" value="<?php echo $book['id']; ?>" class="mr-1">
-                                                    <label for="book-checkbox-<?php echo $index; ?>" class="text-sm text-gray-600">Select</label>
+                                                    <input type="checkbox" id="book-checkbox-<?php echo $date . '-' . $index; ?>" name="selected_books[]" value="<?php echo $book['book_id']; ?>" class="mr-1">
+                                                    <label for="book-checkbox-<?php echo $date . '-' . $index; ?>" class="text-sm text-gray-600">Select</label>
                                                 </div>
                                             </div>
                                         </li>
                                     <?php endforeach; ?>
                                 </div>
                             <?php endforeach; ?>
+
                             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit Selected Books</button>
                         </form>
-
-                        <script>
-                            document.getElementById('book-request-form').addEventListener('submit', function(event) {
-                                event.preventDefault(); // Prevent the default form submission
-
-                                // Create a FormData object from the form
-                                var formData = new FormData(this);
-
-                                // Send an AJAX request
-                                fetch('book_request_2_save.php', {
-                                        method: 'POST',
-                                        body: formData,
-                                    })
-                                    .then(response => response.text())
-                                    .then(data => {
-                                        // Check if the response is successful
-                                        if (data.includes('Books successfully borrowed.')) {
-                                            alert('Successful'); // Show alert
-                                            window.location.href = 'dashboard.php'; // Redirect to dashboard
-                                        } else {
-                                            alert('Error: ' + data); // Handle error
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                    });
-                            });
-                        </script>
 
 
                     <?php else: ?>
@@ -167,6 +178,7 @@ if (isset($_GET['student_id'])) {
                             <div class="text-gray-600">No books found for this student.</div>
                         </div>
                     <?php endif; ?>
+
                 </div>
             </div>
         </div>
@@ -174,16 +186,16 @@ if (isset($_GET['student_id'])) {
 
     <script src="./src/components/header.js"></script>
     <script>
-    // Function to automatically show the dropdown if on book_request.php
-    document.addEventListener('DOMContentLoaded', function() {
-        const dropdownRequest = document.getElementById('dropdown-request');
-     
+        // Function to automatically show the dropdown if on book_request.php
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownRequest = document.getElementById('dropdown-request');
+
             // Open the dropdown menu for 'Request'
             dropdownRequest.classList.remove('hidden');
             dropdownRequest.classList.add('block'); // Make the dropdown visible
-        
-    });
-</script>
+
+        });
+    </script>
 </body>
 
 </html>

@@ -1,8 +1,8 @@
 <?php
 require '../connection2.php'; // Update with your actual path
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($conn2->connect_error) {
+    die("Connection failed: " . $conn2->connect_error);
 }
 
 $connOg = mysqli_connect("localhost", "root", "", "GFI_Library_Database");
@@ -27,10 +27,10 @@ $table = $_GET['table'] ?? '';
 
 if ($table === 'All fields') {
     $sql = "SHOW TABLES FROM gfi_library_database_books_records";
-    $result = $conn->query($sql);
+    $result = $conn2->query($sql);
 
     if (!$result) {
-        die("Error fetching tables: " . $conn->error);
+        die("Error fetching tables: " . $conn2->error);
     }
 
     $allData = [];
@@ -38,13 +38,13 @@ if ($table === 'All fields') {
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_array()) {
             $tableName = $row[0];
-            $tableName = $conn->real_escape_string($tableName);
-            $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies FROM `$tableName`";
+            $tableName = $conn2->real_escape_string($tableName);
+            $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status FROM `$tableName`";
 
-            $tableResult = $conn->query($sql);
+            $tableResult = $conn2->query($sql);
 
             if (!$tableResult) {
-                die("Error fetching data from table $tableName: " . $conn->error);
+                die("Error fetching data from table $tableName: " . $conn2->error);
             }
 
             if ($tableResult->num_rows > 0) {
@@ -63,7 +63,9 @@ if ($table === 'All fields') {
                         'table' => $tableName,
                         'coverImage' => $coverImageDataUrl,
                         'copies' => $tableRow['No_Of_Copies'],
-                        'currentlyBorrowed' => $isCurrentlyBorrowed
+                        'currentlyBorrowed' => $isCurrentlyBorrowed,
+                        'status' => $tableRow['status']
+
                     ];
                 }
             }
@@ -72,13 +74,13 @@ if ($table === 'All fields') {
 
     echo json_encode(['data' => $allData]);
 } else {
-    $table = $conn->real_escape_string($table);
-    $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies FROM `$table`";
+    $table = $conn2->real_escape_string($table);
+    $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status FROM `$table`";
 
-    $result = $conn->query($sql);
+    $result = $conn2->query($sql);
 
     if (!$result) {
-        die("Error fetching data from table $table: " . $conn->error);
+        die("Error fetching data from table $table: " . $conn2->error);
     }
 
     $data = [];
@@ -98,7 +100,9 @@ if ($table === 'All fields') {
                 'table' => $table,
                 'coverImage' => $coverImageDataUrl,
                 'copies' => $row['No_Of_Copies'],
-                'currentlyBorrowed' => $isCurrentlyBorrowed
+                'currentlyBorrowed' => $isCurrentlyBorrowed,
+                'status' => $row['status']
+
             ];
         }
     }

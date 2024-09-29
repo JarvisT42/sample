@@ -49,13 +49,13 @@ session_start();
                             // Database connection
                             require '../connection2.php';
 
-                            if ($conn->connect_error) {
-                                die("Connection failed: " . $conn->connect_error);
+                            if ($conn2->connect_error) {
+                                die("Connection failed: " . $conn2->connect_error);
                             }
 
                             // Query to fetch all table names
                             $sql = "SHOW TABLES FROM gfi_library_database_books_records";
-                            $result = $conn->query($sql);
+                            $result = $conn2->query($sql);
                             ?>
 
                             <div class="relative inline-block text-left">

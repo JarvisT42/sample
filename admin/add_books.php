@@ -70,39 +70,56 @@ session_start();
                             <h2 class="text-lg font-semibold p-4">Please Enter Details Below</h2>
                         </div>
                         <div class="p-6 bg-white rounded-b-lg shadow-md">
+
+
+
                             <form class="space-y-4">
 
-                            <div class="grid grid-cols-3 items-center gap-4">
-                                    <label for="category" class="text-right">CATEGORY:</label>
-                                    <select id="category" class="col-span-2 border rounded px-3 py-2">
-                                        <option value="" disabled selected>Select a category</option>
-                                        <option value="fiction">Fiction</option>
-                                        <option value="non-fiction">Non-Fiction</option>
-                                        <option value="science">Science</option>
-                                        <option value="history">History</option>
-                                    </select>
-                                </div>
 
-                                
+
+                            <div class="grid grid-cols-7 items-center gap-4 mt-3">
+        <label for="category" class="text-left">CATEGORY:</label>
+        <select id="category" class="col-span-2 border rounded px-3 py-2" disabled>
+            <option value="" disabled selected>Select a category</option>
+            <option value="fiction">Fiction</option>
+            <option value="non-fiction">Non-Fiction</option>
+            <option value="science">Science</option>
+            <option value="history">History</option>
+        </select>
+
+        <div class="flex items-center col-span-2">
+            <input type="checkbox" id="checkbox_id" class="mr-2" />
+            <label for="checkbox_id" class="text-left">ADD CATEGORY:</label>
+        </div>
+
+        <input id="add_category" placeholder="Add Category" class="col-span-2 border rounded px-3 py-2" disabled />
+    </div>
+
+
+
+
+
                                 <div class="grid grid-cols-3 items-center gap-4">
-                                    <label for="call_number" class="text-right">CALL NUMBER:</label>
+                                    <label for="call_number" class="text-left">CALL NUMBER:</label>
+
+
                                     <input id="call_number" placeholder="Call Number" class="col-span-2 border rounded px-3 py-2" />
 
 
-                                    <label for="department" class="text-right">DEPARTMENT:</label>
+                                    <label for="department" class="text-left">DEPARTMENT:</label>
                                     <input id="department" placeholder="Department" class="col-span-2 border rounded px-3 py-2" />
 
 
-                                    <label for="book_title" class="text-right">BOOK_TITLE:</label>
+                                    <label for="book_title" class="text-left">BOOK_TITLE:</label>
                                     <input id="book_title" placeholder="Book Title" class="col-span-2 border rounded px-3 py-2" />
                                 </div>
-                               
+
                                 <div class="grid grid-cols-3 items-center gap-4">
-                                    <label for="author" class="text-right">AUTHOR:</label>
+                                    <label for="author" class="text-left">AUTHOR:</label>
                                     <input id="author" placeholder="Author" class="col-span-2 border rounded px-3 py-2" />
                                 </div>
                                 <div class="grid grid-cols-3 items-center gap-4">
-                                    <label for="book_copies" class="text-right">BOOK COPIES:</label>
+                                    <label for="book_copies" class="text-left">BOOK COPIES:</label>
                                     <input id="book_copies" type="number" class="col-span-2 border rounded px-3 py-2" />
                                 </div>
                                 <!-- <div class="grid grid-cols-3 items-center gap-4">
@@ -111,11 +128,11 @@ session_start();
                                     <input id="book_publication" placeholder="book_pub" class="col-span-2 border rounded px-3 py-2" />
                                 </div> -->
                                 <div class="grid grid-cols-3 items-center gap-4">
-                                    <label for="publisher_name" class="text-right">PUBLISHER NAME:</label>
+                                    <label for="publisher_name" class="text-left">PUBLISHER NAME:</label>
                                     <input id="publisher_name" placeholder="Publisher Name" class="col-span-2 border rounded px-3 py-2" />
                                 </div>
                                 <div class="grid grid-cols-3 items-center gap-4">
-                                    <label for="subject" class="text-right">SUBJECT:</label>
+                                    <label for="subject" class="text-left">SUBJECT:</label>
                                     <input id="subject" placeholder="SUBJECT" class="col-span-2 border rounded px-3 py-2" />
                                 </div>
                                 <!-- <div class="grid grid-cols-3 items-center gap-4">
@@ -123,7 +140,7 @@ session_start();
                                     <input id="date_encoded" placeholder="Date Encoded" class="col-span-2 border rounded px-3 py-2" />
                                 </div> -->
                                 <div class="grid grid-cols-3 items-center gap-4">
-                                    <label for="status" class="text-right">STATUS:</label>
+                                    <label for="status" class="text-left">STATUS:</label>
                                     <select id="status" class="col-span-2 border rounded px-3 py-2">
                                         <option value="" disabled selected>Select status</option>
                                         <option value="new">New</option>
@@ -142,6 +159,26 @@ session_start();
                                     </button>
                                 </div>
                             </form>
+
+                            <script>
+    // Get the checkbox and input/select elements
+    const checkbox = document.getElementById('checkbox_id');
+    const categorySelect = document.getElementById('category');
+    const addCategoryInput = document.getElementById('add_category');
+
+    // Add an event listener to the checkbox
+    checkbox.addEventListener('change', function() {
+        // Toggle the disabled state of the select and input based on the checkbox state
+        if (checkbox.checked) {
+            categorySelect.disabled = true;  // Disable the select
+            addCategoryInput.disabled = false; // Enable the input
+        } else {
+            categorySelect.disabled = false; // Enable the select
+            addCategoryInput.disabled = true; // Disable the input
+        }
+    });
+</script>
+
                         </div>
                     </div>
 
