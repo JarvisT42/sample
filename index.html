@@ -1,105 +1,3 @@
-<?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-session_start();
-$loginError = false; // Flag for login error
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_login'])) {
-
-    include 'connection.php'; // Include your database connection file
-
-    // Get form input
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-
-    // Prepare SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM students WHERE Email_Address = ?");
-    $stmt->bind_param("s", $email);
-
-    // Execute the statement
-    $stmt->execute();
-
-    // Get the result
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        // Fetch the row
-        $row = $result->fetch_assoc();
-        $hashed_password = $row['Password']; // Assuming the column name is 'Password'
-
-        // Verify the hashed password
-        if (password_verify($password, $hashed_password)) {
-            // If a match is found, set session variables and redirect to gg.php
-            $_SESSION["loggedin"] = TRUE;
-            $_SESSION["Id"] = $row['Id'];
-            $_SESSION["First_Name"] = $row['First_Name'];
-            $_SESSION["Middle_Initial"] = $row['Middle_Initial'];
-            $_SESSION["Last_Name"] = $row['Last_Name'];
-            $_SESSION['email'] = $email;
-
-            header("Location: user/dashboard.php");
-            exit();
-        } else {
-            $loginError = true; // Set login error flag
-        }
-    } else {
-        $loginError = true; // Set login error flag if no user found
-    }
-
-    // Close the statement and connection
-    $stmt->close();
-    $conn->close();
-}
-
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
-
-    include 'connection.php'; // Include your database connection file
-
-    // Get form input
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-
-    // Prepare SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM admin_account WHERE Email = ?");
-    $stmt->bind_param("s", $email);
-
-    // Execute the statement
-    $stmt->execute();
-
-    // Get the result
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        // Fetch the row
-        $row = $result->fetch_assoc();
-        $hashed_password = $row['Password']; // Assuming the column name is 'Password'
-
-        // Verify the hashed password
-        if (password_verify($password, $hashed_password)) {
-            // If a match is found, set session variables and redirect to gg.php
-            $_SESSION["logged_Admin"] = TRUE;
-            $_SESSION["Id"] = $row['Id'];
-            $_SESSION["Full_Name"] = $row['Full_Name'];
-
-
-
-            header("Location: admin/dashboard.php");
-            exit();
-        } else {
-            $loginError = true;
-        }
-    } else {
-        $loginError = true;
-    }
-
-    // Close the statement and connection
-    $stmt->close();
-    $conn->close();
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -128,154 +26,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                 <input type="button" id="toggleLogin" value="Register" /><br />
             </div>
 
-
-
+            
             <div class="col-md-9 login-right">
-                <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Student</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Admin</a>
-                    </li>
-                </ul>
-
-                <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-
-
-                        <form id="loginForm" class="student" method="POST" action="">
-                            <h3 class="login-heading">Login As Student</h3>
-                            <div class="row login-form">
-                                <div class="col-md-6">
-                                    <!-- Email input -->
-                                    <div class="form-group">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                            </div>
-                                            <input type="email" name="email" class="form-control" placeholder="Your Email *" required />
-                                        </div>
-                                    </div>
-                                    <!-- Password input -->
-                                    <div class="form-group">
-                                        <div class="input-group">
-
-
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                            </div>
-                                            <input type="password" name="password" class="form-control" placeholder="Your Password *" required />
-
-
-
-                                        </div>
-                                    </div>
-
-
-
-
-                                    <div class="form-group">
-                                        <div class="input-group d-flex justify-content-between">
-                                            <label class="form-check-label">
-
-                                                <input type="checkbox" id="rememberMe" name="rememberMe" />
-                                                Remember Me
-                                            </label>
-                                            <div class="">
-                                                <a id="forgot_password" href="#" role="tab" aria-controls="ForgotPassword" aria-selected="false">Forgot Password?</a>
-
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-                                    <!-- Remember Me checkbox -->
-
-                                    <!-- Incorrect login alert -->
-                                    <div class="alert alert-danger" style="display: <?php echo $loginError ? 'block' : 'none'; ?>;">
-                                        Incorrect email or password. Please try again.
-                                    </div>
-                                    <!-- Login button -->
-                                    <input type="submit" class="btnlogin" name="student_login" value="Login" />
-                                    <!-- Forgotten password link -->
-
-                                </div>
-                            </div>
-                        </form>
-
-
-
-
-
-                    </div>
-
-
-
-                    <div class="tab-pane fade show" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-
-
-                        <form id="loginForm " class="admin" method="POST" action="">
-                            <h3 class="login-heading">Login As Admin</h3>
-                            <div class="row login-form">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                            </div>
-                                            <input type="email" name="email" class="form-control" placeholder="Your Email *" required />
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                            </div>
-                                            <input type="password" name="password" class="form-control" placeholder="Your Password *" required />
-                                        </div>
-                                    </div>
-                                    <div class="alert alert-danger" style="display: <?php echo $loginError ? 'block' : 'none'; ?>;">Incorrect email or password. Please try again.</div>
-                                    <input type="submit" class="btnlogin" name="admin_login" value="Login" />
-                                </div>
-                            </div>
-                        </form>
-
-
-
-
-                    </div>
-                </div>
-
-
-
-
-
-            </div>
-
-
-            <div class="col-md-9 forgot-password-right" style="display: none;">
-                <form id="forgotPassword">
-                    <h3 class="forgot-password-heading">Forgot Password</h3>
-                    <div class="row forgot-password-form">
+                <form id="loginForm">
+                    <h3 class="login-heading">Login</h3>
+                    <div class="row login-form">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                                     </div>
-                                    <input type="email" name="email" class="form-control" placeholder="Your Email *" required />
+                                    <input type="email" class="form-control" placeholder="Your Email *" required />
                                 </div>
                             </div>
-
-                            <input type="submit" class="btnlogin" name="forgot_password" value="Send Email" />
-
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    </div>
+                                    <input type="password" class="form-control" placeholder="Your Password *" required />
+                                </div>
+                            </div>
+                            <input type="submit" class="btnlogin" value="Login" />
                         </div>
                     </div>
                 </form>
             </div>
+
 
 
             <div class="col-md-9 validation-right" style="display: none;">
@@ -287,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                 <div class="input-group">
                                     <p class="validation-message alert alert-warning d-flex align-items-center">
                                         <i class="fas fa-exclamation-triangle me-2"></i>
-                                        Before you proceed, make sure that your Student ID No. belongs to you.
+                                        Before you proceed, make sure that your Student ID belongs to you.
                                     </p>
 
                                     <div class="input-group-prepend">
@@ -455,7 +233,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                 // Hide forms and reset input fields
                 $(".validation-right").hide();
                 $(".register-right").hide();
-                $(".forgot-password-right").hide(); // Hide forgot password form
                 $("#validationForm")[0].reset(); // Reset validation form
                 $("#registrationForm")[0].reset(); // Reset registration form
 
@@ -469,13 +246,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                     $(".validation-right").hide();
                     $(this).val("Register");
                 }
-            });
-            // Show forgot password form
-            $("#forgot_password").click(function(e) {
-                e.preventDefault(); // Prevent default anchor click behavior
-                $(".login-right").hide(); // Hide login form
-                $(".forgot-password-right").show(); // Show forgot password form
-                $("#toggleLogin").val("Log In"); // Change register button text to "Log In"
             });
 
             // Show registration form after clicking Proceed
@@ -499,8 +269,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                     }
                 });
             });
-
-
         });
     </script>
     <script>

@@ -13,7 +13,7 @@
             <img class="w-12 h-12 rounded-full" src="https://via.placeholder.com/100" alt="Profile Picture">
             <div class="ms-4">
                 <p class="text-gray-900 dark:text-white text-lg font-medium">
-                    Ngg
+                <?php echo htmlspecialchars($_SESSION["Full_Name"]); ?>
                 </p>
                 <!-- <p class="text-gray-900 dark:text-white text-lg font-medium">John Doe</p> -->
                 <p class="text-gray-500 dark:text-gray-400 text-sm">Admin</p>

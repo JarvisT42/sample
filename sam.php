@@ -183,12 +183,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                                 Remember Me
                                             </label>
                                             <div class="">
+
+
+                                                <!-- <a class="nav-link" id="forgot_password" data-toggle="tab" href="#ForgotPassword" role="tab" aria-controls="ForgotPassword" aria-selected="false">Forgot Password?</a> -->
+
+
                                                 <a id="forgot_password" href="#" role="tab" aria-controls="ForgotPassword" aria-selected="false">Forgot Password?</a>
 
-
+                                              
                                             </div>
                                         </div>
                                     </div>
+
+
+
 
 
 
@@ -258,22 +266,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
 
             <div class="col-md-9 forgot-password-right" style="display: none;">
                 <form id="forgotPassword">
-                    <h3 class="forgot-password-heading">Forgot Password</h3>
-                    <div class="row forgot-password-form">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                    </div>
-                                    <input type="email" name="email" class="form-control" placeholder="Your Email *" required />
-                                </div>
-                            </div>
-
-                            <input type="submit" class="btnlogin" name="forgot_password" value="Send Email" />
-
-                        </div>
-                    </div>
+                    <h3>Forgot Password</h3>
+                    <input type="email" class="form-control" placeholder="Enter your email" required />
+                    <input type="submit" class="btn btn-primary" value="Send Reset Link" />
                 </form>
             </div>
 
@@ -449,59 +444,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
     </div>
 
     <script>
-        $(document).ready(function() {
-            // Toggle between login and registration forms
-            $("#toggleLogin").click(function() {
-                // Hide forms and reset input fields
-                $(".validation-right").hide();
-                $(".register-right").hide();
-                $(".forgot-password-right").hide(); // Hide forgot password form
-                $("#validationForm")[0].reset(); // Reset validation form
-                $("#registrationForm")[0].reset(); // Reset registration form
+    $(document).ready(function() {
+    // Toggle between login and registration forms
+    $("#toggleLogin").click(function() {
+        // Hide forms and reset input fields
+        $(".validation-right").hide();
+        $(".register-right").hide();
+        $(".forgot-password-right").hide(); // Hide forgot password form
+        $("#validationForm")[0].reset(); // Reset validation form
+        $("#registrationForm")[0].reset(); // Reset registration form
 
-                // Toggle visibility of login and validation forms
-                if ($(".login-right").is(":visible")) {
-                    $(".login-right").hide();
-                    $(".validation-right").show();
-                    $(this).val("Login");
-                } else {
-                    $(".login-right").show();
+        // Toggle visibility of login and validation forms
+        if ($(".login-right").is(":visible")) {
+            $(".login-right").hide();
+            $(".validation-right").show();
+            $(this).val("Login");
+        } else {
+            $(".login-right").show();
+            $(".validation-right").hide();
+            $(this).val("Register");
+        }
+    });
+
+    // Show registration form after clicking Proceed
+    $("#proceedToRegister").click(function() {
+        var student_id = $("#student_id").val();
+
+        // AJAX request to check if student ID exists
+        $.ajax({
+            url: 'validate_student.php',
+            type: 'POST',
+            data: {
+                student_id: student_id
+            },
+            success: function(response) {
+                if (response === 'valid') {
                     $(".validation-right").hide();
-                    $(this).val("Register");
+                    $(".register-right").show();
+                } else {
+                    $("#accessDeniedAlert").show();
                 }
-            });
-            // Show forgot password form
-            $("#forgot_password").click(function(e) {
-                e.preventDefault(); // Prevent default anchor click behavior
-                $(".login-right").hide(); // Hide login form
-                $(".forgot-password-right").show(); // Show forgot password form
-                $("#toggleLogin").val("Log In"); // Change register button text to "Log In"
-            });
-
-            // Show registration form after clicking Proceed
-            $("#proceedToRegister").click(function() {
-                var student_id = $("#student_id").val();
-
-                // AJAX request to check if student ID exists
-                $.ajax({
-                    url: 'validate_student.php',
-                    type: 'POST',
-                    data: {
-                        student_id: student_id
-                    },
-                    success: function(response) {
-                        if (response === 'valid') {
-                            $(".validation-right").hide();
-                            $(".register-right").show();
-                        } else {
-                            $("#accessDeniedAlert").show();
-                        }
-                    }
-                });
-            });
-
-
+            }
         });
+    });
+
+    // Show forgot password form
+    $("#forgot_password").click(function(e) {
+        e.preventDefault(); // Prevent default anchor click behavior
+        $(".login-right").hide(); // Hide login form
+        $(".forgot-password-right").show(); // Show forgot password form
+        $("#toggleLogin").val("Log In"); // Change register button text to "Log In"
+    });
+});
+
+
     </script>
     <script>
 

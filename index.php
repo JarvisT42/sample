@@ -45,6 +45,7 @@
 <body>
     <?php include './src/components/header.php'; ?>
     
+    
     <main id="content" class="blur-background">
         <?php include './src/components/background.php'; ?>
         <?php include './src/components/search_engine.php'; ?>

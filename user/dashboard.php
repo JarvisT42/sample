@@ -2,7 +2,18 @@
 # Initialize the session
 session_start();
 
+
+if ( $_SESSION["loggedin"] !== TRUE) {
+    //echo "<script type='text/javascript'> alert ('Iasdasdasd.')</script>";
+    echo "<script>" . "window.location.href='../index.php';" . "</script>";
+     exit;
+  
+  
+   }
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
