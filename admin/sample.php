@@ -1,52 +1,51 @@
 <?php
 session_start();
 include '../connection.php'; // Ensure you have your database connection
-include '../connection2.php'; // Ensure you have your database connection
 
+// Check if student_id is set in the query parameters
 if (isset($_GET['student_id'])) {
     $student_id = htmlspecialchars($_GET['student_id']);
 
-    // Check if student_id is set in the query parameters
-
-
-
-
-    // Fetch the category, book_id, and student details based on the student_id
-    $categoryQuery = "
-    SELECT a.Category, a.book_id, a.Issued_Date
-    FROM GFI_Library_Database.borrow AS a
-    WHERE a.student_id = ? and status ='borrowed'";
-
+    // Fetch the category based on the student_id
+    $categoryQuery = "SELECT Category FROM GFI_Library_Database.borrow WHERE student_id = ?";
     $stmt = $conn->prepare($categoryQuery);
     $stmt->bind_param('i', $student_id); // Assuming student_id is an integer
     $stmt->execute();
+    $result = $stmt->get_result();
 
+    // Fetch the category
+    if ($row = $result->fetch_assoc()) {
+        $category = $row['Category']; // Get the category for the student
+    } else {
+        echo "No category found for this student.";
+        exit;
+    }
+
+    $stmt->close(); // Close the category statement
+
+    // Prepare the SQL statement safely using placeholders
+    $query = "
+    SELECT a.student_id, a.book_id, a.Category,   b.First_Name, b.Middle_Initial, b.Last_Name, a.Issued_Date, c.Title, c.Author, c.record_cover, c.status  
+    FROM GFI_Library_Database.borrow AS a 
+    JOIN GFI_Library_Database.students AS b ON a.student_id = b.id
+    JOIN gfi_library_database_books_records.$category AS c ON a.book_id = c.id
+    WHERE a.student_id = ? AND a.status = 'borrowed'";
+
+    // Prepare the statement
+    $stmt = $conn->prepare($query);
+    // Bind parameters (integer type for student_id)
+    $stmt->bind_param('i', $student_id);
+
+    // Execute the statement
+    $stmt->execute();
+
+    // Get the result
     $result = $stmt->get_result();
 
     // Fetch all data into an array
     $books = $result->fetch_all(MYSQLI_ASSOC) ?: []; // Use short-circuit evaluation for empty check
-    // Fetch student details for full name
-    $studentQuery = "
-    SELECT First_Name, Middle_Initial, Last_Name 
-    FROM GFI_Library_Database.students 
-    WHERE id = ?";
-    $stmtStudent = $conn->prepare($studentQuery);
-    $stmtStudent->bind_param('i', $student_id);
-    $stmtStudent->execute();
-    $studentResult = $stmtStudent->get_result();
 
-    if ($studentResult->num_rows > 0) {
-        $studentRow = $studentResult->fetch_assoc();
-        $fullName = $studentRow['First_Name'] . ' ' . $studentRow['Middle_Initial'] . ' ' . $studentRow['Last_Name'];
-    } else {
-        $fullName = 'Unknown Student'; // Fallback if no student found
-    }
-    $stmtStudent->close();
-
-    // Group books by Date_To_Claim
-
-
-    $stmt->close(); // Close the first statement
+    $stmt->close(); // Close statement
 
 
 } else {
@@ -57,21 +56,19 @@ if (isset($_GET['student_id'])) {
 ?>
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Borrowed Books</title>
     <link rel="stylesheet" href="path/to/your/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.js"></script>
-
     <style>
-        .active-book-request {
+        .active-borrowed-books {
             background-color: #f0f0f0;
             color: #000;
         }
@@ -80,21 +77,50 @@ if (isset($_GET['student_id'])) {
             background-color: #f0f0f0;
             color: #000;
         }
+
+        li {
+            list-style-type: none;
+            /* Remove bullets from list items */
+        }
+
+        .drop_active {
+            display: block;
+            /* or inline, inline-block, etc., depending on your layout needs */
+
+        }
     </style>
 </head>
 
 <body>
     <?php include './src/components/sidebar.php'; ?>
-    <main id="content" class="">
+    <main id="content">
         <div class="p-4 sm:ml-64">
             <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
                 <div class="bg-gray-100 p-6 w-full mx-auto">
                     <div class="bg-white p-4 shadow-sm rounded-lg mb-2">
                         <div class="bg-gray-100 p-2 flex justify-between items-center">
-                            <h1 class="m-0">Student Name: <?php echo $fullName; ?></h1>
+                            <h1 class="m-0">Student Name: <?php
+                                                            // Display Student Name if available
+                                                            if (!empty($books)) {
+                                                                // Access the student's data correctly
+                                                                $firstName = htmlspecialchars($books[0]['First_Name']);
+                                                                $middleInitial = htmlspecialchars($books[0]['Middle_Initial']);
+                                                                $lastName = htmlspecialchars($books[0]['Last_Name']);
 
+                                                                // Concatenate names
+                                                                $fullName = trim("$firstName $middleInitial $lastName"); // Trim to remove any extra spaces
+
+                                                                echo $fullName; // Display the full name
+                                                            }
+
+                                                            ?></h1>
+                            <input type="checkbox" id="book-checkbox" value="" class="ml-2">
                         </div>
                     </div>
+
+
+
+
 
                     <?php if (!empty($books)): ?>
                         <?php
@@ -106,62 +132,14 @@ if (isset($_GET['student_id'])) {
                         }
                         ?>
 
-                        <form id="book-request-form" class="space-y-6" method="POST" action="book_request_2_save.php">
-                            <input type="hidden" name="student_id" value="<?php echo htmlspecialchars($student_id); ?>">
 
+                        <form id="book-request-form" class="space-y-6">
                             <?php foreach ($grouped_books as $date => $books_group): ?>
-
-
-
-
                                 <div class="bg-blue-200 p-4 rounded-lg">
-
-
-
-
-
-                                    <div class="bg-blue-200 rounded-lg flex items-center justify-between ">
-                                        <!-- Left side: Date to Claim -->
-                                        <h3 class="text-lg font-semibold text-white">Issued Date: <?php echo $date; ?></h3>
-
-                                        <!-- Right side: Checkbox -->
-                                        <div class="flex items-center">
-
-                                            <input type="checkbox" id="select-all-<?php echo $date; ?>" class="select-all-checkbox ml-2" onclick="toggleSelectAll('<?php echo $date; ?>')">
-                                            <label for="select-all-<?php echo $date; ?>" class="ml-1 text-sm">Select All</label>
-                                        </div>
-                                    </div>
-
-
-                                    <?php foreach ($books_group as $index => $book): ?>
-                                        <?php
-                                        $category = $book['Category'];
-                                        $book_id = $book['book_id'];
-
-                                        // Fetch the Title, Author, and record_cover from conn2 based on book_id
-                                        $titleQuery = "SELECT * FROM `$category` WHERE id = ?";
-                                        $stmt2 = $conn2->prepare($titleQuery);
-                                        $stmt2->bind_param('i', $book_id);
-                                        $stmt2->execute();
-                                        $result = $stmt2->get_result();
-
-                                        // Initialize variables
-                                        $title = 'Unknown Title';
-                                        $author = 'Unknown Author';
-                                        $status = 'Unknown Status';
-
-                                        $record_cover = null; // Initialize with null
-
-                                        if ($row = $result->fetch_assoc()) {
-                                            $title = $row['Title']; // Get the title
-                                            $author = $row['Author']; // Get the author
-                                            $status = $row['Status']; // Get the author
-                                            $record_cover = $row['record_cover']; // Get the record cover
-                                        }
-
-                                        $stmt2->close();
-                                        ?>
-<?php
+                                    <h3 class="text-lg font-semibold text-white">Date to Claim: <?php echo $date; ?></h3>
+                                    <ul class="space-y-4">
+                                        <?php foreach ($books_group as $index => $book): ?>
+                                            <?php
                                             include '../connection.php';
 
                                             // Get the fines value from the database
@@ -190,13 +168,13 @@ if (isset($_GET['student_id'])) {
                                                 $fine_amount = $overdue_days * $fines_value;
                                             }
                                             ?>
-<li class="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mb-2 flex flex-col">
+
+                                            <li class="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mb-2 flex flex-col">
                                                 <div class="flex-1">
                                                     <div class="flex flex-col md:flex-row justify-between mb-6">
                                                         <div class="flex-1 mb-4 md:mb-0">
                                                             <h1 class="text-2xl font-bold mb-1">Title:</h1>
-                                                            <p class="text-xl mb-4">                                                            <?php echo $title; ?>
-                                                            </p>
+                                                            <p class="text-xl mb-4"><?php echo htmlspecialchars($book['Title']); ?></p>
                                                             <div class="mb-4">
                                                                 <h2 class="text-lg font-semibold text-gray-600 mb-1">Borrow Category:</h2>
                                                                 <p class="text-sm text-gray-500"><?php echo htmlspecialchars($book['Category']); ?></p>
@@ -243,9 +221,9 @@ if (isset($_GET['student_id'])) {
                                                                 </select>
                                                             </div>
                                                             <div>
-                                                                <p class="text-sm font-semibold">Book Status: <?php echo $status; ?></p>
+                                                                <p class="text-sm font-semibold">Book Status: <?php echo htmlspecialchars($book['status']); ?></p>
                                                                 <select class="border border-gray-300 rounded p-1 mr-16">
-                                                                    <option><?php echo $status; ?></option>
+                                                                    <option><?php echo htmlspecialchars($book['status']); ?></option>
                                                                     <option>Old</option>
                                                                     <option>Damage</option>
                                                                     <option>Lost</option>
@@ -260,30 +238,14 @@ if (isset($_GET['student_id'])) {
                                                     <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm">Return</button>
                                                 </div>
                                             </li>
-                                    <?php endforeach; ?>
+                                        <?php endforeach; ?>
+                                    </ul>
                                 </div>
-
                             <?php endforeach; ?>
-
-                            <div class="flex items-center justify-end">
-                                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Done</button>
-                            </div>
                         </form>
 
-                        <script>
-                            function toggleSelectAll(date) {
-                                // Get the "Select All" checkbox
-                                const selectAllCheckbox = document.getElementById('select-all-' + date);
 
-                                // Get all individual book checkboxes for this date group
-                                const bookCheckboxes = document.querySelectorAll('.book-checkbox-' + date);
 
-                                // Toggle the checked state of each individual checkbox
-                                bookCheckboxes.forEach(function(checkbox) {
-                                    checkbox.checked = selectAllCheckbox.checked;
-                                });
-                            }
-                        </script>
 
 
 
@@ -293,23 +255,19 @@ if (isset($_GET['student_id'])) {
                         </div>
                     <?php endif; ?>
 
+
+
+
+
+
+
                 </div>
+
             </div>
         </div>
     </main>
 
     <script src="./src/components/header.js"></script>
-    <script>
-        // Function to automatically show the dropdown if on book_request.php
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropdownRequest = document.getElementById('dropdown-request');
-
-            // Open the dropdown menu for 'Request'
-            dropdownRequest.classList.remove('hidden');
-            dropdownRequest.classList.add('block'); // Make the dropdown visible
-
-        });
-    </script>
 </body>
 
 </html>

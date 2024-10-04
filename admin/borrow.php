@@ -1,9 +1,6 @@
 <?php
 session_start();
-// if ($_SESSION["loggedin"] !== TRUE) {
-//     echo "<script>window.location.href='../index.php';</script>";
-//     exit;
-// }
+
 
 
 
@@ -20,12 +17,7 @@ session_start();
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@^2.2/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
-    <style>
-        .active-books {
-            background-color: #f0f0f0;
-            color: #000;
-        }
-    </style>
+
 </head>
 
 <body>
@@ -40,28 +32,14 @@ session_start();
 
                 <!-- Title Box -->
                 <!-- Title and Button Box -->
-                <?php include './src/components/books.php'; ?>
-
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
-                <ul class="flex flex-wrap gap-2 p-5 border border-dashed rounded-md w-full">
-               
-
-										<li><a class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" href="#">All</a></li>
-                                        <br>
-										<li><a class="px-4 py-2 " href="add_books.php">Add Books</a></li>
-                                        <br>
-                                        <li><a class="px-4 py-2 " href="edit_records.php">Edit Records</a></li>
-                                        <br>
-										<li><a href="#">Lost Books</a></li>
-                                        <br>
-										<li class="#"><a href="damage.php">Damage Books</a></li>
-                                        <br>
-										<li><a href="#">Subject for Replacement</a></li>
-									</ul>                    <!-- Button beside the title -->
-                                   
-
+                    <h1 class="text-3xl font-semibold">Borrow</h1> <!-- Adjusted text size -->
+                    <!-- Button beside the title -->
                 </div>
-                
+
+                <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+                    The Borrow Page is your gateway to accessing and managing book loans efficiently. On this page, you can search for and borrow books from our collection with ease. Simply browse or search for the titles you wish to borrow, select your preferred books, and follow the streamlined borrowing process. The page also provides a clear overview of the available books and their details.
+                </div>
 
                 <!-- Main Content Box -->
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 ">
@@ -123,7 +101,28 @@ session_start();
                                 </svg>
                             </div> <input type="text" id="table-search-users" class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full md:w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
 
-                            
+                            <button type="button" id="bookBagButton" class="relative ml-2 inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 whitespace-nowrap">
+                                Book Bag
+                                <span id="bookBagCount" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-white bg-red-500 rounded-full">
+                                    0
+                                </span>
+                            </button>
+
+                            <script>
+                                // JavaScript function to handle button click
+                                document.getElementById("bookBagButton").addEventListener("click", function() {
+                                    // Get the book bag count
+                                    const bookBagCount = document.getElementById("bookBagCount").innerText;
+
+                                    // Check if count is 0
+                                    if (parseInt(bookBagCount) === 0) {
+                                        alert("Book bag is empty");
+                                    } else {
+                                        // Redirect to book_php if count is greater than 0
+                                        window.location.href = "book_bag.php";
+                                    }
+                                });
+                            </script>
 
 
 
@@ -198,10 +197,16 @@ session_start();
                             let currentPage = 1; // To track the current page
                             const recordsPerPage = 5; // Number of records per page
 
+
+                            
                             function loadTableData(tableName) {
+                               
                                 fetch(`fetch_table_data.php?table=${encodeURIComponent(tableName)}`)
                                     .then(response => response.json())
                                     .then(data => {
+                                        // Update book bag count
+                                        bookBagCountSpan.textContent = data.bookBagCount;
+
                                         allRecords = data.data; // Store the fetched records
                                         filteredRecords = allRecords; // Initialize filtered records
                                         displayRecords(filteredRecords);
@@ -210,118 +215,128 @@ session_start();
                             }
 
                             function displayRecords(records) {
-                                const startIndex = (currentPage - 1) * recordsPerPage;
-                                const endIndex = startIndex + recordsPerPage;
-                                const paginatedRecords = records.slice(startIndex, endIndex);
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    const paginatedRecords = records.slice(startIndex, endIndex);
 
-                                tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
-            <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
-                <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
-                    <div class="flex-none w-12">
-                        <div class="text-lg font-semibold text-gray-800">${startIndex + index + 1}</div>
+    tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
+        <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
+            <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
+                <div class="flex-none w-12">
+                    <div class="text-lg font-semibold text-gray-800">${startIndex + index + 1}</div>
+                </div>
+                <div class="flex-1 border-l-2 border-black p-4">
+                    <h2 class="text-lg font-semibold mb-2">${record.title}</h2>
+                    <span class="block text-base mb-2">by ${record.author}</span>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="text-sm text-gray-600">Published</div>
+                        <div class="text-sm text-gray-600">${record.publicationDate}</div>
+                        <div class="text-sm text-gray-600">copies ${record.copies}</div>
+                    
                     </div>
-                    <div class="flex-1 border-l-2 border-black p-4">
-                        <h2 class="text-lg font-semibold mb-2">${record.title}</h2>
-                        <span class="block text-base mb-2">by ${record.author}</span>
-                        <div class="flex items-center space-x-2 mb-2">
-                            <div class="text-sm text-gray-600">Published</div>
-                            <div class="text-sm text-gray-600">${record.publicationDate}</div>
-                            <div class="text-sm text-gray-600">copies ${record.copies}</div>
-                        </div>
-                         <div class="flex items-center space-x-2 mb-2">
+
+                      <div class="flex items-center space-x-2 mb-2">
                         
                         <div class="text-sm text-gray-600">Book Status: ${record.status}</div> <!-- Add status here -->
                     </div>
-                        <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
-                            ${record.table}
-                        </div>
-                    </div>
-                    <div class="flex-shrink-0">
-                        ${record.copies <= 1
-                            ? `<span class="text-red-600">Not Available</span>`
-                            : `<a href="#" class="${record.inBag ? 'text-red-600' : 'text-green-600'} hover:underline">
-                                ${record.inBag ? '<span class="fa fa-minus"></span> In Bag' : '<span class="fa fa-plus"></span> Available'}
-                            </a>`
-                        }
-                    </div>
-                    <div class="flex-shrink-0">
-                        <a href="#">
-                            <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">
-                        </a>
+
+
+                    <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
+                        ${record.table}
                     </div>
                 </div>
-            </li>
-        `).join('');
-                            }
-
-                            function setupPagination(totalRecords) {
-    const totalPages = Math.ceil(totalRecords / recordsPerPage);
-    const paginationContainer = document.querySelector('nav ul');
-    paginationContainer.innerHTML = '';
-
-    // Previous button
-    const prevButton = document.createElement('li');
-    prevButton.innerHTML = `<a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${currentPage === 1 ? 'text-gray-300' : 'text-gray-500'} bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700" ${currentPage === 1 ? 'disabled' : ''}>Previous</a>`;
-    prevButton.addEventListener('click', function(event) {
-        event.preventDefault();
-        if (currentPage > 1) {
-            currentPage--;
-            displayRecords(filteredRecords);
-            setupPagination(filteredRecords.length);
-        }
-    });
-    paginationContainer.appendChild(prevButton);
-
-    // Page numbers
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-        // Include first and last page, plus two pages around the current page
-        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            pageNumbers.push(i);
-        } else if (pageNumbers[pageNumbers.length - 1] !== '...' && (i === 2 || i === totalPages - 1)) {
-            pageNumbers.push('...');
-        }
-    }
-
-    // Render the page numbers
-    pageNumbers.forEach(page => {
-        const pageItem = document.createElement('li');
-        if (page === '...') {
-            pageItem.innerHTML = `<span class="flex items-center justify-center px-4 h-10">...</span>`;
-        } else {
-            pageItem.innerHTML = `
-                <a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${page === currentPage ? 'text-blue-600 border border-gray-300 bg-blue-50' : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700'}">
-                    ${page}
-                </a>
-            `;
-            pageItem.addEventListener('click', function(event) {
-                event.preventDefault();
-                currentPage = page;
-                displayRecords(filteredRecords);
-                setupPagination(filteredRecords.length);
-            });
-        }
-        paginationContainer.appendChild(pageItem);
-    });
-
-    // Next button
-    const nextButton = document.createElement('li');
-    nextButton.innerHTML = `<a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-500'} bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700" ${currentPage === totalPages ? 'disabled' : ''}>Next</a>`;
-    nextButton.addEventListener('click', function(event) {
-        event.preventDefault();
-        if (currentPage < totalPages) {
-            currentPage++;
-            displayRecords(filteredRecords);
-            setupPagination(filteredRecords.length);
-        }
-    });
-    paginationContainer.appendChild(nextButton);
+                <div class="flex-shrink-0">
+                    ${record.copies <= 1
+                        ? `<span class="text-red-600">Not Available</span>`
+                        : record.currentlyBorrowed
+                            ? `<span class="text-yellow-600">Currently Borrowed</span>`
+                            : `<a href="#" class="${record.inBag ? 'text-red-600' : 'text-green-600'} hover:underline book-bag-toggle"
+                                data-id="${record.id}"  
+                                data-title="${record.title}" 
+                                data-author="${record.author}" 
+                                data-publication-date="${record.publicationDate}" 
+                                data-table="${record.table}" 
+                                data-cover-image="${record.coverImage}" 
+                                data-copies="${record.copies}"
+                                data-in-bag="${record.inBag}">
+                                ${record.inBag ? '<span class="fa fa-minus"></span> Remove from Book Bag' : '<span class="fa fa-plus"></span> Add to Book Bag'}
+                            </a>`
+                    }
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="#">
+                        <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">
+                    </a>
+                </div>
+            </div>
+        </li>
+    `).join('');
 }
 
 
+                            function setupPagination(totalRecords) {
+                                const totalPages = Math.ceil(totalRecords / recordsPerPage);
+                                const paginationContainer = document.querySelector('nav ul');
+                                paginationContainer.innerHTML = '';
 
+                                // Previous button
+                                const prevButton = document.createElement('li');
+                                prevButton.innerHTML = `<a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${currentPage === 1 ? 'text-gray-300' : 'text-gray-500'} bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700" ${currentPage === 1 ? 'disabled' : ''}>Previous</a>`;
+                                prevButton.addEventListener('click', function(event) {
+                                    event.preventDefault();
+                                    if (currentPage > 1) {
+                                        currentPage--;
+                                        displayRecords(filteredRecords);
+                                        setupPagination(filteredRecords.length);
+                                    }
+                                });
+                                paginationContainer.appendChild(prevButton);
 
-                            // Load initial table data
+                                // Page numbers
+                                const pageNumbers = [];
+                                for (let i = 1; i <= totalPages; i++) {
+                                    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                                        pageNumbers.push(i);
+                                    } else if (pageNumbers[pageNumbers.length - 1] !== '...' && (i === 2 || i === totalPages - 1)) {
+                                        pageNumbers.push('...');
+                                    }
+                                }
+
+                                // Render the page numbers
+                                pageNumbers.forEach(page => {
+                                    const pageItem = document.createElement('li');
+                                    if (page === '...') {
+                                        pageItem.innerHTML = `<span class="flex items-center justify-center px-4 h-10">...</span>`;
+                                    } else {
+                                        pageItem.innerHTML = `
+                        <a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${page === currentPage ? 'text-blue-600 border border-gray-300 bg-blue-50' : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700'}">
+                            ${page}
+                        </a>
+                    `;
+                                        pageItem.addEventListener('click', function(event) {
+                                            event.preventDefault();
+                                            currentPage = page;
+                                            displayRecords(filteredRecords);
+                                            setupPagination(filteredRecords.length);
+                                        });
+                                    }
+                                    paginationContainer.appendChild(pageItem);
+                                });
+
+                                // Next button
+                                const nextButton = document.createElement('li');
+                                nextButton.innerHTML = `<a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-500'} bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700" ${currentPage === totalPages ? 'disabled' : ''}>Next</a>`;
+                                nextButton.addEventListener('click', function(event) {
+                                    event.preventDefault();
+                                    if (currentPage < totalPages) {
+                                        currentPage++;
+                                        displayRecords(filteredRecords);
+                                        setupPagination(filteredRecords.length);
+                                    }
+                                });
+                                paginationContainer.appendChild(nextButton);
+                            }
+
                             loadTableData('All fields');
 
                             button.addEventListener('click', function() {
@@ -338,7 +353,77 @@ session_start();
                                 });
                             });
 
-                            // Filter records based on search input and checkbox option
+                            tableDataContainer.addEventListener('click', function(event) {
+                                if (event.target.classList.contains('book-bag-toggle')) {
+                                    event.preventDefault();
+                                    const link = event.target;
+                                    const inBag = link.getAttribute('data-in-bag') === 'true';
+
+                                    const bookData = {
+                                        id: link.getAttribute('data-id'),
+                                        title: link.getAttribute('data-title'),
+                                        author: link.getAttribute('data-author'),
+                                        publicationDate: link.getAttribute('data-publication-date'),
+                                        table: link.getAttribute('data-table'),
+                                        coverImage: link.getAttribute('data-cover-image'),
+                                        copies: link.getAttribute('data-copies')
+                                    };
+
+                                    const currentBookBagCount = parseInt(bookBagCountSpan.textContent);
+
+                                    if (!inBag) {
+                                        if (currentBookBagCount >= 3) {
+                                            alert('You can only borrow a maximum of 3 books.');
+                                            return;
+                                        }
+
+                                        // In the fetch response for adding a book
+                                        fetch('add_to_book_bag.php', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify(bookData)
+                                            })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                if (data.status === 'success') {
+                                                    link.textContent = 'Remove from Book Bag';
+                                                    link.classList.remove('text-green-600');
+                                                    link.classList.add('text-red-600');
+                                                    link.setAttribute('data-in-bag', 'true');
+                                                    bookBagCountSpan.textContent = parseInt(bookBagCountSpan.textContent) + 1;
+                                                } else {
+                                                    alert(data.message); // Show appropriate message if the limit is reached
+                                                }
+                                            });
+
+
+                                    } else {
+                                        fetch('remove_from_book_bag.php', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify(bookData)
+                                            })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                if (data.status === 'success') {
+                                                    link.textContent = 'Add to Book Bag';
+                                                    link.classList.remove('text-red-600');
+                                                    link.classList.add('text-green-600');
+                                                    link.setAttribute('data-in-bag', 'false');
+                                                    bookBagCountSpan.textContent = currentBookBagCount - 1;
+                                                } else {
+                                                    alert('Failed to remove book from the bag.');
+                                                }
+                                            });
+                                    }
+                                }
+                            });
+
+
                             searchInput.addEventListener('input', function() {
                                 const searchTerm = searchInput.value.toLowerCase();
                                 filteredRecords = allRecords.filter(record => {

@@ -180,42 +180,114 @@ session_start();
 
 
                     <div id="table1" class="overflow-x-auto">
-                        <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
-                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 bg-gray-50 dark:bg-gray-700">Book</th>
-                                        <th scope="col" class="px-6 py-3 bg-gray-50 dark:bg-gray-700">Author</th>
 
-                                    </tr>
-                                </thead>
-                                <tbody>
-<?php 
+                    <div class="scrollable-table-container relative overflow-x-auto shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">Book Title</th>
+                <th scope="col" class="px-6 py-3">Author</th>
+                <th scope="col" class="px-6 py-3">Date To Claim</th>
+                <th scope="col" class="px-6 py-3">Issued Date</th>
+                <th scope="col" class="px-6 py-3">Status</th>
+
+
+            </tr>
+        </thead>
+        <tbody>
+            <?php 
+            
 include("../connection.php");
 
 // Sanitize the student ID to prevent SQL injection
 $id = intval($_SESSION["Id"]);
 
-// Query to fetch books borrowed by the student
-$user_query = $conn->query("SELECT * FROM borrow WHERE student_id = $id");
+// Fetch the category based on the student_id
+$categoryQuery = "SELECT Category FROM GFI_Library_Database.borrow WHERE student_id = ?";
+$stmt = $conn->prepare($categoryQuery);
+$stmt->bind_param('i', $id); // Assuming student_id is an integer
+$stmt->execute();
+$result = $stmt->get_result();
 
-while ($row = $user_query->fetch_assoc()) {
-?>
-    <tr class="del<?php echo $id ?>">
-        <td><?php echo $row['Title']; ?></td>
-        <td><?php echo $row['Author']; ?></td>
+// Fetch the category
+if ($row = $result->fetch_assoc()) {
+    $category = $row['Category']; // Get the category for the student
+} else {
+    echo "No category found for this student.";
+    exit;
+}
 
-        
-    </tr>
-<?php 
-} 
-// Close the database connection
-$conn->close();
-?>
-</tbody>
+$stmt->close(); // Close the category statement
 
-                            </table>
-                        </div>
+// Prepare the SQL statement safely using placeholders
+$query = "
+    SELECT a.student_id, a.book_id, a.Date_To_Claim, a.Issued_Date, c.Title, c.Author, a.status  
+    FROM GFI_Library_Database.borrow AS a 
+    JOIN GFI_Library_Database.students AS b ON a.student_id = b.id
+       JOIN gfi_library_database_books_records.$category AS c ON a.book_id = c.id
+
+    WHERE a.student_id = ? ";
+
+// Prepare the statement
+$stmt = $conn->prepare($query);
+
+// Bind parameters (integer type for student_id)
+$stmt->bind_param('i', $id);
+
+// Execute the statement
+$stmt->execute();
+
+// Get the result
+$result = $stmt->get_result();
+
+// Fetch all data into an array
+$books = $result->fetch_all(MYSQLI_ASSOC) ?: []; // Use short-circuit evaluation for empty check
+
+$stmt->close(); // Close statement
+            // Loop through the books to display them in the table
+            foreach ($books as $row) {
+            ?>
+            <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    <?php echo $row['Title']; ?>
+                </th>
+                <td class="px-6 py-4">
+                    <?php echo $row['Author']; ?>
+                </td>
+               
+                <td class="px-6 py-4">
+                    <?php echo $row['Date_To_Claim']; ?>
+                </td>
+                <td class="px-6 py-4">
+                    <?php echo $row['Issued_Date']; ?>
+                </td>
+                <td class="px-6 py-4">
+    <?php 
+    if (!empty($row['status']) && $row['status'] === 'failed-to-claim') {
+        echo 'Failed To Claim';
+    }
+    elseif(!empty($row['status']) && $row['status'] === 'borrowed') {
+        echo 'Borrowed';
+    }
+    elseif(!empty($row['status']) && $row['status'] === 'Pending') {
+        echo 'Pending';
+    }
+    ?>
+</td>
+
+
+            </tr>
+            <?php 
+            } 
+            ?>
+        </tbody>
+    </table>
+</div>
+
+
+
+
+                       
                     </div>
 
                     <!-- Table 2 and Dropdown (hidden initially) -->

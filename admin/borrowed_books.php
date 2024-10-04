@@ -48,14 +48,14 @@ include '../connection.php';  // Ensure you have your database connection
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
 
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Student Name</th>
+                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Student Name</th>
                                     <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/3">Course</th>
                                     <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">Borrow Count</th> <!-- Reduced width -->
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Issued Date</th> <!-- Adjusted width -->
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Due Date</th> <!-- Adjusted width -->
-
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Action</th>
+                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/5">Issued Date</th> <!-- Slightly smaller -->
+                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Due Date</th> <!-- Adjusted width -->
+                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/2">Action</th>
                                 </tr>
+
 
 
 

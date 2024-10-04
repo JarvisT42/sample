@@ -70,17 +70,38 @@ include '../connection.php';  // Ensure you have your database connection
 // Get today's date
 $today = date('Y-m-d');
 
-// //$sql = "SELECT Student, Course, student_id, Time, COUNT(student_id) AS borrow_count, MIN(Date_To_Claim) AS nearest_date 
-// FROM borrow 
-// WHERE Date_To_Claim >= '$today' AND status = 'pending' 
-// GROUP BY student_id";
+// Fetch book_id and category for entries that exceed 3 days
+$fetchSql = "SELECT book_id, Category FROM borrow 
+             WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
+$fetchResult = $conn->query($fetchSql);
 
-$sql = "SELECT s.First_Name, s.Middle_Initial, s.Last_Name, s.S_Course, b.student_id, b.Time, COUNT(b.student_id) AS borrow_count, MIN(b.Date_To_Claim) AS nearest_date 
+if ($fetchResult->num_rows > 0) {
+    while ($row = $fetchResult->fetch_assoc()) {
+        $book_id = $row['book_id'];
+        $category = $row['Category'];
+
+        // Update the book record in the corresponding category table
+        $updateBookSql = "UPDATE gfi_library_database_books_records.$category
+                          SET No_Of_Copies = No_Of_Copies + 1
+                          WHERE id = $book_id";
+        $conn->query($updateBookSql);
+    }
+}
+
+// Update the status to 'Failed' for borrow entries that exceed 3 days
+$updateSql = "UPDATE borrow
+              SET status = 'failed-to-claim'
+              WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
+$conn->query($updateSql);
+
+// Query to get the updated records
+$sql = "SELECT s.First_Name, s.Middle_Initial, s.Last_Name, s.S_Course, b.student_id, b.Time, COUNT(b.student_id) AS borrow_count, 
+
+MIN(b.Date_To_Claim) AS nearest_date 
         FROM borrow b 
         JOIN students s ON b.student_id = s.id  -- Assuming the primary key in students is 'id'
-        WHERE b.Date_To_Claim >= '$today' AND b.status = 'pending' 
+        WHERE b.status = 'pending' 
         GROUP BY b.student_id";
-
 
 $result = $conn->query($sql);
 
@@ -92,6 +113,7 @@ if ($result->num_rows > 0) {
     }
 }
 ?>
+
                                 <?php if (!empty($records)): ?>
     <?php foreach ($records as $record): ?>
         <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-300">

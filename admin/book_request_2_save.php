@@ -18,27 +18,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $issued_date = date('Y-m-d'); // Adjust the format if necessary
 
     // Prepare the update statement without the due date
-    $query = "UPDATE GFI_Library_Database.borrow SET status = 'borrowed', Issued_date = ? WHERE student_id = ? AND book_id = ? AND status = 'pending'";
+    $query = "UPDATE GFI_Library_Database.borrow 
+              SET status = 'borrowed', Issued_date = ? 
+              WHERE student_id = ? AND book_id = ? AND Category = ? AND status = 'pending'";
     $stmt = $conn->prepare($query);
 
     // Loop through each selected book ID and update the status and issued date
-    foreach ($selected_books as $book_id) {
+    foreach ($selected_books as $book_info) {
+        // Split the book_info to get book_id and category
+        list($book_id, $category) = explode('|', $book_info);
+
         $book_id = (int)$book_id; // Ensure the ID is an integer
-        $stmt->bind_param("sii", $issued_date, $student_id, $book_id); // Bind parameters
+        $stmt->bind_param("ssis", $issued_date, $student_id, $book_id, $category); // Bind parameters
+
         $stmt->execute(); // Execute the update
+
+        if ($stmt->error) {
+            echo "Error: " . $stmt->error;
+        }
     }
 
-    if ($stmt->error) {
-        echo "Error: " . $stmt->error;
-    } else {
-        // Optionally, redirect to a success page or refresh
-        echo "<script>alert('Books successfully borrowed!');</script>";
-        
-        // Use exit after header to ensure the script stops executing
-        header("Location: dashboard.php");
-        exit(); // Make sure to exit after header redirection
-    }
-
-    exit; // Stop execution after processing
+    // After processing all selected books, you can redirect or show a message
+    echo "<script>alert('Books successfully borrowed!');</script>";
+    header("Location: dashboard.php");
+    exit(); // Make sure to exit after header redirection
 }
 ?>

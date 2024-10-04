@@ -95,7 +95,7 @@ $formattedDate = (new DateTime($selectedDate))->format('l, F j, Y');
               <div class="mb-6">
                 <div class="grid grid-cols-2 gap-2 border border-gray-300 rounded-lg overflow-hidden">
                   <div class="bg-gray-100 p-2 font-semibold flex items-center border-b border-gray-300"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Email</div>
-                  <div class="p-2 border-b border-gray-300"> <?php echo htmlspecialchars($_SESSION["Email_Address"]); ?></div>
+                  <div class="p-2 border-b border-gray-300"> <?php echo htmlspecialchars($_SESSION["email"]); ?></div>
                   <div class="bg-gray-100 p-2 font-semibold flex items-center border-b border-gray-300"><i data-lucide="phone" class="w-4 h-4 mr-2"></i>Mobile Number</div>
                   <div class="p-2 border-b border-gray-300"></div>
                 </div>

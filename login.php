@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_login'])) {
             $_SESSION["First_Name"] = $row['First_Name'];
             $_SESSION["Middle_Initial"] = $row['Middle_Initial'];
             $_SESSION["Last_Name"] = $row['Last_Name'];
-            $_SESSION['email'] = $email;
+            $_SESSION['email'] = $row['Email_Address'];
 
             header("Location: user/dashboard.php");
             exit();
@@ -432,11 +432,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                 </div>
                             </div>
                         </div>
-                        <!-- Gender Selection -->
-
-                        <!-- Email and Phone Fields -->
-
-                        <!-- Year Level and Department Fields -->
+             
 
                         <div class="col-md-12">
                             <input type="submit" class="btnRegister" value="Register" />
