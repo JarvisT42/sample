@@ -17,14 +17,17 @@ if (!empty($bookBag)) {
         $book_id = $book['id'];  // Assuming 'id' exists in the book session data
         $table = $book['table'];  // Assuming 'table' exists in the book session data
         // Assuming 'author' exists in the book session data
-        $status = 'Pending';
+        $role = 'Student';
+
+        $status = 'pending';
+        $way_of_borrow = 'online';
 
         // Insert the data into the `borrow` table
-        $sql = "INSERT INTO borrow (student_id, book_id, Category,  Date_to_claim, time, status) 
-                VALUES (?, ?, ?,  ?, ?,  ?)"; // Add cover_image to the SQL query
+        $sql = "INSERT INTO borrow (role, student_id, book_id, Category,  Date_to_claim, time, Way_Of_Borrow, status) 
+                VALUES (?, ?, ?, ?,  ?, ?,  ?,  ?)"; // Add cover_image to the SQL query
         
         if ($stmt = $conn->prepare($sql)) {
-            $stmt->bind_param("iissss", $id,  $book_id, $table,  $selectedDate, $selectedTime, $status);
+            $stmt->bind_param("siisssss",     $role,  $id, $book_id, $table,  $selectedDate, $selectedTime, $way_of_borrow, $status);
             
             // Execute the query
             if ($stmt->execute()) {

@@ -41,6 +41,30 @@ session_start();
                     The Borrow Page is your gateway to accessing and managing book loans efficiently. On this page, you can search for and borrow books from our collection with ease. Simply browse or search for the titles you wish to borrow, select your preferred books, and follow the streamlined borrowing process. The page also provides a clear overview of the available books and their details.
                 </div>
 
+
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-start space-x-4">
+                    <label for="full_name" class="text-left">ROLE:&nbsp;&nbsp;&nbsp;</label>
+                    <select id="role" name="role" class="col-span-2 border rounded px-3 py-2">
+                        <option value="">Select Role</option>
+                        <option value="Student">Student</option>
+                        <option value="Teacher">Teacher</option>
+                    </select>
+                    <label for="full_name" class="text-left">FULL NAME:&nbsp;&nbsp;&nbsp;</label>
+                    <input id="full_name" name="full_name" placeholder="Full Name" class="col-span-2 border rounded px-3 py-2" />
+
+                    <label for="date" class="text-left">DUE DATE:</label>
+                    <input type="date" id="date" name="date" class="border rounded px-3 py-2" />
+                </div>
+
+
+
+                <script>
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('date').setAttribute('min', today);
+                </script>
+
+
+
                 <!-- Main Content Box -->
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 ">
                     <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900">
@@ -100,7 +124,6 @@ session_start();
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                                 </svg>
                             </div> <input type="text" id="table-search-users" class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full md:w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
-
                             <button type="button" id="bookBagButton" class="relative ml-2 inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 whitespace-nowrap">
                                 Book Bag
                                 <span id="bookBagCount" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-white bg-red-500 rounded-full">
@@ -108,22 +131,49 @@ session_start();
                                 </span>
                             </button>
 
-                            <script>
-                                // JavaScript function to handle button click
-                                document.getElementById("bookBagButton").addEventListener("click", function() {
-                                    // Get the book bag count
-                                    const bookBagCount = document.getElementById("bookBagCount").innerText;
+                            
+<script>
+    // JavaScript function to handle button click
+    document.getElementById("bookBagButton").addEventListener("click", function() {
+        // Get the book bag count
+        const bookBagCount = document.getElementById("bookBagCount").innerText;
 
-                                    // Check if count is 0
-                                    if (parseInt(bookBagCount) === 0) {
-                                        alert("Book bag is empty");
-                                    } else {
-                                        // Redirect to book_php if count is greater than 0
-                                        window.location.href = "book_bag.php";
-                                    }
-                                });
-                            </script>
+        // Get the role value
+        const role = document.getElementById("role").value;
 
+        // Get the full name value
+        const fullName = document.getElementById("full_name").value.trim();
+
+        // Get the due date value
+        const dueDate = document.getElementById("date").value;
+
+        // Check if role is not selected
+        if (!role) {
+            alert("Please select a role.");
+            return; // Stop the function if the role is not selected
+        }
+
+        // Check if the full name is empty
+        if (!fullName) {
+            alert("Please enter a full name.");
+            return; // Stop the function if the full name is empty
+        }
+
+        // Check if the due date is empty
+        if (!dueDate) {
+            alert("Please enter a due date.");
+            return; // Stop the function if the due date is empty
+        }
+
+        // Check if count is 0
+        if (parseInt(bookBagCount) === 0) {
+            alert("Book bag is empty");
+        } else {
+            // Redirect to book_bag.php with the role, full name, and due date as URL parameters
+            window.location.href = "book_bag.php?role=" + encodeURIComponent(role) + "&full_name=" + encodeURIComponent(fullName) + "&due_date=" + encodeURIComponent(dueDate);
+        }
+    });
+</script>
 
 
 
@@ -198,9 +248,9 @@ session_start();
                             const recordsPerPage = 5; // Number of records per page
 
 
-                            
+
                             function loadTableData(tableName) {
-                               
+
                                 fetch(`fetch_table_data.php?table=${encodeURIComponent(tableName)}`)
                                     .then(response => response.json())
                                     .then(data => {
@@ -215,11 +265,11 @@ session_start();
                             }
 
                             function displayRecords(records) {
-    const startIndex = (currentPage - 1) * recordsPerPage;
-    const endIndex = startIndex + recordsPerPage;
-    const paginatedRecords = records.slice(startIndex, endIndex);
+                                const startIndex = (currentPage - 1) * recordsPerPage;
+                                const endIndex = startIndex + recordsPerPage;
+                                const paginatedRecords = records.slice(startIndex, endIndex);
 
-    tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
+                                tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
         <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
             <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
                 <div class="flex-none w-12">
@@ -271,7 +321,7 @@ session_start();
             </div>
         </li>
     `).join('');
-}
+                            }
 
 
                             function setupPagination(totalRecords) {
@@ -378,6 +428,7 @@ session_start();
                                         }
 
                                         // In the fetch response for adding a book
+
                                         fetch('add_to_book_bag.php', {
                                                 method: 'POST',
                                                 headers: {

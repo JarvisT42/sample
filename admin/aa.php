@@ -152,19 +152,27 @@ if (isset($_GET['student_id'])) {
                         <form id="book-request-form" class="space-y-6" method="POST" action="book_request_2_save.php">
                             <input type="hidden" name="student_id" value="<?php echo htmlspecialchars($student_id); ?>">
 
-                            <?php
-                            // Initialize the overall index counter
-                            $overall_index = 0;
-                            ?>
-
                             <?php foreach ($grouped_books as $date => $books_group): ?>
+
+
+
+
                                 <div class="bg-blue-200 p-4 rounded-lg">
+
+
+
+
+
                                     <div class="bg-blue-200 rounded-lg flex items-center justify-between ">
                                         <!-- Left side: Date to Claim -->
                                         <h3 class="text-lg font-semibold text-white">Issued Date: <?php echo $date; ?></h3>
+
+                                        <!-- Right side: Checkbox -->
+
                                     </div>
 
-                                    <?php foreach ($books_group as $book): ?>
+
+                                    <?php foreach ($books_group as $index => $book): ?>
                                         <?php
                                         $category = $book['Category'];
                                         $book_id = $book['book_id'];
@@ -180,6 +188,7 @@ if (isset($_GET['student_id'])) {
                                         $title = 'Unknown Title';
                                         $author = 'Unknown Author';
                                         $status = 'Unknown Status';
+
                                         $record_cover = null; // Initialize with null
 
                                         if ($row = $result->fetch_assoc()) {
@@ -190,6 +199,8 @@ if (isset($_GET['student_id'])) {
                                         }
 
                                         $stmt2->close();
+                                        ?>
+                                        <?php
                                         include '../connection.php';
 
                                         // Get the fines value from the database
@@ -205,17 +216,20 @@ if (isset($_GET['student_id'])) {
                                         // Get the issued date from the book array
                                         $issued_date = $book['Issued_Date'];
 
+                                        // Get the issued date from the book array
+
                                         // Calculate the due date (3 days after the issued date)
                                         $due_date = date('Y-m-d', strtotime($issued_date . ' + 3 days'));
 
                                         // Calculate the fines based on the due date
                                         $current_date = date('Y-m-d');
                                         $fine_amount = 0;
+                                        $daily_fine_rate = 5; // Define the daily fine rate
 
                                         if ($current_date > $due_date) {
                                             // Calculate overdue days
                                             $overdue_days = (strtotime($current_date) - strtotime($due_date)) / (60 * 60 * 24);
-                                            $fine_amount = $overdue_days * $fines_value;
+                                            $fine_amount = $overdue_days * $fines_value; // Multiply overdue days by the fine rate (₱5 per day)
                                         }
                                         ?>
 
@@ -224,7 +238,8 @@ if (isset($_GET['student_id'])) {
                                                 <div class="flex flex-col md:flex-row justify-between mb-6">
                                                     <div class="flex-1 mb-4 md:mb-0">
                                                         <h1 class="text-2xl font-bold mb-1">Title:</h1>
-                                                        <p class="text-xl mb-4"><?php echo $title; ?> (Index: <?php echo $overall_index; ?>)</p>
+                                                        <p class="text-xl mb-4"> <?php echo $title; ?>
+                                                        </p>
                                                         <div class="mb-4">
                                                             <h2 class="text-lg font-semibold text-gray-600 mb-1">Borrow Category:</h2>
                                                             <p class="text-sm text-gray-500"><?php echo htmlspecialchars($book['Category']); ?></p>
@@ -232,7 +247,12 @@ if (isset($_GET['student_id'])) {
                                                     </div>
                                                     <div class="w-full md:w-32 h-40 bg-gray-200 border border-gray-300 flex items-center justify-center mb-4 md:mb-0">
                                                         <?php
-                                                        // Handle book cover image...
+                                                        if (!empty($book['record_cover'])) {
+                                                            $imageData = base64_encode($book['record_cover']);
+                                                            $imageSrc = 'data:image/jpeg;base64,' . $imageData;
+                                                        } else {
+                                                            $imageSrc = 'path/to/default/image.jpg'; // Provide a default image source
+                                                        }
                                                         ?>
                                                         <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-full h-full border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
                                                     </div>
@@ -245,18 +265,20 @@ if (isset($_GET['student_id'])) {
                                                         </div>
                                                         <div>
                                                             <p class="text-sm font-semibold">Due Date:</p>
-                                                            <p class="text-sm due-date" data-index="<?php echo $overall_index; ?>">
-                                                                <?php echo htmlspecialchars($due_date); ?>
-                                                            </p>
+                                                            <p class="due-date" data-index="<?php echo $index; ?>"><?php echo htmlspecialchars($due_date); ?></p>
+
                                                         </div>
                                                         <div>
-                                                        <p class="text-sm font-semibold">Fines: ₱ <span id="fine-amount-<?php echo $overall_index; ?>"><?php echo $fine_amount; ?></span>.00</p>
+                                                            <p class="text-sm font-semibold">Fines: ₱ <span id="fine-amount-<?php echo $index; ?>"><?php echo $fine_amount; ?></span>.00</p>
                                                         </div>
                                                     </div>
+
+
                                                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                                                        <!-- Row 1 -->
                                                         <div>
                                                             <p class="text-sm font-semibold">Renew</p>
-                                                            <select class="renew-dropdown border border-gray-300 rounded p-1 mr-16" data-index="<?php echo $overall_index; ?>" data-due-date="<?php echo htmlspecialchars($due_date); ?>">
+                                                            <select class="renew-dropdown" data-index="<?php echo $index; ?>" data-due-date="<?php echo htmlspecialchars($due_date); ?>">
                                                                 <option value="0">0 Days</option>
                                                                 <option value="3">3 Days</option>
                                                                 <option value="6">6 Days</option>
@@ -267,7 +289,7 @@ if (isset($_GET['student_id'])) {
                                                         </div>
                                                         <div>
                                                             <p class="text-sm font-semibold">Book Status:</p>
-                                                            <select id="statusSelect-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-1 mr-16" onchange="toggleFinesInput(<?php echo $overall_index; ?>)">
+                                                            <select id="statusSelect-<?php echo $index; ?>" class="border border-gray-300 rounded p-1 mr-16">
                                                                 <option value="<?php echo $status; ?>"><?php echo $status; ?></option>
                                                                 <option value="Damage">Damage</option>
                                                                 <option value="Lost">Lost</option>
@@ -276,10 +298,25 @@ if (isset($_GET['student_id'])) {
                                                         <div>
                                                             <p class="text-sm font-semibold">Fines:</p>
                                                             <div class="flex items-center">
-                                                                P:<input id="fineInput-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-1 w-32 finesInput" type="number" disabled placeholder="Disabled">
+                                                                P:<input id="finesInput-<?php echo $index; ?>" class="border border-gray-300 rounded p-1 w-32" type="number" disabled placeholder="Disabled">
                                                             </div>
                                                         </div>
                                                     </div>
+
+                                                    <!-- Duplicate the above div block for additional rows, updating the $index variable accordingly -->
+
+                                                  <!-- Inside your form, just before the closing </form> tag -->
+                                                   
+
+                                                  
+
+
+
+
+
+
+
+
                                                 </div>
                                             </div>
                                             <div class="flex justify-end space-x-2 mt-4">
@@ -287,102 +324,38 @@ if (isset($_GET['student_id'])) {
                                                 <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm">Return</button>
                                             </div>
                                         </li>
-
-
-
-                                        <script>
-                                            document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('book-request-form');
-
-    form.addEventListener('change', function (event) {
-        // Handle renewal dropdown changes
-        if (event.target.classList.contains('renew-dropdown')) {
-            const renewalDropdown = event.target;
-            const renewalDays = parseInt(renewalDropdown.value, 10);
-            const dueDateStr = renewalDropdown.getAttribute('data-due-date');
-            const finesValue = <?php echo $fines_value; ?>; // Get the fines value from PHP
-
-            // Parse the due date
-            const currentDueDate = new Date(dueDateStr + 'T00:00:00');
-
-            // Calculate the new due date
-            const newDueDate = new Date(currentDueDate);
-            newDueDate.setDate(currentDueDate.getDate() + renewalDays);
-
-            const options = {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            };
-            const formattedDueDate = newDueDate.toLocaleDateString('en-CA', options);
-
-            // Get the index and update the due date display
-            const index = renewalDropdown.getAttribute('data-index');
-            const dueDateElement = form.querySelector(`.due-date[data-index="${index}"]`);
-
-            if (dueDateElement) {
-                dueDateElement.innerText = formattedDueDate;
-            }
-
-            // Calculate the fine amount based on the new due date
-            const currentDate = new Date();
-            let fineAmount = 0;
-
-            if (currentDate > newDueDate) {
-                // Calculate overdue days
-                const overdueDays = Math.floor((currentDate - newDueDate) / (1000 * 60 * 60 * 24));
-                fineAmount = overdueDays * finesValue;
-            }
-
-            // Update the fine amount display
-            const fineAmountElement = document.getElementById(`fine-amount-${index}`);
-if (fineAmountElement) {
-    fineAmountElement.innerText = Math.floor(fineAmount); // Use Math.floor to remove decimal places
-}
-        }
-    });
-});
-
-                                        </script>
-                                        <script>
-                                            function toggleFinesInput(index) {
-                                                const statusSelect = document.getElementById(`statusSelect-${index}`);
-                                                const fineInput = document.getElementById(`fineInput-${index}`);
-
-                                                // Log the status value for debugging
-                                                console.log(`Index: ${index}, Status: ${statusSelect.value}`);
-
-                                                // Enable fine input for "Damage" or "Lost"
-                                                if (statusSelect.value === "Damage" || statusSelect.value === "Lost") {
-                                                    fineInput.disabled = false; // Enable the fine input
-                                                    fineInput.placeholder = ""; // Clear the placeholder
-                                                    console.log(`Enabling fine input for index: ${index}`);
-                                                } else {
-                                                    fineInput.disabled = true; // Disable the fine input
-                                                    fineInput.value = ""; // Clear the input value
-                                                    fineInput.placeholder = "Disabled"; // Reset the placeholder
-                                                    console.log(`Disabling fine input for index: ${index}`);
-                                                }
-                                            }
-                                        </script>
-
-
-                                        <?php
-                                        // Increment overall index for each book displayed
-                                        $overall_index++;
-                                        ?>
                                     <?php endforeach; ?>
                                 </div>
+
                             <?php endforeach; ?>
 
                             <div class="flex items-center justify-end">
-                                <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Submit</button>
+                                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Done</button>
                             </div>
                         </form>
-                    <?php else: ?>
-                        <p>No books available.</p>
-                    <?php endif; ?>
 
+                        <script>
+                            function toggleSelectAll(date) {
+                                // Get the "Select All" checkbox
+                                const selectAllCheckbox = document.getElementById('select-all-' + date);
+
+                                // Get all individual book checkboxes for this date group
+                                const bookCheckboxes = document.querySelectorAll('.book-checkbox-' + date);
+
+                                // Toggle the checked state of each individual checkbox
+                                bookCheckboxes.forEach(function(checkbox) {
+                                    checkbox.checked = selectAllCheckbox.checked;
+                                });
+                            }
+                        </script>
+
+
+
+                    <?php else: ?>
+                        <div class="p-4 bg-white flex items-center border-b-2 border-black">
+                            <div class="text-gray-600">No books found for this student.</div>
+                        </div>
+                    <?php endif; ?>
 
                 </div>
             </div>
@@ -404,3 +377,58 @@ if (fineAmountElement) {
 </body>
 
 </html>
+<!-- 
+                                                                                                                                            <script>
+                                                                                                                                            
+                                                                                                                                            
+                                                                                                                                            
+                                                                                                                                            document.addEventListener('DOMContentLoaded', function() {
+                                                                                        const form = document.getElementById('book-request-form');
+
+                                                                                        form.addEventListener('change', function(event) {
+                                                                                            // Handle renewal dropdown changes
+                                                                                            if (event.target.classList.contains('renew-dropdown')) {
+                                                                                                const renewalDropdown = event.target;
+                                                                                                const renewalDays = parseInt(renewalDropdown.value);
+                                                                                                const dueDateStr = renewalDropdown.getAttribute('data-due-date');
+                                                                                                const currentDueDate = new Date(dueDateStr + 'T00:00:00');
+
+                                                                                                // Calculate the new due date
+                                                                                                const newDueDate = new Date(currentDueDate);
+                                                                                                newDueDate.setDate(currentDueDate.getDate() + renewalDays);
+
+                                                                                                const options = {
+                                                                                                    year: 'numeric',
+                                                                                                    month: '2-digit',
+                                                                                                    day: '2-digit'
+                                                                                                };
+                                                                                                const formattedDueDate = newDueDate.toLocaleDateString('en-CA', options);
+
+                                                                                                const index = renewalDropdown.getAttribute('data-index');
+                                                                                                const dueDateElement = form.querySelector(`.due-date[data-index="${index}"]`);
+
+                                                                                                if (dueDateElement) {
+                                                                                                    dueDateElement.innerText = formattedDueDate;
+                                                                                                }
+                                                                                            }
+
+                                                                                            // Handle status select changes
+                                                                                            if (event.target.matches('[id^="statusSelect-"]')) {
+                                                                                                const index = event.target.id.split('-')[1]; // Get the index from the element ID
+                                                                                                const finesInput = document.getElementById(`finesInput-${index}`);
+
+                                                                                                // Enable or disable the fines input based on the selected status
+                                                                                                if (event.target.value === 'Damage' || event.target.value === 'Lost') {
+                                                                                                    finesInput.disabled = false; // Enable the fines input
+                                                                                                    finesInput.placeholder = ''; // Clear the placeholder when enabled
+                                                                                                } else {
+                                                                                                    finesInput.disabled = true; // Disable the fines input
+                                                                                                    finesInput.value = ''; // Clear the input value when disabled
+                                                                                                    finesInput.placeholder = 'Disabled'; // Set placeholder to 'Disabled'
+                                                                                                }
+                                                                                            }
+                                                                                        });
+                                                                                    });
+
+
+                                                                                    </script> -->

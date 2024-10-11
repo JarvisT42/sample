@@ -2,7 +2,6 @@
 session_start();
 include '../connection.php';  // Ensure you have your database connection
 
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -27,6 +26,7 @@ include '../connection.php';  // Ensure you have your database connection
             color: #000;
         }
     </style>
+
 </head>
 
 <body>
@@ -43,19 +43,21 @@ include '../connection.php';  // Ensure you have your database connection
                         </div>
                     </div>
 
-                    <div class="overflow-y-auto max-h-screen">
-                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-gray-300">
+                    <div class="overflow-y-auto max-h-screen h-[600px] border border-gray-300 rounded-lg">
+                    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-gray-300">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
 
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Student Name</th>
+                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Student Name</th>
+                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">way pf borrow</th>
+
                                     <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/3">Course</th>
                                     <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">Borrow Count</th> <!-- Reduced width -->
                                     <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/5">Issued Date</th> <!-- Slightly smaller -->
                                     <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Due Date</th> <!-- Adjusted width -->
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/2">Action</th>
-                                </tr>
 
+                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Action</th>
+                                </tr>
 
 
 
@@ -63,93 +65,155 @@ include '../connection.php';  // Ensure you have your database connection
 
                             </thead>
                             <tbody>
-                                <?php
+                            <?php
                                 include '../connection.php';  // Ensure you have your database connection
 
                                 // Get today's date
                                 $today = date('Y-m-d');
 
-                                // //$sql = "SELECT Student, Course, student_id, Time, COUNT(student_id) AS borrow_count, MIN(Date_To_Claim) AS nearest_date 
-                                // FROM borrow 
-                                // WHERE Date_To_Claim >= '$today' AND status = 'pending' 
-                                // GROUP BY student_id";
+                                // Fetch book_id and category for entries that exceed 3 days
+                              
 
-                                $sql = "SELECT s.First_Name, s.Middle_Initial, s.Last_Name, s.S_Course, b.student_id, b.Due_Date, b.Issued_Date, b.Time, COUNT(b.student_id) AS borrow_count, MIN(b.Due_Date) AS nearest_date 
-        FROM borrow b 
-        JOIN students s ON b.student_id = s.id  -- Assuming the primary key in students is 'id'
-        WHERE b.Date_To_Claim >= '$today' AND b.status = 'borrowed' 
-        GROUP BY b.student_id";
+                               
 
 
-                                $result = $conn->query($sql);
+                                // Query to fetch all pending borrow entries along with student names and their borrowing method
+                                $sql = "SELECT 
+                                b.student_id,  -- Add this line
+                                b.Way_Of_Borrow,
+                                 b.walk_in_id,
+                                CASE 
+                                    WHEN b.Way_Of_Borrow = 'online' THEN CONCAT(s.First_Name, ' ', s.Last_Name) 
+                                    WHEN b.Way_Of_Borrow = 'walk-in' THEN b.Full_Name 
+                                    ELSE '' 
+                                END AS First_Name,
+                                CASE 
+                                    WHEN b.Way_Of_Borrow = 'online' THEN s.S_Course
+                                    WHEN b.Way_Of_Borrow = 'walk-in' THEN '' 
+                                    ELSE '' 
+                                END AS Course,
+                                b.Due_Date,
+                                b.Issued_Date,
+                                COUNT(b.student_id) AS borrow_count,
+                                MIN(CASE 
+                                    WHEN b.Due_Date = '' THEN DATE_ADD(b.Issued_Date, INTERVAL 3 DAY)
+                                    ELSE b.Due_Date
+                                END) AS nearest_date,
+                                MIN(b.Time) AS Time  
+                            FROM borrow b
+                            LEFT JOIN students s ON b.student_id = s.id  
+                            WHERE b.status = 'borrowed' AND b.role = 'Student'
+                            GROUP BY b.Way_Of_Borrow, b.student_id, b.Full_Name, b.Return_Date";
+                            
 
-                                // Array to store records
-                                $records = [];
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        $records[] = $row;
-                                    }
-                                }
+
+
+
+                                $borrowData = $conn->query($sql);
+                                $conn->close(); // Close the database connection
                                 ?>
-                                <?php if (!empty($records)): ?>
-                                    <?php foreach ($records as $record): ?>
+
+
+                                <?php if ($borrowData && $borrowData->num_rows > 0): ?>
+                                    <?php while ($row = $borrowData->fetch_assoc()): ?>
                                         <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-300">
-                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white break-words" style="max-width: 300px;">
-                                                <?php echo htmlspecialchars($record['First_Name'] . ' ' . $record['Middle_Initial'] . ' ' . $record['Last_Name']); ?>
-                                            </th>
+                                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white break-words" style="max-width: 300px;">
+                                                <?php echo htmlspecialchars($row['First_Name']); ?> </td>
+
+                                            <td class="px-6 py-4"><?php echo htmlspecialchars($row['Way_Of_Borrow']); ?></td>
+
+
+     
+
                                             <td class="px-6 py-4 break-words" style="max-width: 300px;">
-                                                <?php echo htmlspecialchars($record['S_Course']); ?>
-                                            </td>
-                                            <td class="px-6 py-4"><?php echo htmlspecialchars($record['borrow_count']); ?></td>
+                                                <?php echo htmlspecialchars($row['Course']); ?> </td>
+                                            <td class="px-6 py-4"><?php echo htmlspecialchars($row['borrow_count']); ?></td>
                                             <td class="px-6 py-4">
                                                 <?php
                                                 // Format the nearest date
-                                                $nearestDate = new DateTime($record['Issued_Date']);
+                                                $nearestDate = new DateTime($row['Issued_Date']);
                                                 // Format the date as 'F j, Y' and get the day of the week
                                                 $formattedDate = $nearestDate->format('F j, Y') . ' - ' . $nearestDate->format('l');
 
                                                 // Output the formatted date along with the Time value if available
-                                                echo htmlspecialchars($formattedDate) . ' ' . htmlspecialchars($record['Time']);
+                                                echo htmlspecialchars($formattedDate) . ' ' . htmlspecialchars($row['Time']);
                                                 ?>
                                             </td>
+
+
                                             <td class="px-6 py-4">
                                                 <?php
                                                 // Format the nearest date
-                                                $nearestDate = new DateTime($record['nearest_date']);
+                                                $nearestDate = new DateTime($row['nearest_date']);
                                                 // Format the date as 'F j, Y' and get the day of the week
                                                 $formattedDate = $nearestDate->format('F j, Y') . ' - ' . $nearestDate->format('l');
 
                                                 // Output the formatted date along with the Time value if available
-                                                echo htmlspecialchars($formattedDate) . ' ' . htmlspecialchars($record['Time']);
+                                                echo htmlspecialchars($formattedDate) . ' ' . htmlspecialchars($row['Time']);
                                                 ?>
                                             </td>
-                                            <td class="px-6 py-4">
-                                                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                                    onclick="redirectToBookRequest('<?php echo htmlspecialchars($record['student_id']); ?>')">
-                                                    Next
-                                                </button>
-                                            </td>
+
+
+       
+<td class="px-6 py-4">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+    onclick="redirectToBookRequest('<?php echo htmlspecialchars($row['Way_Of_Borrow']); ?>', '<?php echo htmlspecialchars($row['walk_in_id'] ?? ''); ?>', '<?php echo htmlspecialchars($row['student_id'] ?? ''); ?>')">
+    Next
+    </button>
+</td>
+
+
+
+
+
                                         </tr>
-                                    <?php endforeach; ?>
+
+                                        
+
+                                    <?php endwhile; ?>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="5" class="px-6 py-4 text-center">No records found.</td>
                                     </tr>
                                 <?php endif; ?>
+
                             </tbody>
                         </table>
                     </div>
+                    <script>
+function redirectToBookRequest(wayOfBorrow, walkInId, studentId) {
+    let redirectUrl;
+
+    if (wayOfBorrow === 'online' && studentId) {
+        redirectUrl = 'borrowed_books_2.php?student_id=' + studentId;
+    } else if (wayOfBorrow === 'walk-in' && walkInId) {
+        redirectUrl = 'borrowed_books_2.php?walk_in_id=' + encodeURIComponent(walkInId);
+    } else {
+        console.error("No valid student ID or walkInId provided.");
+        return; // Exit if there's no valid identifier
+    }
+
+    window.location.href = redirectUrl;
+}
+</script>
+
+
+                    
+
+
+
+                    
+
+
+
+
                 </div>
             </div>
         </div>
     </main>
 
-    <script>
-        function redirectToBookRequest(studentId) {
-            // Redirect to book_request_2.php with student_id as a query parameter
-            window.location.href = 'borrowed_books_2.php?student_id=' + studentId;
-        }
-    </script>
+
+
 
     <script>
         // Function to automatically show the dropdown if on book_request.php
@@ -162,10 +226,8 @@ include '../connection.php';  // Ensure you have your database connection
 
         });
     </script>
+
+
 </body>
 
 </html>
-
-<?php
-$conn->close(); // Close the database connection
-?>

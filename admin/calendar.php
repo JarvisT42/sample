@@ -91,12 +91,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['selectedDates']) && is
 
 
 ?>
-<span style="font-family: verdana, geneva, sans-serif;">
+<!-- <span style="font-family: verdana, geneva, sans-serif;"> -->
     <!DOCTYPE html>
     <html lang="en">
 
     <head>
         <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
         <title>Dashboard | By Code Info</title>
         <!-- Font Awesome Cdn Link -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -116,9 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['selectedDates']) && is
 
     </head>
     <style>
-        
-
-
         nav #manage-content a[href="appointment_date.php"] {
             color: blue;
         }
@@ -128,180 +127,180 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['selectedDates']) && is
 
 
 
-.containerCalendar {
+        .containerCalendar {
 
 
-  /* Set a fixed height as per your requirement */
-  margin-top: 20px;
-  /* Add overflow if content exceeds the fixed height */
+            /* Set a fixed height as per your requirement */
+            margin-top: 20px;
+            /* Add overflow if content exceeds the fixed height */
 
 
-  --primary-color: #f90a39;
-  --text-color: #1d1d1d;
-  --bg-color: #f1f1fb;
+            --primary-color: #f90a39;
+            --text-color: #1d1d1d;
+            --bg-color: #f1f1fb;
 
 
 
 
 
-}
+        }
 
-.calendar {
+        .calendar {
 
-  /* Adjust the max-width as needed */
-  padding: 30px 20px;
-  border-radius: 10px;
-  background-color: var(--bg-color);
-  height: 580px;
-  position: relative;
-}
+            /* Adjust the max-width as needed */
+            padding: 30px 20px;
+            border-radius: 10px;
+            background-color: var(--bg-color);
+            height: 580px;
+            position: relative;
+        }
 
-.calendar .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #ccc;
-}
-.calendar .footer {
-    display: flex;
-    justify-content: flex-end; /* Aligns content to the right */
-    align-items: center;
-    margin-top: 20px;
-    border-top: 2px solid #ccc;
-}
+        .calendar .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ccc;
+        }
 
-.disabled {
-    pointer-events: none;
-    opacity: 0.5;
-}
+        .calendar .footer {
+            display: flex;
+            justify-content: flex-end;
+            /* Aligns content to the right */
+            align-items: center;
+            margin-top: 20px;
+            border-top: 2px solid #ccc;
+        }
 
-.cool-button {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 16px;
-    text-align: center;
-    text-decoration: none;
-    outline: none;
-    border: none;
-    border-radius: 5px;
-    color: #fff;
-    background-color: #3498db;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
-    cursor: pointer;
-    margin-top: 20px;
-}
+        .disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
 
-/* Hover effect */
-.cool-button:hover {
-    background-color: #21f367;
-}
+        .cool-button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            margin-top: 20px;
+        }
 
-/* Click effect */
-.cool-button:active {
-    background-color: #2471a3;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
- 
+        /* Hover effect */
+        .cool-button:hover {
+            background-color: #21f367;
+        }
+
+        /* Click effect */
+        .cool-button:active {
+            background-color: #2471a3;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
 
-.calendar .header .month {
-  display: flex;
-  align-items: center;
-  font-size: 25px;
-  font-weight: 600;
-  color: var(--text-color);
-}
 
-.calendar .header .btns {
-  display: flex;
-  gap: 10px;
-}
+        .calendar .header .month {
+            display: flex;
+            align-items: center;
+            font-size: 25px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
 
-.calendar .header .btns .btn {
-  width: 50px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  color: #fff;
-  background-color: var(--primary-color);
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
+        .calendar .header .btns {
+            display: flex;
+            gap: 10px;
+        }
 
-.calendar .header .btns .btn:hover {
-  background-color: #db0933;
-  transform: scale(1.05);
-}
+        .calendar .header .btns .btn {
+            width: 50px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            color: #fff;
+            background-color: var(--primary-color);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
 
-.weekdays {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
+        .calendar .header .btns .btn:hover {
+            background-color: #db0933;
+            transform: scale(1.05);
+        }
 
-.weekdays .day {
-  width: calc(100% / 7 - 10px);
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-}
+        .weekdays {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
 
-.days {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+        .weekdays .day {
+            width: calc(100% / 7 - 10px);
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+        }
 
-.day.fetched {
-  background-color: blue;
-  /* Or any color you desire for fetched dates */
-  /* Additional styles for fetched dates */
-}
+        .days {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-.days .day {
-  width: calc(100% / 7 - 10px);
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  font-size: 16px;
-  font-weight: 400;
-  color: var(--text-color);
-  background-color: #fcfcfc;
-  transition: all 0.3s;
-  border: 1px solid #000;
+        .day.fetched {
+            background-color: blue;
+            /* Or any color you desire for fetched dates */
+            /* Additional styles for fetched dates */
+        }
 
-}
+        .days .day {
+            width: calc(100% / 7 - 10px);
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--text-color);
+            background-color: #fcfcfc;
+            transition: all 0.3s;
+            border: 1px solid #000;
 
-.days .day:not(.next):not(.prev):hover {
-  color: #fff;
-  background-color: var(--primary-color);
-  transform: scale(1.05);
-}
+        }
 
-.days .day.today {
-  color: #130c0c;
-  background-color: var(--primary-color);
-}
+        .days .day:not(.next):not(.prev):hover {
+            color: #fff;
+            background-color: var(--primary-color);
+            transform: scale(1.05);
+        }
 
-.days .day.next,
-.days .day.prev {
-  color: #ccc;
+        .days .day.today {
+            color: #130c0c;
+            background-color: var(--primary-color);
+        }
 
-}
+        .days .day.next,
+        .days .day.prev {
+            color: #ccc;
 
-.day.fetched {
-  background-color: lightblue;
-}
+        }
 
-     
+        .day.fetched {
+            background-color: lightblue;
+        }
     </style>
     <script>
         const fetchedDates = <?php echo $fetchedDatesJson; ?>;
@@ -323,57 +322,57 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['selectedDates']) && is
                 <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
 
 
-                <div class="containerCalendar">
+                    <div class="containerCalendar">
 
-                <div class=" p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-                Records older than 1 year will automatically deleted
-                </div>
-
-
-          <br>
-          <br>
-
-          <div class="calendar">
-            <div class="header">
-              <div class="month"></div>
-              <div class="btns">
-                <div class="btn today-btn">
-                  <i class="fas fa-calendar-day"></i>
-                </div>
-                <div class="btn prev-btn">
-                  <i class="fas fa-chevron-left"></i>
-                </div>
-                <div class="btn next-btn">
-                  <i class="fas fa-chevron-right"></i>
-                </div>
-
-              </div>
-            </div>
-
-            <div class="weekdays">
-              <div class="day">Sun</div>
-              <div class="day">Mon</div>
-              <div class="day">Tue</div>
-              <div class="day">Wed</div>
-              <div class="day">Thu</div>
-              <div class="day">Fri</div>
-              <div class="day">Sat</div>
-            </div>
-            <div class="days">
-              <!-- lets add days using js -->
-            </div>
-            <div class="footer">
-    <form id="datesForm" method="POST" action="calendar.php">
-        <input type="hidden" id="selectedDatesInput" name="selectedDates">
-        <input type="hidden" id="DeSelectedDatesInput" name="DeSelectedDates">
-        <button type="button" class="cool-button" name="Save" onclick="submitDates()">Save</button>
-    </form>
-</div>
+                        <div class=" p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+                            Records older than 1 year will automatically deleted
+                        </div>
 
 
+                        <br>
+                        <br>
 
-          </div>
-        </div>
+                        <div class="calendar">
+                            <div class="header">
+                                <div class="month"></div>
+                                <div class="btns">
+                                    <div class="btn today-btn">
+                                        <i class="fas fa-calendar-day"></i>
+                                    </div>
+                                    <div class="btn prev-btn">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </div>
+                                    <div class="btn next-btn">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="weekdays">
+                                <div class="day">Sun</div>
+                                <div class="day">Mon</div>
+                                <div class="day">Tue</div>
+                                <div class="day">Wed</div>
+                                <div class="day">Thu</div>
+                                <div class="day">Fri</div>
+                                <div class="day">Sat</div>
+                            </div>
+                            <div class="days">
+                                <!-- lets add days using js -->
+                            </div>
+                            <div class="footer">
+                                <form id="datesForm" method="POST" action="calendar.php">
+                                    <input type="hidden" id="selectedDatesInput" name="selectedDates">
+                                    <input type="hidden" id="DeSelectedDatesInput" name="DeSelectedDates">
+                                    <button type="button" class="cool-button" name="Save" onclick="submitDates()">Save</button>
+                                </form>
+                            </div>
+
+
+
+                        </div>
+                    </div>
 
 
 

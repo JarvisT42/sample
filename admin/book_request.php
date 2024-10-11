@@ -14,6 +14,7 @@ include '../connection.php';  // Ensure you have your database connection
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         .active-book-request {
@@ -50,13 +51,24 @@ include '../connection.php';  // Ensure you have your database connection
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-gray-300">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
 
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Student Name</th>
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/3">Course</th>
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">Borrow Count</th> <!-- Reduced width -->
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Date To Claim</th> <!-- Adjusted width -->
-                                    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Action</th>
-                                </tr>
+                            <tr>
+    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">
+        <i class="fas fa-user"></i> Student Name
+    </th>
+    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/3">
+        <i class="fas fa-book"></i> Course
+    </th>
+    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">
+        <i class="fas fa-list-ol"></i> Quantity
+    </th>
+    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">
+        <i class="fas fa-calendar-alt"></i> Date To Claim
+    </th>
+    <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">
+        <i class="fas fa-tasks"></i> Action
+    </th>
+</tr>
+
 
 
 

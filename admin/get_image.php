@@ -1,30 +1,68 @@
-<?php
-include '../connection.php'; // Ensure you have your database connection
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Most Borrowed Books</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            width: 80%;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
 
-if (isset($_GET['id']) && isset($_GET['category'])) {
-    $id = intval($_GET['id']); // Ensure it's an integer to prevent SQL injection
-    $category = intval($_GET['category']); // Ensure it's an integer to prevent SQL injection
+<div class="chart-container">
+    <canvas id="borrowedBooksChart"></canvas>
+</div>
 
-    // Query to get the image data
-    $query = "SELECT record_cover FROM $category WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param('i', $id);
-    $stmt->execute();
-    $stmt->store_result();
-    $stmt->bind_result($record_cover);
+<script>
+    // Data for the chart
+    const labels = ['ID 001', 'ID 002', 'ID 003', 'ID 004', 'ID 005'];
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: 'Number of Times Borrowed',
+            data: [30, 50, 70, 40, 60], // Replace with actual borrow counts
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
 
-    if ($stmt->num_rows > 0) {
-        $stmt->fetch();
-        header("Content-Type: image/jpeg"); // Set the correct content type
-        echo $record_cover; // Output the binary data
-    } else {
-        // Handle no image found
-        http_response_code(404);
-        echo "Image not found.";
-    }
-    $stmt->close();
-} else {
-    http_response_code(400);
-    echo "No ID provided.";
-}
-?>
+    // Configuring the chart
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    };
+
+    // Rendering the chart
+    const borrowedBooksChart = new Chart(
+        document.getElementById('borrowedBooksChart'),
+        config
+    );
+</script>
+
+</body>
+</html>
