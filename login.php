@@ -98,6 +98,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
     $stmt->close();
     $conn->close();
 }
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
+
+    include 'connection.php'; // Include your database connection file
+
+    // Get form input
+    $email = $_POST['email'];
+    $firstname = $_POST['firstname']; // Assuming you have a name field in your form
+    // $password = password_hash($_POST['password'], PASSWORD_BCRYPT); // Hash the password for security
+
+    // Prepare SQL statement to insert the new student into the database
+    $stmt = $conn->prepare("INSERT INTO students (First_Name, Email_Address) VALUES (?, ?)");
+    $stmt->bind_param("ss", $firstname, $email );
+
+    // Execute the statement
+    if ($stmt->execute()) {
+        echo "Student registered successfully!";
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    // Close the statement and connection
+    $stmt->close();
+    $conn->close();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -311,7 +337,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
 
 
             <div class="col-md-9 register-right" style="display: none;">
-                <form id="registrationForm">
+            <form id="registrationForm" class="register" method="POST" action="">
+
                     <h3 class="register-heading">Student Registration</h3>
                     <div class="row register-form">
                         <!-- First Name and Last Name Fields -->
@@ -321,7 +348,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                                     </div>
-                                    <input type="text" class="form-control" placeholder="First Name *" required />
+                                    <input type="text" name="firstname" class="form-control"  placeholder="First Name *"  />
                                 </div>
                             </div>
                         </div>
@@ -331,7 +358,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                                     </div>
-                                    <input type="text" class="form-control" placeholder="Last Name *" required />
+                                    <input type="text"  name="lastname" class="form-control" placeholder="Last Name *" />
                                 </div>
                             </div>
                         </div>
@@ -342,7 +369,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                                     </div>
-                                    <input type="email" class="form-control" placeholder="Your Email *" required />
+                                    <input type="email"  name="email" class="form-control" placeholder="Your Email *" />
                                 </div>
                             </div>
                         </div>
@@ -354,14 +381,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-phone"></i></span>
                                     </div>
-                                    <input type="text" minlength="10" maxlength="10" name="txtEmpPhone" class="form-control" placeholder="Your Phone *" required />
+                                    <input type="text" minlength="10" maxlength="10" name="txtEmpPhone" class="form-control" placeholder="Your Phone *"  />
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <select class="form-control" required>
+                                <select class="form-control" >
                                     <option class="hidden" selected disabled>Year Level</option>
                                     <option>1st Year</option>
                                     <option>2nd Year</option>
@@ -373,7 +400,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                         <div class="col-md-6">
 
                             <div class="form-group">
-                                <select class="form-control" required>
+                                <select class="form-control" >
                                     <option class="hidden" selected disabled>Department</option>
                                     <option>Business Administration</option>
                                     <option>Engineering</option>
@@ -406,7 +433,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
                                     </div>
-                                    <input type="date" class="form-control" placeholder="Birth Date *" required />
+                                    <input type="date" class="form-control" placeholder="Birth Date *" />
                                 </div>
                             </div>
                         </div>
@@ -418,7 +445,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                     </div>
-                                    <input type="password" class="form-control" placeholder="Password *" required />
+                                    <input type="password" class="form-control" placeholder="Password *"  />
                                 </div>
                             </div>
                         </div>
@@ -428,14 +455,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                     </div>
-                                    <input type="password" class="form-control" placeholder="Confirm Password *" required />
+                                    <input type="password"  name="password" class="form-control" placeholder="Confirm Password *"/>
                                 </div>
                             </div>
                         </div>
              
 
                         <div class="col-md-12">
-                            <input type="submit" class="btnRegister" value="Register" />
+
+                            <input type="submit" class="btnRegister" name="student_register"  value="Register" />
                         </div>
                     </div>
                 </form>

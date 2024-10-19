@@ -44,7 +44,7 @@ include '../connection.php';  // Ensure you have your database connection
                     </div>
 
                     <div class="overflow-y-auto max-h-screen h-[600px] border border-gray-300 rounded-lg">
-                    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-gray-300">
+                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-gray-300">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
 
                                 <tr>
@@ -65,16 +65,16 @@ include '../connection.php';  // Ensure you have your database connection
 
                             </thead>
                             <tbody>
-                            <?php
+                                <?php
                                 include '../connection.php';  // Ensure you have your database connection
 
                                 // Get today's date
                                 $today = date('Y-m-d');
 
                                 // Fetch book_id and category for entries that exceed 3 days
-                              
 
-                               
+
+
 
 
                                 // Query to fetch all pending borrow entries along with student names and their borrowing method
@@ -104,7 +104,7 @@ include '../connection.php';  // Ensure you have your database connection
                             LEFT JOIN students s ON b.student_id = s.id  
                             WHERE b.status = 'borrowed' AND b.role = 'Student'
                             GROUP BY b.Way_Of_Borrow, b.student_id, b.Full_Name, b.Return_Date";
-                            
+
 
 
 
@@ -123,7 +123,7 @@ include '../connection.php';  // Ensure you have your database connection
                                             <td class="px-6 py-4"><?php echo htmlspecialchars($row['Way_Of_Borrow']); ?></td>
 
 
-     
+
 
                                             <td class="px-6 py-4 break-words" style="max-width: 300px;">
                                                 <?php echo htmlspecialchars($row['Course']); ?> </td>
@@ -154,13 +154,14 @@ include '../connection.php';  // Ensure you have your database connection
                                             </td>
 
 
-       
-<td class="px-6 py-4">
-    <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-    onclick="redirectToBookRequest('<?php echo htmlspecialchars($row['Way_Of_Borrow']); ?>', '<?php echo htmlspecialchars($row['walk_in_id'] ?? ''); ?>', '<?php echo htmlspecialchars($row['student_id'] ?? ''); ?>')">
-    Next
-    </button>
-</td>
+
+                                            <td class="px-6 py-4">
+                                                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                                    onclick="redirectToBookRequest('<?php echo htmlspecialchars($row['Way_Of_Borrow']); ?>', '<?php echo htmlspecialchars($row['walk_in_id'] ?? ''); ?>', '<?php echo htmlspecialchars($row['student_id'] ?? ''); ?>')">
+                                                    Next
+                                                </button>
+
+                                            </td>
 
 
 
@@ -168,7 +169,7 @@ include '../connection.php';  // Ensure you have your database connection
 
                                         </tr>
 
-                                        
+
 
                                     <?php endwhile; ?>
                                 <?php else: ?>
@@ -181,28 +182,26 @@ include '../connection.php';  // Ensure you have your database connection
                         </table>
                     </div>
                     <script>
-function redirectToBookRequest(wayOfBorrow, walkInId, studentId) {
-    let redirectUrl;
-
-    if (wayOfBorrow === 'online' && studentId) {
-        redirectUrl = 'borrowed_books_2.php?student_id=' + studentId;
-    } else if (wayOfBorrow === 'walk-in' && walkInId) {
-        redirectUrl = 'borrowed_books_2.php?walk_in_id=' + encodeURIComponent(walkInId);
-    } else {
-        console.error("No valid student ID or walkInId provided.");
-        return; // Exit if there's no valid identifier
-    }
-
-    window.location.href = redirectUrl;
-}
-</script>
-
-
-                    
+                        function redirectToBookRequest(wayOfBorrow, walkInId, studentId) {
+                            let url;
+                            if (wayOfBorrow === 'online') {
+                                url = 'borrowed_books_2online.php?student_id=' + studentId; // Append student_id if needed
+                            } else if (wayOfBorrow === 'walk-in') {
+                                url = 'borrowed_books_2walkIn.php?walk_in_id=' + walkInId; // Append walk_in_id if needed
+                            }
+                            if (url) {
+                                window.location.href = url; // Redirect to the chosen URL
+                            }
+                        }
+                    </script>
 
 
 
-                    
+
+
+
+
+
 
 
 

@@ -29,6 +29,7 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
     <style>
@@ -55,11 +56,11 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
 
 
+                <div class="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
 
-                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm ">
                         <div class="p-6">
                             <div class="flex items-center justify-between">
                                 <p class="text-sm font-medium text-muted-foreground">TOTAL PENDING BORROW BOOKS</p>
@@ -183,6 +184,120 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
 
 
+
+                </div>
+
+
+
+
+
+                <div class="col-span-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div class="p-6">
+        <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-muted-foreground">MOST BORROWED BOOKS</p>
+            <div class="flex items-center text-red-600">
+                <i class="fas fa-arrow-down mr-1 h-4 w-4"></i>
+                <span class="text-sm font-medium">5.12%</span>
+            </div>
+        </div>
+        <canvas id="pendingBooksChart" class="mt-4"></canvas>
+        <?php
+        // Query to count borrowed books
+        $sql = "SELECT COUNT(*) AS total_borrowed FROM borrow WHERE status = 'pending'";
+        $result = $conn->query($sql);
+        $total = 0;
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $total = $row['total_borrowed'];
+        }
+        ?>
+        <h3 class="text-2xl font-bold mt-2"><?php echo $total; ?></h3> <!-- Display total count -->
+        <div class="mt-4 flex items-center justify-between">
+            <a href="#" class="text-sm font-medium text-primary hover:underline">View pending requests</a>
+            <div class="bg-green-400 h-12 w-12 flex items-center justify-center rounded-full"> <!-- Circle background with fixed width and height -->
+                <i class="fas fa-book text-white"></i> <!-- Icon size -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var ctx = document.getElementById('pendingBooksChart').getContext('2d');
+    var pendingBooksChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Pending Books'],
+            datasets: [{
+                label: 'Total',
+                data: [<?php echo $total; ?>],
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Books'
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+
+
+
+
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div class="p-8"> <!-- Increased padding for the container -->
+        <div class="bg-white rounded-lg shadow-sm p-6"> <!-- Increased padding for the inner box -->
+            <h2 class="font-semibold text-xl mb-6 flex items-center justify-between"> <!-- Increased font size -->
+                Borrow Activity
+                <span class="text-md font-normal text-gray-500">3 Today</span> <!-- Increased font size -->
+            </h2>
+            <div class="space-y-6"> <!-- Increased space between items -->
+                <!-- Activity Items -->
+                <div class="flex justify-between items-center">
+                    <div class="flex items-start">
+                        <span class="bg-green-500 w-3 h-3 rounded-full mt-1.5 mr-3 flex-shrink-0"></span> <!-- Increased dot size -->
+                        <p class="text-lg">Due Soon</p> <!-- Increased font size -->
+                    </div>
+                    <span class="text-md text-gray-500">32 min</span> <!-- Increased font size -->
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-start">
+                        <span class="bg-red-500 w-3 h-3 rounded-full mt-1.5 mr-3 flex-shrink-0"></span> <!-- Increased dot size -->
+                        <p class="text-lg">Due Today</p> <!-- Increased font size -->
+                    </div>
+                    <span class="text-md text-gray-500">56 min</span> <!-- Increased font size -->
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-start">
+                        <span class="bg-blue-500 w-3 h-3 rounded-full mt-1.5 mr-3 flex-shrink-0"></span> <!-- Increased dot size -->
+                        <p class="text-lg">Due Soon</p> <!-- Increased font size -->
+                    </div>
+                    <span class="text-md text-gray-500">2 hrs</span> <!-- Increased font size -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
                 </div>
 
 
@@ -196,80 +311,10 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
 
 
-                <div class="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800">
-                    <p class="text-2xl text-gray-400 dark:text-gray-500">
-                        <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                        </svg>
-                    </p>
-                </div>
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                        <p class="text-2xl text-gray-400 dark:text-gray-500">
-                            <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                            </svg>
-                        </p>
-                    </div>
-                    <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                        <p class="text-2xl text-gray-400 dark:text-gray-500">
-                            <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                            </svg>
-                        </p>
-                    </div>
-                    <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                        <p class="text-2xl text-gray-400 dark:text-gray-500">
-                            <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                            </svg>
-                        </p>
-                    </div>
-                    <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                        <p class="text-2xl text-gray-400 dark:text-gray-500">
-                            <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                            </svg>
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800">
-                    <p class="text-2xl text-gray-400 dark:text-gray-500">
-                        <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                        </svg>
-                    </p>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                        <p class="text-2xl text-gray-400 dark:text-gray-500">
-                            <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                            </svg>
-                        </p>
-                    </div>
-                    <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                        <p class="text-2xl text-gray-400 dark:text-gray-500">
-                            <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                            </svg>
-                        </p>
-                    </div>
-                    <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                        <p class="text-2xl text-gray-400 dark:text-gray-500">
-                            <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                            </svg>
-                        </p>
-                    </div>
-                    <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                        <p class="text-2xl text-gray-400 dark:text-gray-500">
-                            <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                            </svg>
-                        </p>
-                    </div>
-                </div>
+
+
+
+
             </div>
         </div>
 

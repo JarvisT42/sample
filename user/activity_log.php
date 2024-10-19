@@ -99,7 +99,7 @@ session_start();
                                 <div class="flex items-center">
                                     <input id="inline-radio" type="radio" name="inline-radio-group" class="hidden peer">
                                     <label for="inline-radio" class="ms-2 cursor-pointer text-sm font-semibold px-6 py-3 rounded-lg bg-gray-100 text-gray-900 dark:text-gray-300 hover:text-blue-600 hover:bg-blue-50 peer-checked:underline peer-checked:bg-blue-500 peer-checked:text-white shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
-                                        History 
+                                        History
                                     </label>
                                 </div>
                             </div>
@@ -181,130 +181,154 @@ session_start();
 
                     <div id="table1" class="overflow-x-auto">
 
-                    <div class="scrollable-table-container relative overflow-x-auto shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-                <th scope="col" class="px-6 py-3">Book Title</th>
-                <th scope="col" class="px-6 py-3">Author</th>
-                <th scope="col" class="px-6 py-3">Date To Claim</th>
-                <th scope="col" class="px-6 py-3">Issued Date</th>
-                <th scope="col" class="px-6 py-3">Status</th>
+                        <div class="scrollable-table-container relative overflow-x-auto shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
+                            <?php
 
+                            include("../connection.php");
+                            include("../connection2.php");
 
-            </tr>
-        </thead>
-        <tbody>
-            <?php 
-            
-include("../connection.php");
+                            // Sanitize the student ID to prevent SQL injection
+                            $id = intval($_SESSION["Id"]);
 
-// Sanitize the student ID to prevent SQL injection
-$id = intval($_SESSION["Id"]);
+                            // Fetch the category and book_id based on the student_id
+                            $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status FROM GFI_Library_Database.borrow WHERE student_id = ?";
+                            $stmt = $conn->prepare($categoryQuery);
+                            $stmt->bind_param('i', $id); // Assuming student_id is an integer
+                            $stmt->execute();
+                            $result = $stmt->get_result();
 
-// Fetch the category based on the student_id
-$categoryQuery = "SELECT Category FROM GFI_Library_Database.borrow WHERE student_id = ?";
-$stmt = $conn->prepare($categoryQuery);
-$stmt->bind_param('i', $id); // Assuming student_id is an integer
-$stmt->execute();
-$result = $stmt->get_result();
+                            // Initialize an array to hold the fetched book records
+                            $books = [];
 
-// Fetch the category
-if ($row = $result->fetch_assoc()) {
-    $category = $row['Category']; // Get the category for the student
-} else {
-    echo "No category found for this student.";
-    exit;
-}
+                            // Fetch all rows (there may be multiple books borrowed by the same student)
+                            while ($row = $result->fetch_assoc()) {
+                                $category = $row['Category'];
+                                $bookId = $row['book_id'];
+                                $dateToClaim = $row['Date_To_Claim'];
+                                $issuedDate = $row['Issued_Date'];
+                                $status = $row['status'];
 
-$stmt->close(); // Close the category statement
+                                // Prepare the SQL to fetch book details from the category-specific table
+                                $query = "SELECT Title, Author FROM `$category` WHERE id = ?";
 
-// Prepare the SQL statement safely using placeholders
-$query = "
-    SELECT a.student_id, a.book_id, a.Date_To_Claim, a.Issued_Date, c.Title, c.Author, a.status  
-    FROM GFI_Library_Database.borrow AS a 
-    JOIN GFI_Library_Database.students AS b ON a.student_id = b.id
-       JOIN gfi_library_database_books_records.$category AS c ON a.book_id = c.id
+                                $bookStmt = $conn2->prepare($query);
+                                $bookStmt->bind_param('i', $bookId);
+                                $bookStmt->execute();
+                                $bookResult = $bookStmt->get_result();
 
-    WHERE a.student_id = ? ";
+                                // Fetch the book details and store them in the $books array
+                                if ($bookRow = $bookResult->fetch_assoc()) {
+                                    $books[] = [
+                                        'Title' => $bookRow['Title'],
+                                        'Author' => $bookRow['Author'],
+                                        'Date_To_Claim' => $dateToClaim,
+                                        'Issued_Date' => $issuedDate,
+                                        'status' => $status
+                                    ];
+                                }
 
-// Prepare the statement
-$stmt = $conn->prepare($query);
+                                $bookStmt->close();
+                            }
 
-// Bind parameters (integer type for student_id)
-$stmt->bind_param('i', $id);
+                            $stmt->close();
+                            ?>
 
-// Execute the statement
-$stmt->execute();
+                            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Book Title</th>
+                                        <th scope="col" class="px-6 py-3">Author</th>
+                                        <th scope="col" class="px-6 py-3">Date To Claim</th>
+                                        <th scope="col" class="px-6 py-3">Issued Date</th>
+                                        <th scope="col" class="px-6 py-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    // Loop through the books to display them in the table
+                                    foreach ($books as $row) {
+                                    ?>
+                                        <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                <?php echo htmlspecialchars($row['Title']); ?>
+                                            </th>
+                                            <td class="px-6 py-4">
+                                                <?php echo htmlspecialchars($row['Author']); ?>
+                                            </td>
 
-// Get the result
-$result = $stmt->get_result();
+                                            <td class="px-6 py-4">
+                                                <?php echo htmlspecialchars($row['Date_To_Claim']); ?>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <?php echo htmlspecialchars($row['Issued_Date']); ?>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <?php
+                                                if (!empty($row['status']) && $row['status'] === 'failed-to-claim') {
+                                                    echo 'Failed To Claim';
+                                                } elseif (!empty($row['status']) && $row['status'] === 'borrowed') {
+                                                    echo 'Borrowed';
+                                                } elseif (!empty($row['status']) && $row['status'] === 'Pending') {
+                                                    echo 'Pending';
+                                                }
+                                                ?>
+                                            </td>
+                                        </tr>
+                                    <?php
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
 
-// Fetch all data into an array
-$books = $result->fetch_all(MYSQLI_ASSOC) ?: []; // Use short-circuit evaluation for empty check
-
-$stmt->close(); // Close statement
-            // Loop through the books to display them in the table
-            foreach ($books as $row) {
-            ?>
-            <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                    <?php echo $row['Title']; ?>
-                </th>
-                <td class="px-6 py-4">
-                    <?php echo $row['Author']; ?>
-                </td>
-               
-                <td class="px-6 py-4">
-                    <?php echo $row['Date_To_Claim']; ?>
-                </td>
-                <td class="px-6 py-4">
-                    <?php echo $row['Issued_Date']; ?>
-                </td>
-                <td class="px-6 py-4">
-    <?php 
-    if (!empty($row['status']) && $row['status'] === 'failed-to-claim') {
-        echo 'Failed To Claim';
-    }
-    elseif(!empty($row['status']) && $row['status'] === 'borrowed') {
-        echo 'Borrowed';
-    }
-    elseif(!empty($row['status']) && $row['status'] === 'Pending') {
-        echo 'Pending';
-    }
-    ?>
-</td>
-
-
-            </tr>
-            <?php 
-            } 
-            ?>
-        </tbody>
-    </table>
-</div>
-
+                        </div>
 
 
 
-                       
+
+
                     </div>
 
                     <!-- Table 2 and Dropdown (hidden initially) -->
                     <div id="table2-container" class="hidden">
                         <div id="table2" class="overflow-x-auto">
                             <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
+
+
+
+
+                             
+
                                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3 bg-gray-50 dark:bg-gray-700">Book</th>
-                                            <th scope="col" class="px-6 py-3 bg-gray-50 dark:bg-gray-700">Author</th>
+                                        <th scope="col" class="px-6 py-3">Book Title</th>
+                                        <th scope="col" class="px-6 py-3">Author</th>
+                                        <th scope="col" class="px-6 py-3">Date To Claim</th>
+                                        <th scope="col" class="px-6 py-3">Issued Date</th>
+                                        <th scope="col" class="px-6 py-3">Status</th>
+
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Repeat more rows as needed -->
-                                    </tbody>
+                                    <?php
+        // Loop through the books to display them in the table
+        foreach ($books as $row) {
+        ?>
+            <tr class="odd:bg-white even:bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                    <?php echo htmlspecialchars($row['Title']); ?>
+                </th>
+                <td class="px-6 py-4">
+                    <?php echo htmlspecialchars($row['Author']); ?>
+                </td>
+            </tr>
+        <?php
+        }
+        ?>                                    </tbody>
                                 </table>
+
+
+
                             </div>
                         </div>
                     </div>
