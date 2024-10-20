@@ -7,14 +7,7 @@ session_start();
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="path/to/your/styles.css">
-    <!-- Include Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@^2.2/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
+<?php include 'user_header.php'; ?>
 
     <style>
         /* If you prefer inline styles, you can include them directly */
@@ -191,7 +184,7 @@ session_start();
                             $id = intval($_SESSION["Id"]);
 
                             // Fetch the category and book_id based on the student_id
-                            $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status FROM GFI_Library_Database.borrow WHERE student_id = ?";
+                            $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status FROM GFI_Library_Database.borrow WHERE student_id = ? and status = 'borrowed'";
                             $stmt = $conn->prepare($categoryQuery);
                             $stmt->bind_param('i', $id); // Assuming student_id is an integer
                             $stmt->execute();
@@ -290,48 +283,93 @@ session_start();
 
                     <!-- Table 2 and Dropdown (hidden initially) -->
                     <div id="table2-container" class="hidden">
-                        <div id="table2" class="overflow-x-auto">
-                            <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
+    <div id="table2" class="overflow-x-auto">
+        <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
+            <?php
+            // Query for books with status 'returned'
+            $categoryQueryReturned = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status FROM GFI_Library_Database.borrow WHERE student_id = ? AND status = 'returned'";
+            $stmtReturned = $conn->prepare($categoryQueryReturned);
+            $stmtReturned->bind_param('i', $id); // Assuming student_id is an integer
+            $stmtReturned->execute();
+            $resultReturned = $stmtReturned->get_result();
 
+            // Initialize an array to hold the returned books
+            $returnedBooks = [];
 
+            // Fetch all rows for returned books
+            while ($rowReturned = $resultReturned->fetch_assoc()) {
+                $category = $rowReturned['Category'];
+                $bookId = $rowReturned['book_id'];
+                $dateToClaim = $rowReturned['Date_To_Claim'];
+                $issuedDate = $rowReturned['Issued_Date'];
+                $status = $rowReturned['status'];
 
+                // Prepare the SQL to fetch book details from the category-specific table
+                $queryReturned = "SELECT Title, Author FROM `$category` WHERE id = ?";
+                $bookStmtReturned = $conn2->prepare($queryReturned);
+                $bookStmtReturned->bind_param('i', $bookId);
+                $bookStmtReturned->execute();
+                $bookResultReturned = $bookStmtReturned->get_result();
 
-                             
+                // Fetch the book details and store them in the $returnedBooks array
+                if ($bookRowReturned = $bookResultReturned->fetch_assoc()) {
+                    $returnedBooks[] = [
+                        'Title' => $bookRowReturned['Title'],
+                        'Author' => $bookRowReturned['Author'],
+                        'Date_To_Claim' => $dateToClaim,
+                        'Issued_Date' => $issuedDate,
+                        'status' => $status
+                    ];
+                }
 
-                                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
-                                        <tr>
-                                        <th scope="col" class="px-6 py-3">Book Title</th>
-                                        <th scope="col" class="px-6 py-3">Author</th>
-                                        <th scope="col" class="px-6 py-3">Date To Claim</th>
-                                        <th scope="col" class="px-6 py-3">Issued Date</th>
-                                        <th scope="col" class="px-6 py-3">Status</th>
+                $bookStmtReturned->close();
+            }
 
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    <?php
-        // Loop through the books to display them in the table
-        foreach ($books as $row) {
-        ?>
-            <tr class="odd:bg-white even:bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                    <?php echo htmlspecialchars($row['Title']); ?>
-                </th>
-                <td class="px-6 py-4">
-                    <?php echo htmlspecialchars($row['Author']); ?>
-                </td>
-            </tr>
-        <?php
-        }
-        ?>                                    </tbody>
-                                </table>
+            $stmtReturned->close();
+            ?>
 
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Book Title</th>
+                        <th scope="col" class="px-6 py-3">Author</th>
+                        <th scope="col" class="px-6 py-3">Date To Claim</th>
+                        <th scope="col" class="px-6 py-3">Issued Date</th>
+                        <th scope="col" class="px-6 py-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Loop through the returned books to display them in the table
+                    foreach ($returnedBooks as $rowReturned) {
+                    ?>
+                        <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                <?php echo htmlspecialchars($rowReturned['Title']); ?>
+                            </th>
+                            <td class="px-6 py-4">
+                                <?php echo htmlspecialchars($rowReturned['Author']); ?>
+                            </td>
+                            <td class="px-6 py-4">
+                                <?php echo htmlspecialchars($rowReturned['Date_To_Claim']); ?>
+                            </td>
+                            <td class="px-6 py-4">
+                                <?php echo htmlspecialchars($rowReturned['Issued_Date']); ?>
+                            </td>
+                            <td class="px-6 py-4">
+                                <?php echo htmlspecialchars($rowReturned['status']); ?>
+                            </td>
+                        </tr>
+                    <?php
+                    }
+                    ?>
+                </tbody>
+            </table>
 
+        </div>
+    </div>
+</div>
 
-                            </div>
-                        </div>
-                    </div>
 
 
 

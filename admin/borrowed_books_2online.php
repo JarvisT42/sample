@@ -244,6 +244,7 @@ if (isset($_GET['student_id'])) {
                                                                 <option value="Damage">Damage</option>
                                                                 <option value="Lost">Lost</option>
                                                             </select>
+
                                                         </div>
                                                         <div>
                                                             <p class="text-sm font-semibold">Fines:</p>
@@ -265,10 +266,12 @@ if (isset($_GET['student_id'])) {
                                                     Renew
                                                 </button>
 
-                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm"
+                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
+                                                    data-index="<?php echo $overall_index; ?>"
                                                     onclick="openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($student_id); ?>', '<?php echo htmlspecialchars($book_id); ?>')">
                                                     Return
                                                 </button>
+
 
 
 
@@ -328,6 +331,34 @@ if (isset($_GET['student_id'])) {
             </div>
         </div>
 
+
+
+        <script>
+            function toggleFinesInput(index) {
+                const statusSelect = document.getElementById(`statusSelect-${index}`);
+                const fineInput = document.getElementById(`fineInput-${index}`);
+                const returnButton = document.querySelector(`.return-button[data-index="${index}"]`); // Get the related return button
+
+                // Enable fine input for "Damage" or "Lost"
+                if (statusSelect.value === "Damage" || statusSelect.value === "Lost") {
+                    fineInput.disabled = false; // Enable the fine input
+                    fineInput.placeholder = ""; // Clear the placeholder
+                    console.log(`Enabling fine input for index: ${index}`);
+                } else {
+                    fineInput.disabled = true; // Disable the fine input
+                    fineInput.value = ""; // Clear the input value
+                    fineInput.placeholder = "Disabled"; // Reset the placeholder
+                    console.log(`Disabling fine input for index: ${index}`);
+                }
+
+                // Change the button label to 'Next' if 'Lost' is selected
+                if (statusSelect.value === "Lost") {
+                    returnButton.innerText = "Next";
+                } else {
+                    returnButton.innerText = "Return"; // Reset to 'Return' for other statuses
+                }
+            }
+        </script>
 
 
         <script>
@@ -504,9 +535,21 @@ if (isset($_GET['student_id'])) {
             document.getElementById('modalStudentId').innerText = 'Student ID: ' + studentId;
             document.getElementById('modalBookId').innerText = 'Book ID: ' + bookId;
 
+            // Check if the button clicked was "Next" (which means the book is marked as "Lost")
+            const statusSelect = document.getElementById(`statusSelect-${fineInputId.split('-')[1]}`).value; // Get the status of the book
+
+            // Update the label of the "Confirm Return" button to "Pay" if the status is "Lost"
+            const confirmButton = document.getElementById('confirmReturn');
+            if (statusSelect === "Lost") {
+                confirmButton.innerText = 'Pay'; // Change the label to 'Pay'
+            } else {
+                confirmButton.innerText = 'Confirm Return'; // Reset to default
+            }
+
             // Display the modal
             document.getElementById('returnModal').classList.remove('hidden');
         }
+
 
         // Close modal when the close button is clicked
         document.getElementById('closeModal').onclick = function() {
@@ -514,9 +557,8 @@ if (isset($_GET['student_id'])) {
         }
 
         // Confirm return logic
-        document.getElementById('confirmReturn').onclick = confirmReturn;
-
-        function confirmReturn() {
+        // Confirm return or pay logic
+        document.getElementById('confirmReturn').onclick = function() {
             // Get the values from the modal
             const overdueFines = document.getElementById('OverDueFines').innerText.replace('Over Due Fines: ₱ ', ''); // Extract overdue fines
             const bookFines = document.getElementById('BookFines').innerText.replace('Book Fines: ₱ ', ''); // Correct extraction of book fines
@@ -530,34 +572,60 @@ if (isset($_GET['student_id'])) {
                 book_fines: parseFloat(bookFines) || 0, // Ensure it's a number, default to 0 if not available
                 student_id: studentId,
                 book_id: bookId,
-                category: category // Ensure this variable is set correctly
+                category: category
             };
 
-            // Send the data to the PHP script
-            fetch('borrowed_books_2online_save.php', { // Replace with your actual PHP script path
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        alert('Book returned successfully!');
-                        location.reload(); // Reload the page
-                    } else {
-                        alert('Error: ' + result.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while returning the book.');
-                });
+            // Check if the button label is "Pay" or "Confirm Return"
+            const confirmButton = document.getElementById('confirmReturn');
+            if (confirmButton.innerText === 'Pay') {
+                // If "Pay" is clicked, send the data to `borrowed_books_2online_pay.php`
+                fetch('borrowed_books_2online_pay.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data) // Send the data in JSON format
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert('Payment processed successfully!');
+                            location.reload(); // Reload the page after successful payment
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while processing the payment.');
+                    });
+            } else {
+                // If "Confirm Return" is clicked, use the existing return logic
+                fetch('borrowed_books_2online_save.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data) // Send the data in JSON format
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert('Book returned successfully!');
+                            location.reload(); // Reload the page
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while returning the book.');
+                    });
+            }
 
-            // Close the modal after sending the request
+            // Close the modal after the action
             document.getElementById('returnModal').classList.add('hidden');
-        }
+        };
     </script>
 
 
@@ -615,27 +683,8 @@ if (isset($_GET['student_id'])) {
             });
         });
     </script>
-    <script>
-        function toggleFinesInput(index) {
-            const statusSelect = document.getElementById(`statusSelect-${index}`);
-            const fineInput = document.getElementById(`fineInput-${index}`);
 
-            // Log the status value for debugging
-            console.log(`Index: ${index}, Status: ${statusSelect.value}`);
 
-            // Enable fine input for "Damage" or "Lost"
-            if (statusSelect.value === "Damage" || statusSelect.value === "Lost") {
-                fineInput.disabled = false; // Enable the fine input
-                fineInput.placeholder = ""; // Clear the placeholder
-                console.log(`Enabling fine input for index: ${index}`);
-            } else {
-                fineInput.disabled = true; // Disable the fine input
-                fineInput.value = ""; // Clear the input value
-                fineInput.placeholder = "Disabled"; // Reset the placeholder
-                console.log(`Disabling fine input for index: ${index}`);
-            }
-        }
-    </script>
 
 
 

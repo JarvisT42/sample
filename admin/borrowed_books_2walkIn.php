@@ -256,7 +256,8 @@ if (isset($_GET['walk_in_id'])) {
                                                 </button>
 
 
-                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm"
+                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
+                                                    data-index="<?php echo $overall_index; ?>"
                                                     onclick="openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($walk_in_id); ?>', '<?php echo htmlspecialchars($book_id); ?>')">
                                                     Return
                                                 </button>
@@ -280,7 +281,7 @@ if (isset($_GET['walk_in_id'])) {
                             <?php endforeach; ?>
 
                             <div class="flex items-center justify-end">
-                            <button type="button" onclick="openReturnAllModal()" class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Return All</button>
+                                <button type="button" onclick="openReturnAllModal()" class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Return All</button>
 
                             </div>
                         </div>
@@ -301,141 +302,158 @@ if (isset($_GET['walk_in_id'])) {
         </div>
 
 
-<!-- Modal for "Return All" -->
-<!-- Modal for "Return All" -->
-<div id="returnAllModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-white rounded-lg p-6 w-11/12 md:w-1/3">
-        <h2 class="text-lg font-semibold mb-4">Return All Books</h2>
-        
-        <!-- Display No. of Books Borrowed -->
-        <p id="booksBorrowedCount" class="mb-4 font-semibold"></p>
+        <!-- Modal for "Return All" -->
+        <!-- Modal for "Return All" -->
+        <div id="returnAllModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-lg p-6 w-11/12 md:w-1/3">
+                <h2 class="text-lg font-semibold mb-4">Return All Books</h2>
 
-        <!-- Display Total Overdue Fines -->
-        <p id="totalOverdueFines" class="mb-4 font-semibold"></p>
+                <!-- Display No. of Books Borrowed -->
+                <p id="booksBorrowedCount" class="mb-4 font-semibold"></p>
 
-        <div class="flex justify-end space-x-2">
-            <button id="closeReturnAllModal" class="bg-red-500 text-white py-2 px-4 rounded">Close</button>
-            <button id="confirmReturnAll" class="bg-blue-500 text-white py-2 px-4 rounded">Confirm Return All</button>
+                <!-- Display Total Overdue Fines -->
+                <p id="totalOverdueFines" class="mb-4 font-semibold"></p>
+
+                <div class="flex justify-end space-x-2">
+                    <button id="closeReturnAllModal" class="bg-red-500 text-white py-2 px-4 rounded">Close</button>
+                    <button id="confirmReturnAll" class="bg-blue-500 text-white py-2 px-4 rounded">Confirm Return All</button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
 
 
-<script>// Function to open the 'Return All' modal
-// Function to open the 'Return All' modal
-// Function to open the 'Return All' modal
-function openReturnAllModal() {
-    // Get all the book titles and fines from the displayed list
-    const bookTitles = document.querySelectorAll('li .text-2xl.font-bold + p'); // Select all title elements
-    const fineSpans = document.querySelectorAll('[id^="fine-amount-"]'); // Select all spans with ID starting with "fine-amount-"
-    const fineInputs = document.querySelectorAll('.finesInput'); // Select all fine inputs (e.g., for damage or lost books)
-    const booksBorrowedCount = document.getElementById('booksBorrowedCount'); // Element to display the book count
-    const totalOverdueFines = document.getElementById('totalOverdueFines'); // Element to display the total overdue fines
+        <script>
+            // Function to open the 'Return All' modal
+            // Function to open the 'Return All' modal
+            // Function to open the 'Return All' modal
+            function openReturnAllModal() {
+                // Get all the book titles and fines from the displayed list
+                const bookTitles = document.querySelectorAll('li .text-2xl.font-bold + p'); // Select all title elements
+                const fineSpans = document.querySelectorAll('[id^="fine-amount-"]'); // Select all spans with ID starting with "fine-amount-"
+                const fineInputs = document.querySelectorAll('.finesInput'); // Select all fine inputs (e.g., for damage or lost books)
+                const booksBorrowedCount = document.getElementById('booksBorrowedCount'); // Element to display the book count
+                const totalOverdueFines = document.getElementById('totalOverdueFines'); // Element to display the total overdue fines
 
-    // Calculate the number of books
-    const numberOfBooks = bookTitles.length;
-    booksBorrowedCount.innerText = `NO. OF BOOK/S BORROWED: ${numberOfBooks}`;
+                // Calculate the number of books
+                const numberOfBooks = bookTitles.length;
+                booksBorrowedCount.innerText = `NO. OF BOOK/S BORROWED: ${numberOfBooks}`;
 
-    // Calculate the total fines from both span elements and fine input fields
-    let totalFines = 0;
+                // Calculate the total fines from both span elements and fine input fields
+                let totalFines = 0;
 
-    // Add fines from the span elements (fines already displayed)
-    fineSpans.forEach(fineSpan => {
-        const fineAmount = parseFloat(fineSpan.innerText) || 0; // Parse the fine value or default to 0
-        totalFines += fineAmount;
-    });
+                // Add fines from the span elements (fines already displayed)
+                fineSpans.forEach(fineSpan => {
+                    const fineAmount = parseFloat(fineSpan.innerText) || 0; // Parse the fine value or default to 0
+                    totalFines += fineAmount;
+                });
 
-    // Add fines from the input fields (for damage/lost fines)
-    fineInputs.forEach(fineInput => {
-        const fineAmount = parseFloat(fineInput.value) || 0; // Parse the fine value or default to 0
-        totalFines += fineAmount;
-    });
+                // Add fines from the input fields (for damage/lost fines)
+                fineInputs.forEach(fineInput => {
+                    const fineAmount = parseFloat(fineInput.value) || 0; // Parse the fine value or default to 0
+                    totalFines += fineAmount;
+                });
 
-    // Display the total overdue fines in the modal
-    totalOverdueFines.innerText = `TOTAL ALL FINES: ₱ ${totalFines.toFixed(2)}`;
+                // Display the total overdue fines in the modal
+                totalOverdueFines.innerText = `TOTAL ALL FINES: ₱ ${totalFines.toFixed(2)}`;
 
-    // Show the modal
-    document.getElementById('returnAllModal').classList.remove('hidden');
-}
+                // Show the modal
+                document.getElementById('returnAllModal').classList.remove('hidden');
+            }
 
-// Close the modal when the "Close" button is clicked
-document.getElementById('closeReturnAllModal').onclick = function() {
-    document.getElementById('returnAllModal').classList.add('hidden');
-};
+            // Close the modal when the "Close" button is clicked
+            document.getElementById('closeReturnAllModal').onclick = function() {
+                document.getElementById('returnAllModal').classList.add('hidden');
+            };
 
-// Confirm return logic for 'Return All'
-document.getElementById('confirmReturnAll').onclick = function() {
-    // Get the walk_in_id (assuming it's available in the page somewhere)
-    const walkInId = <?php echo json_encode($walk_in_id); ?>;
+            // Confirm return logic for 'Return All'
+            document.getElementById('confirmReturnAll').onclick = function() {
+                // Get the walk_in_id (assuming it's available in the page somewhere)
+                const walkInId = <?php echo json_encode($walk_in_id); ?>;
 
-    // Gather all book data: book IDs, categories, and fines
-    const books = [];
-    const fineSpans = document.querySelectorAll('[id^="fine-amount-"]'); // Select all fine amount spans
-    const fineInputs = document.querySelectorAll('.finesInput'); // Select all fine inputs (for damage or lost)
+                // Gather all book data: book IDs, categories, and fines
+                const books = [];
+                const fineSpans = document.querySelectorAll('[id^="fine-amount-"]'); // Select all fine amount spans
+                const fineInputs = document.querySelectorAll('.finesInput'); // Select all fine inputs (for damage or lost)
 
-    fineSpans.forEach((fineSpan, index) => {
-        const bookId = fineSpan.closest('li').querySelector('.renew-button').getAttribute('data-book-id'); // Get book_id
-        const category = fineSpan.closest('li').querySelector('.renew-button').getAttribute('data-category'); // Get category
-        const fineAmount = parseFloat(fineSpan.innerText) || 0; // Get fine amount from span
+                fineSpans.forEach((fineSpan, index) => {
+                    const bookId = fineSpan.closest('li').querySelector('.renew-button').getAttribute('data-book-id'); // Get book_id
+                    const category = fineSpan.closest('li').querySelector('.renew-button').getAttribute('data-category'); // Get category
+                    const fineAmount = parseFloat(fineSpan.innerText) || 0; // Get fine amount from span
 
-        // Check if there's an additional fine from input (damage or lost)
-        const inputFine = fineInputs[index] ? parseFloat(fineInputs[index].value) || 0 : 0;
-        const totalFines = fineAmount + inputFine; // Sum both fine values
+                    // Check if there's an additional fine from input (damage or lost)
+                    const inputFine = fineInputs[index] ? parseFloat(fineInputs[index].value) || 0 : 0;
+                    const totalFines = fineAmount + inputFine; // Sum both fine values
 
-        // Add this book's data to the books array
-        books.push({
-            book_id: bookId,
-            category: category,
-            total_fines: totalFines
-        });
-    });
+                    // Add this book's data to the books array
+                    books.push({
+                        book_id: bookId,
+                        category: category,
+                        total_fines: totalFines
+                    });
+                });
 
-    // Create the data object to send
-    const data = {
-        walk_in_id: walkInId, // Use walk_in_id instead of student_id
-        books: books
-    };
+                // Create the data object to send
+                const data = {
+                    walk_in_id: walkInId, // Use walk_in_id instead of student_id
+                    books: books
+                };
 
-    // Send the data to the backend using fetch
-    fetch('borrowed_books_2walkIn_returnall.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            alert('All books returned successfully!');
-            location.reload(); // Reload the page to reflect changes
-        } else {
-            alert('Error: ' + result.message);
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('An error occurred while returning the books.');
-    });
+                // Send the data to the backend using fetch
+                fetch('borrowed_books_2walkIn_returnall.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert('All books returned successfully!');
+                            location.reload(); // Reload the page to reflect changes
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        alert('An error occurred while returning the books.');
+                    });
 
-    // Close the modal after sending the request
-    document.getElementById('returnAllModal').classList.add('hidden');
-};
-
-
-
-
+                // Close the modal after sending the request
+                document.getElementById('returnAllModal').classList.add('hidden');
+            };
+        </script>
 
 
 
+        <script>
+            function toggleFinesInput(index) {
+                const statusSelect = document.getElementById(`statusSelect-${index}`);
+                const fineInput = document.getElementById(`fineInput-${index}`);
+                const returnButton = document.querySelector(`.return-button[data-index="${index}"]`); // Get the related return button
 
+                // Enable fine input for "Damage" or "Lost"
+                if (statusSelect.value === "Damage" || statusSelect.value === "Lost") {
+                    fineInput.disabled = false; // Enable the fine input
+                    fineInput.placeholder = ""; // Clear the placeholder
+                    console.log(`Enabling fine input for index: ${index}`);
+                } else {
+                    fineInput.disabled = true; // Disable the fine input
+                    fineInput.value = ""; // Clear the input value
+                    fineInput.placeholder = "Disabled"; // Reset the placeholder
+                    console.log(`Disabling fine input for index: ${index}`);
+                }
 
-
-</script>
-
-
-
+                // Change the button label to 'Next' if 'Lost' is selected
+                if (statusSelect.value === "Lost") {
+                    returnButton.innerText = "Next";
+                } else {
+                    returnButton.innerText = "Return"; // Reset to 'Return' for other statuses
+                }
+            }
+        </script>
 
 
 
@@ -447,34 +465,36 @@ document.getElementById('confirmReturnAll').onclick = function() {
 
 
         <!-- Modal Structure -->
-    <div id="returnModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white rounded-lg p-6 w-11/12 md:w-1/3">
-            <h2 class="text-lg font-semibold mb-4">Return Book</h2>
-            <p id="modalBookTitle" class="mb-2"></p>
-            <p id="modalBookAuthor" class="mb-2"></p>
-            <p id="modalBookCategory" class="mb-2"></p>
+        <div id="returnModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-lg p-6 w-11/12 md:w-1/3">
+                <h2 class="text-lg font-semibold mb-4">Return Book</h2>
+                <p id="modalBookTitle" class="mb-2"></p>
+                <p id="modalBookAuthor" class="mb-2"></p>
+                <p id="modalBookCategory" class="mb-2"></p>
 
-            <!-- Original fines display (unchanged) -->
-            <p id="OverDueFines" class="mb-4"></p>
+                <!-- Original fines display (unchanged) -->
+                <p id="OverDueFines" class="mb-4"></p>
 
-            <!-- Updated fines display -->
-            <p id="BookFines" class="mb-4"></p>
+                <!-- Updated fines display -->
+                <p id="BookFines" class="mb-4"></p>
 
-            <!-- Display for walk-in ID and book ID -->
-            <p id="modalWalkinId" class="mb-2"></p>
-            <p id="modalBookId" class="mb-2"></p>
+                <!-- Display for walk-in ID and book ID -->
+                <p id="modalWalkinId" class="mb-2"></p>
+                <p id="modalBookId" class="mb-2"></p>
 
-            <div class="flex justify-end space-x-2">
-                <button id="closeModal" class="bg-red-500 text-white py-2 px-4 rounded">Close</button>
-                <button id="confirmReturn" class="bg-blue-500 text-white py-2 px-4 rounded">Confirm Return</button>
+                <div class="flex justify-end space-x-2">
+                    <button id="closeModal" class="bg-red-500 text-white py-2 px-4 rounded">Close</button>
+                    <button id="confirmReturn" class="bg-blue-500 text-white py-2 px-4 rounded">Confirm Return</button>
+                </div>
             </div>
         </div>
-    </div>
 
 
 
     </main>
-    
+
+
+
 
 
 
@@ -498,13 +518,25 @@ document.getElementById('confirmReturnAll').onclick = function() {
             let updatedFines = document.getElementById(fineInputId).value; // Get value from the specific fines input field
             document.getElementById('BookFines').innerText = 'Book Fines: ₱ ' + (updatedFines || '0'); // Display updated fines or 0 if none
 
-            // Display the walk-in ID and book ID in the modal
-            document.getElementById('modalWalkinId').innerText = 'Walk-in ID: ' + walkinId;
+            // Display the walkin ID and book ID in the modal
+            document.getElementById('modalWalkinId').innerText = 'Walkin ID: ' + walkinId; // Correct ID usage
             document.getElementById('modalBookId').innerText = 'Book ID: ' + bookId;
+
+            // Check if the button clicked was "Next" (which means the book is marked as "Lost")
+            const statusSelect = document.getElementById(`statusSelect-${fineInputId.split('-')[1]}`).value; // Get the status of the book
+
+            // Update the label of the "Confirm Return" button to "Pay" if the status is "Lost"
+            const confirmButton = document.getElementById('confirmReturn');
+            if (statusSelect === "Lost") {
+                confirmButton.innerText = 'Pay'; // Change the label to 'Pay'
+            } else {
+                confirmButton.innerText = 'Confirm Return'; // Reset to default
+            }
 
             // Display the modal
             document.getElementById('returnModal').classList.remove('hidden');
         }
+
 
         // Close modal when the close button is clicked
         document.getElementById('closeModal').onclick = function() {
@@ -512,53 +544,80 @@ document.getElementById('confirmReturnAll').onclick = function() {
         }
 
         // Confirm return logic
-        document.getElementById('confirmReturn').onclick = confirmReturn;
-
-        function confirmReturn() {
+        // Confirm return logic
+        document.getElementById('confirmReturn').onclick = function() {
             // Get the values from the modal
-            const overdueFines = document.getElementById('OverDueFines').innerText.replace('Over Due Fines: ₱ ', ''); // Extract overdue fines
-            const bookFines = document.getElementById('BookFines').innerText.replace('Book Fines: ₱ ', ''); // Correct extraction of book fines
-            const walkinId = document.getElementById('modalWalkinId').innerText.replace('Walk-in ID: ', ''); // Extract Walk-in ID
-            const bookId = document.getElementById('modalBookId').innerText.replace('Book ID: ', ''); // Extract Book ID
+            const overdueFines = document.getElementById('OverDueFines').innerText.replace('Over Due Fines: ₱ ', ''); // Extract overdue 
+            const bookFines = document.getElementById('BookFines').innerText.replace('Book Fines: ₱ ', ''); // Correct extraction of book 
+            const walkinId = document.getElementById('modalWalkinId').innerText.replace('Walkin ID: ', ''); // Use correct ID
+            const bookId = document.getElementById('modalBookId').innerText.replace('Book ID: ', '');
             const category = document.getElementById('modalBookCategory').innerText.replace('Category: ', ''); // Extract category text
 
             // Create the data object to send
             const data = {
                 fines: parseFloat(overdueFines) || 0, // Ensure it's a number, default to 0 if not available
                 book_fines: parseFloat(bookFines) || 0, // Ensure it's a number, default to 0 if not available
-                walkin_id: walkinId, // Update this to walk-in ID
+                walkin_id: walkinId,
                 book_id: bookId,
-                category: category // Ensure this variable is set correctly
+                category: category
             };
 
-            // Send the data to the PHP script
-            fetch('borrowed_books_2walkIn_save.php', { // Replace with your actual PHP script path
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        alert('Book returned successfully!');
-                        location.reload();  // Reload the page
+            // Check if the button label is "Pay" or "Confirm Return"
+            const confirmButton = document.getElementById('confirmReturn');
+            if (confirmButton.innerText === 'Pay') {
+                // If "Pay" is clicked, send the data to `borrowed_books_2online_pay.php`
+                fetch('borrowed_books_2walkIn_pay.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data) // Send the data in JSON format
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert('Payment processed successfully!');
+                            location.reload(); // Reload the page after successful payment
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while processing the payment.');
+                    });
+            } else {
+                // If "Confirm Return" is clicked, use the existing return logic
+                fetch('borrowed_books_2walkIn_save.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data) // Send the data in JSON format
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert('Book returned successfully!');
+                            location.reload(); // Reload the page
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while returning the book.');
+                    });
+            }
 
-                        // Optionally, refresh the page or update the UI accordingly
-                    } else {
-                        alert('Error: ' + result.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while returning the book.');
-                });
-
-            // Close the modal after sending the request
+            // Close the modal after the action
             document.getElementById('returnModal').classList.add('hidden');
-        }
+        };
     </script>
+
+
+
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -613,74 +672,54 @@ document.getElementById('confirmReturnAll').onclick = function() {
             });
         });
     </script>
+
+
     <script>
-        function toggleFinesInput(index) {
-            const statusSelect = document.getElementById(`statusSelect-${index}`);
-            const fineInput = document.getElementById(`fineInput-${index}`);
+        document.addEventListener('DOMContentLoaded', function() {
+            const renewButtons = document.querySelectorAll('.renew-button');
 
-            // Log the status value for debugging
-            console.log(`Index: ${index}, Status: ${statusSelect.value}`);
+            renewButtons.forEach(button => {
+                button.addEventListener('click', function() {
 
-            // Enable fine input for "Damage" or "Lost"
-            if (statusSelect.value === "Damage" || statusSelect.value === "Lost") {
-                fineInput.disabled = false; // Enable the fine input
-                fineInput.placeholder = ""; // Clear the placeholder
-                console.log(`Enabling fine input for index: ${index}`);
-            } else {
-                fineInput.disabled = true; // Disable the fine input
-                fineInput.value = ""; // Clear the input value
-                fineInput.placeholder = "Disabled"; // Reset the placeholder
-                console.log(`Disabling fine input for index: ${index}`);
-            }
-        }
-    </script>
+                    const walkInId = this.getAttribute('data-walk-in-id');
+                    const bookId = this.getAttribute('data-book-id'); // replaced title and author with book_id
+                    const category = this.getAttribute('data-category');
+                    const newDueDate = this.parentElement.parentElement.querySelector('.due-date').innerText;
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const renewButtons = document.querySelectorAll('.renew-button');
+                    // Create the data to send
+                    const data = {
+                        walk_in_id: walkInId,
+                        book_id: bookId, // updated to book_id
+                        category: category,
+                        due_date: newDueDate
+                    };
 
-        renewButtons.forEach(button => {
-            button.addEventListener('click', function() {
+                    // Make an AJAX request to borrowed_books_2_save.php
+                    fetch('borrowed_books_2_save.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(data),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Renewed successfully!');
 
-                const walkInId = this.getAttribute('data-walk-in-id');
-                const bookId = this.getAttribute('data-book-id');  // replaced title and author with book_id
-                const category = this.getAttribute('data-category');
-                const newDueDate = this.parentElement.parentElement.querySelector('.due-date').innerText;
+                                location.reload(); // Reload the page
 
-                // Create the data to send
-                const data = {
-                    walk_in_id: walkInId,
-                    book_id: bookId,  // updated to book_id
-                    category: category,
-                    due_date: newDueDate
-                };
-
-                // Make an AJAX request to borrowed_books_2_save.php
-                fetch('borrowed_books_2_save.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Renewed successfully!');
-                            
-                            location.reload();  // Reload the page
-
-                        } else {
-                            alert('Error renewing book: ' + data.message);
-                        }
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
+                            } else {
+                                alert('Error renewing book: ' + data.message);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                        });
+                });
             });
         });
-    });
-</script>
+    </script>
 
     <script src="./src/components/header.js"></script>
     <script>

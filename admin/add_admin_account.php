@@ -53,19 +53,19 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
             <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
 
 
-            <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
                     <h1 class="text-3xl font-semibold">Create Account</h1> <!-- Adjusted text size -->
                     <!-- Button beside the title -->
                 </div>
 
                 <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-                The Create Account page allows administrators to set up new accounts with the required privileges. This page makes it easy to add new admins, ensuring that all necessary information—such as full name, email, and password—is gathered securely. Once an admin account is created, they will have access to the system's management features, providing them with the tools they need to maintain and organize the library efficiently.
+                    The Create Account page allows administrators to set up new accounts with the required privileges. This page makes it easy to add new admins, ensuring that all necessary information—such as full name, email, and password—is gathered securely. Once an admin account is created, they will have access to the system's management features, providing them with the tools they need to maintain and organize the library efficiently.
                 </div>
 
 
                 <div class="grid grid-cols-2 gap-4 mb-4">
 
-                
+
                     <div class="flex items-center justify-center rounded   dark:bg-gray-800">
 
 
@@ -74,7 +74,6 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
                             <div class="p-4 bg-gray-50 rounded-lg">
                                 <form id="createAccountForm" class="space-y-4">
-
                                     <!-- Full Name Field -->
                                     <div class="space-y-2">
                                         <label for="fullname" class="font-semibold text-gray-700">Full Name</label>
@@ -141,6 +140,54 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                                         <i class="fas fa-user-plus"></i> Create Account
                                     </button>
                                 </form>
+
+                                <script>
+                                    document.getElementById('createAccountForm').addEventListener('submit', function(e) {
+                                        e.preventDefault(); // Prevent the form from submitting traditionally
+
+                                        const password = document.getElementById('password').value;
+                                        const confirmPassword = document.getElementById('confirm-password').value;
+
+                                        // Check if passwords match
+                                        if (password !== confirmPassword) {
+                                            alert("Passwords do not match!");
+                                            return; // Stop the form submission if passwords don't match
+                                        }
+
+                                        const data = {
+                                            fullname: document.getElementById('fullname').value,
+                                            username: document.getElementById('username').value,
+                                            email: document.getElementById('email').value,
+                                            password: password, // Send the password (already validated)
+                                            confirm_password: confirmPassword // Optional to send, or you can skip it
+                                        };
+
+                                        // Send data to the PHP backend using fetch
+                                        fetch('add_admin_create_account.php', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify(data),
+                                            })
+                                            .then(response => response.json())
+                                            .then(result => {
+                                                if (result.success) {
+                                                    alert('Account created successfully!');
+                                                    location.reload(); // Reload the page or redirect
+                                                } else {
+                                                    alert('Error: ' + result.message);
+                                                }
+                                            })
+                                            .catch(error => {
+                                                console.error('Error:', error);
+                                                alert('An error occurred. Please try again.');
+                                            });
+                                    });
+                                </script>
+
+
+
                             </div>
 
                         </div>
@@ -148,10 +195,29 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
 
                     </div>
+
+
+                    <?php
+                    // Include your database connection file
+                    include '../connection.php';
+
+                    // Query to get all users
+                    $query = "SELECT id, Full_Name, email FROM admin_account where Default_Account = ''";
+                    $result = $conn->query($query);
+
+                    // Initialize an empty array to hold the user data
+                    $users = [];
+
+                    if ($result->num_rows > 0) {
+                        // Fetch each row from the result set
+                        while ($row = $result->fetch_assoc()) {
+                            // Add each user to the array
+                            $users[] = $row;
+                        }
+                    }
+                    ?>
+
                     <div class="flex items-center justify-center rounded bg-gray-50 dark:bg-gray-800">
-
-
-
                         <div class="w-full md:w-1/2 border border-gray-300 rounded-lg h-full shadow-md">
                             <div class="p-4">
                                 <div class="overflow-x-auto">
@@ -165,26 +231,88 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                                             </tr>
                                         </thead>
                                         <tbody id="userTableBody">
-                                            <!-- Example Row with Data -->
-                                            <tr class="border-b">
-                                                <td class="p-2">1</td>
-                                                <td class="p-2">John Doe</td>
-                                                <td class="p-2">johndoe@example.com</td>
-                                                <td class="p-2">
-                                                    <!-- Delete Button with Icon -->
-                                                    <button class="text-red-600 hover:text-red-800 focus:outline-none">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                            <?php
+                                            if (!empty($users)) {
+                                                // Loop through each user and display their data in the table
+                                                foreach ($users as $user) {
+                                            ?>
+                                                    <tr class="border-b" data-user-id="<?php echo htmlspecialchars($user['id']); ?>">
+                                                        <td class="px-6 py-4 break-words" style="max-width: 300px;">
+                                                            <?php echo htmlspecialchars($user['id']); ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 break-words" style="max-width: 300px;">
+                                                            <?php echo htmlspecialchars($user['Full_Name']); ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 break-words" style="max-width: 300px;">
+                                                            <?php echo htmlspecialchars($user['email']); ?>
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            <button class="text-red-600 hover:text-red-800 focus:outline-none" onclick="deleteUser(<?php echo $user['id']; ?>)">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                <?php
+                                                }
+                                            } else {
+                                                ?>
+                                                <tr>
+                                                    <td colspan="4" class="text-center p-2">No users found</td>
+                                                </tr>
+                                            <?php
+                                            }
+                                            ?>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
+
+                    <script>
+                        // JavaScript function to handle user deletion
+                        function deleteUser(userId) {
+                            if (confirm("Are you sure you want to delete this user?")) {
+                                // Send the deletion request to the server using fetch
+                                fetch('add_delete_addmin_account.php', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/x-www-form-urlencoded',
+                                        },
+                                        body: new URLSearchParams({
+                                            id: userId
+                                        })
+                                    })
+                                    .then(response => response.json()) // Parse the JSON response
+                                    .then(data => {
+                                        if (data.success) {
+                                            alert(data.message);
+                                            location.reload(); // Reload the page to refresh the table
+                                        } else {
+                                            alert('Error: ' + data.message);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        alert('An error occurred while trying to delete the user.');
+                                    });
+                            }
+                        }
+                    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 </div>
 

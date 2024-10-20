@@ -53,8 +53,7 @@ session_start();
                         <li><a class="px-4 py-2 " href="edit_records.php">Edit Records</a></li>
 
                         <br>
-                        <li><a href="#">Lost Books</a></li>
-                        <br>
+                     
                         <li class="#"><a href="damage.php">Damage Books</a></li>
                         <br>
                         <li><a href="#">Subject for Replacement</a></li>
@@ -112,6 +111,7 @@ session_start();
 
     <input id="add_category" name="add_category" placeholder="Add Category" class="col-span-2 border rounded px-3 py-2" disabled />
 </div>
+
 
 <div class="grid grid-cols-3 items-center gap-4">
     <label for="tracking_id" class="text-left">Tracking Id</label>

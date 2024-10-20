@@ -43,25 +43,25 @@ session_start();
                 <?php include './src/components/books.php'; ?>
 
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
-                <ul class="flex flex-wrap gap-2 p-5 border border-dashed rounded-md w-full">
-               
+                    <ul class="flex flex-wrap gap-2 p-5 border border-dashed rounded-md w-full">
 
-										<li><a class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" href="#">All</a></li>
-                                        <br>
-										<li><a class="px-4 py-2 " href="add_books.php">Add Books</a></li>
-                                        <br>
-                                        <li><a class="px-4 py-2 " href="edit_records.php">Edit Records</a></li>
-                                        <br>
-										<li><a href="#">Lost Books</a></li>
-                                        <br>
-										<li class="#"><a href="damage.php">Damage Books</a></li>
-                                        <br>
-										<li><a href="#">Subject for Replacement</a></li>
-									</ul>                    <!-- Button beside the title -->
-                                   
+
+                        <li><a class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" href="#">All</a></li>
+                        <br>
+                        <li><a class="px-4 py-2 " href="add_books.php">Add Books</a></li>
+                        <br>
+                        <li><a  class="px-4 py-2 " href="edit_records.php">Edit Records</a></li>
+                        <br>
+                      
+                        <li class="#"><a href="damage.php">Damage Books</a></li>
+                        <br>
+                        
+                        <li><a class="px-4 py-2 " href="subject_for_replacement.php">Subject for Replacement</a></li>
+                    </ul> <!-- Button beside the title -->
+
 
                 </div>
-                
+
 
                 <!-- Main Content Box -->
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 ">
@@ -123,7 +123,7 @@ session_start();
                                 </svg>
                             </div> <input type="text" id="table-search-users" class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full md:w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
 
-                            
+
 
 
 
@@ -255,68 +255,68 @@ session_start();
                             }
 
                             function setupPagination(totalRecords) {
-    const totalPages = Math.ceil(totalRecords / recordsPerPage);
-    const paginationContainer = document.querySelector('nav ul');
-    paginationContainer.innerHTML = '';
+                                const totalPages = Math.ceil(totalRecords / recordsPerPage);
+                                const paginationContainer = document.querySelector('nav ul');
+                                paginationContainer.innerHTML = '';
 
-    // Previous button
-    const prevButton = document.createElement('li');
-    prevButton.innerHTML = `<a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${currentPage === 1 ? 'text-gray-300' : 'text-gray-500'} bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700" ${currentPage === 1 ? 'disabled' : ''}>Previous</a>`;
-    prevButton.addEventListener('click', function(event) {
-        event.preventDefault();
-        if (currentPage > 1) {
-            currentPage--;
-            displayRecords(filteredRecords);
-            setupPagination(filteredRecords.length);
-        }
-    });
-    paginationContainer.appendChild(prevButton);
+                                // Previous button
+                                const prevButton = document.createElement('li');
+                                prevButton.innerHTML = `<a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${currentPage === 1 ? 'text-gray-300' : 'text-gray-500'} bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700" ${currentPage === 1 ? 'disabled' : ''}>Previous</a>`;
+                                prevButton.addEventListener('click', function(event) {
+                                    event.preventDefault();
+                                    if (currentPage > 1) {
+                                        currentPage--;
+                                        displayRecords(filteredRecords);
+                                        setupPagination(filteredRecords.length);
+                                    }
+                                });
+                                paginationContainer.appendChild(prevButton);
 
-    // Page numbers
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-        // Include first and last page, plus two pages around the current page
-        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            pageNumbers.push(i);
-        } else if (pageNumbers[pageNumbers.length - 1] !== '...' && (i === 2 || i === totalPages - 1)) {
-            pageNumbers.push('...');
-        }
-    }
+                                // Page numbers
+                                const pageNumbers = [];
+                                for (let i = 1; i <= totalPages; i++) {
+                                    // Include first and last page, plus two pages around the current page
+                                    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                                        pageNumbers.push(i);
+                                    } else if (pageNumbers[pageNumbers.length - 1] !== '...' && (i === 2 || i === totalPages - 1)) {
+                                        pageNumbers.push('...');
+                                    }
+                                }
 
-    // Render the page numbers
-    pageNumbers.forEach(page => {
-        const pageItem = document.createElement('li');
-        if (page === '...') {
-            pageItem.innerHTML = `<span class="flex items-center justify-center px-4 h-10">...</span>`;
-        } else {
-            pageItem.innerHTML = `
+                                // Render the page numbers
+                                pageNumbers.forEach(page => {
+                                    const pageItem = document.createElement('li');
+                                    if (page === '...') {
+                                        pageItem.innerHTML = `<span class="flex items-center justify-center px-4 h-10">...</span>`;
+                                    } else {
+                                        pageItem.innerHTML = `
                 <a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${page === currentPage ? 'text-blue-600 border border-gray-300 bg-blue-50' : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700'}">
                     ${page}
                 </a>
             `;
-            pageItem.addEventListener('click', function(event) {
-                event.preventDefault();
-                currentPage = page;
-                displayRecords(filteredRecords);
-                setupPagination(filteredRecords.length);
-            });
-        }
-        paginationContainer.appendChild(pageItem);
-    });
+                                        pageItem.addEventListener('click', function(event) {
+                                            event.preventDefault();
+                                            currentPage = page;
+                                            displayRecords(filteredRecords);
+                                            setupPagination(filteredRecords.length);
+                                        });
+                                    }
+                                    paginationContainer.appendChild(pageItem);
+                                });
 
-    // Next button
-    const nextButton = document.createElement('li');
-    nextButton.innerHTML = `<a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-500'} bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700" ${currentPage === totalPages ? 'disabled' : ''}>Next</a>`;
-    nextButton.addEventListener('click', function(event) {
-        event.preventDefault();
-        if (currentPage < totalPages) {
-            currentPage++;
-            displayRecords(filteredRecords);
-            setupPagination(filteredRecords.length);
-        }
-    });
-    paginationContainer.appendChild(nextButton);
-}
+                                // Next button
+                                const nextButton = document.createElement('li');
+                                nextButton.innerHTML = `<a href="#" class="flex items-center justify-center px-4 h-10 leading-tight ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-500'} bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700" ${currentPage === totalPages ? 'disabled' : ''}>Next</a>`;
+                                nextButton.addEventListener('click', function(event) {
+                                    event.preventDefault();
+                                    if (currentPage < totalPages) {
+                                        currentPage++;
+                                        displayRecords(filteredRecords);
+                                        setupPagination(filteredRecords.length);
+                                    }
+                                });
+                                paginationContainer.appendChild(nextButton);
+                            }
 
 
 

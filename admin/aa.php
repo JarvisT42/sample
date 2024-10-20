@@ -1,434 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Most Borrowed Books per Month</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: green;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        canvas {
+            margin-top: 20px;
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Most Borrowed Books Per Month</h2>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'bar',  // Bar chart
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], // Months of the year
+                datasets: [{
+                    label: 'Most Borrowed Book',
+                    data: [40, 30, 50, 25, 60, 35, 55, 40, 45, 50, 30, 20],  // Times borrowed per month
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',  // Colors per bar
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)',
+                        'rgba(199, 199, 199, 0.2)',
+                        'rgba(83, 102, 255, 0.2)',
+                        'rgba(170, 102, 255, 0.2)',
+                        'rgba(255, 202, 86, 0.2)',
+                        'rgba(99, 132, 255, 0.2)',
+                        'rgba(54, 235, 162, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(199, 199, 199, 1)',
+                        'rgba(83, 102, 255, 1)',
+                        'rgba(170, 102, 255, 1)',
+                        'rgba(255, 202, 86, 1)',
+                        'rgba(99, 132, 255, 1)',
+                        'rgba(54, 235, 162, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Times Borrowed'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Months'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false,  // Hide the legend, since each bar corresponds to one book
+                    },
+                    title: {
+                        display: true,
+                        text: 'Most Borrowed Book per Month'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                // Array to hold the book titles corresponding to each month
+                                const books = [
+                                    'Algebra Made Easy',
+                                    'Filipino for Beginners',
+                                    'Advanced Calculus',
+                                    'World History 101',
+                                    'Introduction to Physics',
+                                    'Chemistry Basics',
+                                    'Geometry for Everyone',
+                                    'Biology Explained',
+                                    'Literature Classics',
+                                    'Modern Programming',
+                                    'Environmental Science',
+                                    'Business Management'
+                                ];
+                                return books[tooltipItem.dataIndex] + ': ' + tooltipItem.raw + ' times borrowed';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
+
 <?php
+# Initialize the session
+require '../connection.php';
+
 session_start();
-include '../connection.php'; // Ensure you have your database connection
-include '../connection2.php'; // Ensure you have your database connection
-
-if (isset($_GET['student_id'])) {
-    $student_id = htmlspecialchars($_GET['student_id']);
-
-    // Check if student_id is set in the query parameters
-
-
-
-
-    // Fetch the category, book_id, and student details based on the student_id
-    $categoryQuery = "
-    SELECT a.Category, a.book_id, a.Issued_Date
-    FROM GFI_Library_Database.borrow AS a
-    WHERE a.student_id = ? and status ='borrowed'";
-
-    $stmt = $conn->prepare($categoryQuery);
-    $stmt->bind_param('i', $student_id); // Assuming student_id is an integer
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-
-    // Fetch all data into an array
-    $books = $result->fetch_all(MYSQLI_ASSOC) ?: []; // Use short-circuit evaluation for empty check
-    // Fetch student details for full name
-    $studentQuery = "
-    SELECT First_Name, Middle_Initial, Last_Name 
-    FROM GFI_Library_Database.students 
-    WHERE id = ?";
-    $stmtStudent = $conn->prepare($studentQuery);
-    $stmtStudent->bind_param('i', $student_id);
-    $stmtStudent->execute();
-    $studentResult = $stmtStudent->get_result();
-
-    if ($studentResult->num_rows > 0) {
-        $studentRow = $studentResult->fetch_assoc();
-        $fullName = $studentRow['First_Name'] . ' ' . $studentRow['Middle_Initial'] . ' ' . $studentRow['Last_Name'];
-    } else {
-        $fullName = 'Unknown Student'; // Fallback if no student found
-    }
-    $stmtStudent->close();
-
-    // Group books by Date_To_Claim
-
-
-    $stmt->close(); // Close the first statement
-
-
-} elseif (isset($_GET['walk_in_id'])) {
-    $walk_in_id = htmlspecialchars($_GET['walk_in_id']);
-    // Proceed with your logic for online borrowing
-
-    // Check if student_id is set in the query parameters
-
-    // Fetch the student ID and full name based on walk_in_id
-    $studentQuery = "
-  SELECT student_id, walk_in_id, Full_Name
-  FROM GFI_Library_Database.borrow 
-  WHERE walk_in_id = ? AND status = 'borrowed'";
-
-    $stmtStudent = $conn->prepare($studentQuery);
-    $stmtStudent->bind_param('s', $walk_in_id); // Assuming walk_in_id is a string
-    $stmtStudent->execute();
-    $studentResult = $stmtStudent->get_result();
-
-    if ($studentResult->num_rows > 0) {
-        $studentData = $studentResult->fetch_assoc();
-
-        $student_id = $studentData['student_id']; // Get the student ID for future queries
-        $fullName = $studentData['Full_Name'];
-
-        // Fetch the category, book_id, and issued date based on the student_id
-        $categoryQuery = "
-      SELECT a.Category, a.book_id, a.Issued_Date 
-      FROM GFI_Library_Database.borrow AS a
-      WHERE a.walk_in_id = ? AND a.status = 'borrowed'";
-
-        $stmt = $conn->prepare($categoryQuery);
-        $stmt->bind_param('i', $walk_in_id); // Assuming student_id is an integer
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        // Fetch all data into an array
-        $books = $result->fetch_all(MYSQLI_ASSOC) ?: []; // Use short-circuit evaluation for empty check
-
-        $stmt->close(); // Close the book query statement
-    } else {
-        $fullName = 'Unknown Student'; // Fallback if no student found
-    }
-    $stmtStudent->close(); // Close the student statement
-
-} else {
-    // Handle the case where student_id is not provided
-    echo "No student ID provided.";
-    exit; // Stop execution if no student_id
+if ($_SESSION["logged_Admin"] !== TRUE) {
+    //echo "<script type='text/javascript'> alert ('Iasdasdasd.')</script>";
+    echo "<script>" . "window.location.href='../index.php';" . "</script>";
+    exit;
 }
 ?>
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="path/to/your/styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.js"></script>
+    <?php include 'admin_header.php'; ?>
 
     <style>
-        .active-borrowed-books {
+        /* If you prefer inline styles, you can include them directly */
+        .active-dashboard {
             background-color: #f0f0f0;
+            /* Example for light mode */
             color: #000;
+            /* Example for light mode */
+        }
+    </style>
+    <style>
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
         }
 
-        .active-request {
-            background-color: #f0f0f0;
-            color: #000;
+        h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        canvas {
+            margin-top: 20px;
+            width: 100%;
+            height: auto;
         }
     </style>
 </head>
 
 <body>
     <?php include './src/components/sidebar.php'; ?>
-    <main id="content" class="">
-        <div class="p-4 sm:ml-64">
-            <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-                <div class="bg-gray-100 p-6 w-full mx-auto">
-                    <div class="bg-white p-4 shadow-sm rounded-lg mb-2">
-                        <div class="bg-gray-100 p-2 flex justify-between items-center">
-                            <h1 class="m-0">Student Name: <?php echo $fullName; ?></h1>
 
+    <main id="content" class="">
+
+
+        <div class="p-4 sm:ml-64">
+
+            <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+
+
+
+                <div class="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+
+
+                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm ">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-muted-foreground">TOTAL PENDING BORROW BOOKS</p>
+                                <div class="flex items-center text-red-600">
+                                    <i class="fas fa-arrow-down mr-1 h-4 w-4"></i>
+                                    <span class="text-sm font-medium">5.12%</span>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-center justify-between">
+                                <?php
+
+
+                                // Query to count borrowed books
+                                $sql = "SELECT COUNT(*) AS total_borrowed FROM borrow WHERE status = 'pending'"; // Replace 'books' with your table name and 'status' with your field
+                                $result = $conn->query($sql);
+
+                                if ($result->num_rows > 0) {
+                                    // Output the count
+                                    $row = $result->fetch_assoc();
+                                    $total =  $row['total_borrowed'];
+                                }
+
+                                ?>
+
+                                <h3 class="text-2xl font-bold"><?php echo $total; ?></h3> <!-- Example number for registered students -->
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <a href="#" class="text-sm font-medium text-primary hover:underline">View pending requests</a>
+                                <div class="bg-green-400 h-12 w-12 flex items-center justify-center rounded-full"> <!-- Circle background with fixed width and height -->
+                                    <i class="fas fa-book  text-white"></i> <!-- Icon size -->
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <?php if (!empty($books)): ?>
-                        <?php
-                        // Group books by Date_To_Claim
-                        $grouped_books = [];
-                        foreach ($books as $book) {
-                            $date_to_claim = htmlspecialchars($book['Issued_Date']);
-                            $grouped_books[$date_to_claim][] = $book;
-                        }
-                        ?>
-
-                        <form id="book-request-form" class="space-y-6" method="POST" action="book_request_2_save.php">
-                            <input type="hidden" name="student_id" value="<?php echo htmlspecialchars($student_id); ?>">
-
-                            <?php foreach ($grouped_books as $date => $books_group): ?>
 
 
 
 
-                                <div class="bg-blue-200 p-4 rounded-lg">
-
-
-
-
-
-                                    <div class="bg-blue-200 rounded-lg flex items-center justify-between ">
-                                        <!-- Left side: Date to Claim -->
-                                        <h3 class="text-lg font-semibold text-white">Issued Date: <?php echo $date; ?></h3>
-
-                                        <!-- Right side: Checkbox -->
-
-                                    </div>
-
-
-                                    <?php foreach ($books_group as $index => $book): ?>
-                                        <?php
-                                        $category = $book['Category'];
-                                        $book_id = $book['book_id'];
-
-                                        // Fetch the Title, Author, and record_cover from conn2 based on book_id
-                                        $titleQuery = "SELECT * FROM `$category` WHERE id = ?";
-                                        $stmt2 = $conn2->prepare($titleQuery);
-                                        $stmt2->bind_param('i', $book_id);
-                                        $stmt2->execute();
-                                        $result = $stmt2->get_result();
-
-                                        // Initialize variables
-                                        $title = 'Unknown Title';
-                                        $author = 'Unknown Author';
-                                        $status = 'Unknown Status';
-
-                                        $record_cover = null; // Initialize with null
-
-                                        if ($row = $result->fetch_assoc()) {
-                                            $title = $row['Title']; // Get the title
-                                            $author = $row['Author']; // Get the author
-                                            $status = $row['Status']; // Get the author
-                                            $record_cover = $row['record_cover']; // Get the record cover
-                                        }
-
-                                        $stmt2->close();
-                                        ?>
-                                        <?php
-                                        include '../connection.php';
-
-                                        // Get the fines value from the database
-                                        $fines_value = 0;
-                                        $sql = "SELECT fines FROM library_fines LIMIT 1";
-                                        $result = $conn->query($sql);
-
-                                        if ($result && $result->num_rows > 0) {
-                                            $row = $result->fetch_assoc();
-                                            $fines_value = (int)$row['fines'];
-                                        }
-
-                                        // Get the issued date from the book array
-                                        $issued_date = $book['Issued_Date'];
-
-                                        // Get the issued date from the book array
-
-                                        // Calculate the due date (3 days after the issued date)
-                                        $due_date = date('Y-m-d', strtotime($issued_date . ' + 3 days'));
-
-                                        // Calculate the fines based on the due date
-                                        $current_date = date('Y-m-d');
-                                        $fine_amount = 0;
-                                        $daily_fine_rate = 5; // Define the daily fine rate
-
-                                        if ($current_date > $due_date) {
-                                            // Calculate overdue days
-                                            $overdue_days = (strtotime($current_date) - strtotime($due_date)) / (60 * 60 * 24);
-                                            $fine_amount = $overdue_days * $fines_value; // Multiply overdue days by the fine rate (₱5 per day)
-                                        }
-                                        ?>
-
-                                        <li class="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mb-2 flex flex-col">
-                                            <div class="flex-1">
-                                                <div class="flex flex-col md:flex-row justify-between mb-6">
-                                                    <div class="flex-1 mb-4 md:mb-0">
-                                                        <h1 class="text-2xl font-bold mb-1">Title:</h1>
-                                                        <p class="text-xl mb-4"> <?php echo $title; ?>
-                                                        </p>
-                                                        <div class="mb-4">
-                                                            <h2 class="text-lg font-semibold text-gray-600 mb-1">Borrow Category:</h2>
-                                                            <p class="text-sm text-gray-500"><?php echo htmlspecialchars($book['Category']); ?></p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="w-full md:w-32 h-40 bg-gray-200 border border-gray-300 flex items-center justify-center mb-4 md:mb-0">
-                                                        <?php
-                                                        if (!empty($book['record_cover'])) {
-                                                            $imageData = base64_encode($book['record_cover']);
-                                                            $imageSrc = 'data:image/jpeg;base64,' . $imageData;
-                                                        } else {
-                                                            $imageSrc = 'path/to/default/image.jpg'; // Provide a default image source
-                                                        }
-                                                        ?>
-                                                        <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-full h-full border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
-                                                    </div>
-                                                </div>
-                                                <div class="bg-blue-100 p-4 rounded-lg">
-                                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Issued Date:</p>
-                                                            <p class="text-sm"><?php echo htmlspecialchars($book['Issued_Date']); ?></p>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Due Date:</p>
-                                                            <p class="due-date" data-index="<?php echo $index; ?>"><?php echo htmlspecialchars($due_date); ?></p>
-
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Fines: ₱ <span id="fine-amount-<?php echo $index; ?>"><?php echo $fine_amount; ?></span>.00</p>
-                                                        </div>
-                                                    </div>
-
-
-                                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                                        <!-- Row 1 -->
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Renew</p>
-                                                            <select class="renew-dropdown" data-index="<?php echo $index; ?>" data-due-date="<?php echo htmlspecialchars($due_date); ?>">
-                                                                <option value="0">0 Days</option>
-                                                                <option value="3">3 Days</option>
-                                                                <option value="6">6 Days</option>
-                                                                <option value="9">9 Days</option>
-                                                                <option value="12">12 Days</option>
-                                                                <option value="15">15 Days</option>
-                                                            </select>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Book Status:</p>
-                                                            <select id="statusSelect-<?php echo $index; ?>" class="border border-gray-300 rounded p-1 mr-16">
-                                                                <option value="<?php echo $status; ?>"><?php echo $status; ?></option>
-                                                                <option value="Damage">Damage</option>
-                                                                <option value="Lost">Lost</option>
-                                                            </select>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Fines:</p>
-                                                            <div class="flex items-center">
-                                                                P:<input id="finesInput-<?php echo $index; ?>" class="border border-gray-300 rounded p-1 w-32" type="number" disabled placeholder="Disabled">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Duplicate the above div block for additional rows, updating the $index variable accordingly -->
-
-                                                  <!-- Inside your form, just before the closing </form> tag -->
-                                                   
-
-                                                  
-
-
-
-
-
-
-
-
-                                                </div>
-                                            </div>
-                                            <div class="flex justify-end space-x-2 mt-4">
-                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm">Renew</button>
-                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm">Return</button>
-                                            </div>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </div>
-
-                            <?php endforeach; ?>
-
-                            <div class="flex items-center justify-end">
-                                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Done</button>
+                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-muted-foreground">REGISTERED STUDENTS</p>
                             </div>
-                        </form>
+                            <div class="mt-2 flex items-center justify-between">
+                                <?php
 
-                        <script>
-                            function toggleSelectAll(date) {
-                                // Get the "Select All" checkbox
-                                const selectAllCheckbox = document.getElementById('select-all-' + date);
+                                // Query to count all students
+                                $sql = "SELECT COUNT(*) AS total_students FROM students"; // No WHERE clause, counting all rows
+                                $result = $conn->query($sql);
 
-                                // Get all individual book checkboxes for this date group
-                                const bookCheckboxes = document.querySelectorAll('.book-checkbox-' + date);
+                                if ($result->num_rows > 0) {
+                                    // Output the count
+                                    $row = $result->fetch_assoc();
+                                    $total =  $row['total_students'];
+                                } else {
+                                    $total = 0; // Fallback in case no rows are found
+                                }
 
-                                // Toggle the checked state of each individual checkbox
-                                bookCheckboxes.forEach(function(checkbox) {
-                                    checkbox.checked = selectAllCheckbox.checked;
-                                });
-                            }
-                        </script>
+                                ?>
 
-
-
-                    <?php else: ?>
-                        <div class="p-4 bg-white flex items-center border-b-2 border-black">
-                            <div class="text-gray-600">No books found for this student.</div>
+                                <h3 class="text-2xl font-bold"><?php echo $total; ?></h3> <!-- Display total count of students -->
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <a href="#" class="text-sm font-medium text-primary hover:underline">View student details</a>
+                                <div class="bg-yellow-400 h-12 w-12 flex items-center justify-center rounded-full"> <!-- Circle background with fixed width and height -->
+                                    <i class="fas fa-user-graduate text-white text-xl"></i> <!-- Icon for students -->
+                                </div>
+                            </div>
                         </div>
-                    <?php endif; ?>
+                    </div>
+
+
+
+                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-muted-foreground">BOOKS IN INVENTORY</p>
+                            </div>
+                            <div class="mt-2 flex items-center justify-between">
+                                <?php
+                                // Database connection
+                                $conn2 = mysqli_connect("localhost", "root", "", "gfi_library_database_books_records");
+
+                                if (!$conn2) {
+                                    die("Connection failed: " . mysqli_connect_error());
+                                }
+
+                                // Query to fetch all table names
+                                $tablesResult = $conn2->query("SHOW TABLES");
+
+                                $total = 0; // Initialize total count
+
+                                // Loop through each table
+                                if ($tablesResult->num_rows > 0) {
+                                    while ($table = $tablesResult->fetch_array()) {
+                                        $tableName = $table[0];
+                                        // Count rows in the current table
+                                        $countResult = $conn2->query("SELECT COUNT(*) AS total FROM `$tableName`");
+
+                                        if ($countResult) {
+                                            $countRow = $countResult->fetch_assoc();
+                                            $total += $countRow['total']; // Sum the counts
+                                        }
+                                    }
+                                }
+
+                                $conn2->close(); // Close the connection
+                                ?>
+
+                                <h3 class="text-2xl font-bold"><?php echo $total; ?></h3> <!-- Display total count of rows in all tables -->
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <a href="#" class="text-sm font-medium text-primary hover:underline">View inventory</a>
+                                <div class="bg-blue-400 h-12 w-12 flex items-center justify-center rounded-full">
+                                    <i class="fas fa-book-open text-white text-xl"></i> <!-- Icon for inventory -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
 
                 </div>
+
+
+
+
+
+                <div class="col-span-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+
+                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                        <div class="p-6">
+                            <div class="container">
+                                <h2>Most Borrowed Books Per Month</h2>
+                                <canvas id="myChart"></canvas>
+                            </div>
+
+                            <script>
+                                const ctx = document.getElementById('myChart').getContext('2d');
+                                const myChart = new Chart(ctx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                                        datasets: [{
+                                            label: 'Most Borrowed Book',
+                                            data: [40, 30, 50, 25, 60, 35, 55, 40, 45, 50, 30, 20],
+                                            backgroundColor: [
+                                                'rgba(255, 99, 132, 0.2)',
+                                                'rgba(54, 162, 235, 0.2)',
+                                                'rgba(255, 206, 86, 0.2)',
+                                                'rgba(75, 192, 192, 0.2)',
+                                                'rgba(153, 102, 255, 0.2)',
+                                                'rgba(255, 159, 64, 0.2)',
+                                                'rgba(199, 199, 199, 0.2)',
+                                                'rgba(83, 102, 255, 0.2)',
+                                                'rgba(170, 102, 255, 0.2)',
+                                                'rgba(255, 202, 86, 0.2)',
+                                                'rgba(99, 132, 255, 0.2)',
+                                                'rgba(54, 235, 162, 0.2)'
+                                            ],
+                                            borderColor: [
+                                                'rgba(255, 99, 132, 1)',
+                                                'rgba(54, 162, 235, 1)',
+                                                'rgba(255, 206, 86, 1)',
+                                                'rgba(75, 192, 192, 1)',
+                                                'rgba(153, 102, 255, 1)',
+                                                'rgba(255, 159, 64, 1)',
+                                                'rgba(199, 199, 199, 1)',
+                                                'rgba(83, 102, 255, 1)',
+                                                'rgba(170, 102, 255, 1)',
+                                                'rgba(255, 202, 86, 1)',
+                                                'rgba(99, 132, 255, 1)',
+                                                'rgba(54, 235, 162, 1)'
+                                            ],
+                                            borderWidth: 1
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                title: {
+                                                    display: true,
+                                                    text: 'Times Borrowed'
+                                                }
+                                            },
+                                            x: {
+                                                title: {
+                                                    display: true,
+                                                    text: 'Months'
+                                                }
+                                            }
+                                        },
+                                        plugins: {
+                                            legend: {
+                                                display: false,
+                                            },
+                                            title: {
+                                                display: true,
+                                                text: 'Most Borrowed Book per Month'
+                                            },
+                                            tooltip: {
+                                                callbacks: {
+                                                    label: function(tooltipItem) {
+                                                        const books = [
+                                                            'Algebra Made Easy',
+                                                            'Filipino for Beginners',
+                                                            'Advanced Calculus',
+                                                            'World History 101',
+                                                            'Introduction to Physics',
+                                                            'Chemistry Basics',
+                                                            'Geometry for Everyone',
+                                                            'Biology Explained',
+                                                            'Literature Classics',
+                                                            'Modern Programming',
+                                                            'Environmental Science',
+                                                            'Business Management'
+                                                        ];
+                                                        return books[tooltipItem.dataIndex] + ': ' + tooltipItem.raw + ' times borrowed';
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            </script>
+                        </div>
+                    </div>
+
+
+
+
+
+
+                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                        <div class="p-8"> <!-- Increased padding for the container -->
+                            <div class="bg-white rounded-lg shadow-sm p-6"> <!-- Increased padding for the inner box -->
+                                <h2 class="font-semibold text-xl mb-6 flex items-center justify-between"> <!-- Increased font size -->
+                                    Borrow Activity
+                                    <span class="text-md font-normal text-gray-500">3 Today</span> <!-- Increased font size -->
+                                </h2>
+                                <div class="space-y-6"> <!-- Increased space between items -->
+                                    <!-- Activity Items -->
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-start">
+                                            <span class="bg-green-500 w-3 h-3 rounded-full mt-1.5 mr-3 flex-shrink-0"></span> <!-- Increased dot size -->
+                                            <p class="text-lg">Due Soon</p> <!-- Increased font size -->
+                                        </div>
+                                        <span class="text-md text-gray-500">32 min</span> <!-- Increased font size -->
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-start">
+                                            <span class="bg-red-500 w-3 h-3 rounded-full mt-1.5 mr-3 flex-shrink-0"></span> <!-- Increased dot size -->
+                                            <p class="text-lg">Due Today</p> <!-- Increased font size -->
+                                        </div>
+                                        <span class="text-md text-gray-500">56 min</span> <!-- Increased font size -->
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-start">
+                                            <span class="bg-blue-500 w-3 h-3 rounded-full mt-1.5 mr-3 flex-shrink-0"></span> <!-- Increased dot size -->
+                                            <p class="text-lg">Due Soon</p> <!-- Increased font size -->
+                                        </div>
+                                        <span class="text-md text-gray-500">2 hrs</span> <!-- Increased font size -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             </div>
         </div>
+
     </main>
 
+
+
     <script src="./src/components/header.js"></script>
-    <script>
-        // Function to automatically show the dropdown if on book_request.php
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropdownRequest = document.getElementById('dropdown-request');
 
-            // Open the dropdown menu for 'Request'
-            dropdownRequest.classList.remove('hidden');
-            dropdownRequest.classList.add('block'); // Make the dropdown visible
 
-        });
-    </script>
 </body>
 
 </html>
-<!-- 
-                                                                                                                                            <script>
-                                                                                                                                            
-                                                                                                                                            
-                                                                                                                                            
-                                                                                                                                            document.addEventListener('DOMContentLoaded', function() {
-                                                                                        const form = document.getElementById('book-request-form');
-
-                                                                                        form.addEventListener('change', function(event) {
-                                                                                            // Handle renewal dropdown changes
-                                                                                            if (event.target.classList.contains('renew-dropdown')) {
-                                                                                                const renewalDropdown = event.target;
-                                                                                                const renewalDays = parseInt(renewalDropdown.value);
-                                                                                                const dueDateStr = renewalDropdown.getAttribute('data-due-date');
-                                                                                                const currentDueDate = new Date(dueDateStr + 'T00:00:00');
-
-                                                                                                // Calculate the new due date
-                                                                                                const newDueDate = new Date(currentDueDate);
-                                                                                                newDueDate.setDate(currentDueDate.getDate() + renewalDays);
-
-                                                                                                const options = {
-                                                                                                    year: 'numeric',
-                                                                                                    month: '2-digit',
-                                                                                                    day: '2-digit'
-                                                                                                };
-                                                                                                const formattedDueDate = newDueDate.toLocaleDateString('en-CA', options);
-
-                                                                                                const index = renewalDropdown.getAttribute('data-index');
-                                                                                                const dueDateElement = form.querySelector(`.due-date[data-index="${index}"]`);
-
-                                                                                                if (dueDateElement) {
-                                                                                                    dueDateElement.innerText = formattedDueDate;
-                                                                                                }
-                                                                                            }
-
-                                                                                            // Handle status select changes
-                                                                                            if (event.target.matches('[id^="statusSelect-"]')) {
-                                                                                                const index = event.target.id.split('-')[1]; // Get the index from the element ID
-                                                                                                const finesInput = document.getElementById(`finesInput-${index}`);
-
-                                                                                                // Enable or disable the fines input based on the selected status
-                                                                                                if (event.target.value === 'Damage' || event.target.value === 'Lost') {
-                                                                                                    finesInput.disabled = false; // Enable the fines input
-                                                                                                    finesInput.placeholder = ''; // Clear the placeholder when enabled
-                                                                                                } else {
-                                                                                                    finesInput.disabled = true; // Disable the fines input
-                                                                                                    finesInput.value = ''; // Clear the input value when disabled
-                                                                                                    finesInput.placeholder = 'Disabled'; // Set placeholder to 'Disabled'
-                                                                                                }
-                                                                                            }
-                                                                                        });
-                                                                                    });
-
-
-                                                                                    </script> -->

@@ -118,6 +118,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['selectedDates']) && is
 
     </head>
     <style>
+        /* If you prefer inline styles, you can include them directly */
+        .active-calendar {
+            background-color: #f0f0f0;
+            /* Example for light mode */
+            color: #000;
+            /* Example for light mode */
+        }
+    </style>
+    <style>
         nav #manage-content a[href="appointment_date.php"] {
             color: blue;
         }
