@@ -99,30 +99,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
     $conn->close();
 }
 
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
 
     include 'connection.php'; // Include your database connection file
+    $validated_student_id = $_POST['validated_student_id']; // Get the validated student ID
 
     // Get form input
     $email = $_POST['email'];
-    $firstname = $_POST['firstname']; // Assuming you have a name field in your form
-    // $password = password_hash($_POST['password'], PASSWORD_BCRYPT); // Hash the password for security
+    $firstname = $_POST['firstname'];
+    $middlename = $_POST['middlename'];
+
+
+    $lastname = $_POST['lastname'];
+    $mobile_number = $_POST['txtEmpPhone'];
+    $year_level = $_POST['year_level'];
+    $department = $_POST['department'];
+    $gender = $_POST['gender'];
+    $birthdate = $_POST['birthdate']; // Capture the birthdate from the form
+    $password = $_POST['password']; // Get the password from the form
+    $confirm_password = $_POST['confirm_password'];
+
+    // Ensure that passwords match
+    if ($password !== $confirm_password) {
+        echo "Passwords do not match!";
+        exit();
+    }
+
+    // Hash the password for security
+    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
     // Prepare SQL statement to insert the new student into the database
-    $stmt = $conn->prepare("INSERT INTO students (First_Name, Email_Address) VALUES (?, ?)");
-    $stmt->bind_param("ss", $firstname, $email );
+    $stmt = $conn->prepare("INSERT INTO students (First_Name, Middle_Initial, Last_Name, S_Gender, Mobile_Number, Year_Level, S_Course, Id_Number, Email_Address, Birth_Date, Password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssssssss", $firstname, $middlename, $lastname, $gender, $mobile_number, $year_level, $department, $validated_student_id, $email, $birthdate, $hashed_password);
 
     // Execute the statement
     if ($stmt->execute()) {
-        echo "Student registered successfully!";
+        // Update students_id table with the validated student ID
+        $stmt = $conn->prepare("UPDATE students_id SET status = 'Taken' WHERE student_id = ?");
+        $stmt->bind_param("s", $validated_student_id);
+
+        // Execute the update statement
+        if ($stmt->execute()) {
+            echo "<script>alert('Student registered successfully and status updated!');</script>";
+        } else {
+            echo "Error updating student status: " . $stmt->error;
+        }
     } else {
-        echo "Error: " . $stmt->error;
+        echo "Error registering student: " . $stmt->error;
     }
 
     // Close the statement and connection
     $stmt->close();
     $conn->close();
 }
+
 
 ?>
 
@@ -181,6 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
                                                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                                             </div>
                                             <input type="email" name="email" class="form-control" placeholder="Your Email *" required />
+
                                         </div>
                                     </div>
                                     <!-- Password input -->
@@ -337,7 +369,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
 
 
             <div class="col-md-9 register-right" style="display: none;">
-            <form id="registrationForm" class="register" method="POST" action="">
+                <form id="registrationForm" class="register" method="POST" action="">
 
                     <h3 class="register-heading">Student Registration</h3>
                     <div class="row register-form">
@@ -348,17 +380,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                                     </div>
-                                    <input type="text" name="firstname" class="form-control"  placeholder="First Name *"  />
+                                    <input type="text" name="firstname" class="form-control" placeholder="First Name *" />
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    </div>
+                                    <input type="text" name="middlename" class="form-control" placeholder="MI" style="max-width: 50px;" />
                                 </div>
                             </div>
                         </div>
+
+
                         <div class="col-md-6">
                             <div class="form-group">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                                     </div>
-                                    <input type="text"  name="lastname" class="form-control" placeholder="Last Name *" />
+                                    <input type="text" name="lastname" class="form-control" placeholder="Last Name *" />
                                 </div>
                             </div>
                         </div>
@@ -369,7 +407,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                                     </div>
-                                    <input type="email"  name="email" class="form-control" placeholder="Your Email *" />
+                                    <input type="email" name="email" class="form-control" placeholder="Your Email *" />
                                 </div>
                             </div>
                         </div>
@@ -381,14 +419,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-phone"></i></span>
                                     </div>
-                                    <input type="text" minlength="10" maxlength="10" name="txtEmpPhone" class="form-control" placeholder="Your Phone *"  />
+                                    <input type="text" minlength="10" maxlength="10" name="txtEmpPhone" class="form-control" placeholder="Your Phone *" />
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <select class="form-control" >
+                                <select name="year_level" class="form-control">
                                     <option class="hidden" selected disabled>Year Level</option>
                                     <option>1st Year</option>
                                     <option>2nd Year</option>
@@ -398,18 +436,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
                             </div>
                         </div>
                         <div class="col-md-6">
+                            <?php
+                            // Include your database connection
+                            include 'connection.php'; // Adjust the path as needed
 
+                            // Fetch all courses from the database
+                            $sql = "SELECT course FROM course";
+                            $result = $conn->query($sql);
+
+                            // Check if there are any courses available
+                            $courses = [];
+                            if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) {
+                                    $courses[] = $row['course'];
+                                }
+                            }
+
+                            // Close the database connection
+                            $conn->close();
+                            ?>
                             <div class="form-group">
-                                <select class="form-control" >
+                                <select class="form-control" name="department" id="department">
                                     <option class="hidden" selected disabled>Department</option>
-                                    <option>Business Administration</option>
-                                    <option>Engineering</option>
-                                    <option>Education</option>
-                                    <option>Arts and Sciences</option>
+                                    <?php
+                                    // Loop through the courses array and display each course as an option
+                                    if (!empty($courses)) {
+                                        foreach ($courses as $course) {
+                                            echo '<option>' . htmlspecialchars($course) . '</option>';
+                                        }
+                                    } else {
+                                        echo '<option disabled>No courses available</option>';
+                                    }
+                                    ?>
                                 </select>
                             </div>
-
                         </div>
+
 
                         <div class="col-md-6">
                             <div class="form-group">
@@ -433,44 +495,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
                                     </div>
-                                    <input type="date" class="form-control" placeholder="Birth Date *" />
+                                    <input type="date" name="birthdate" class="form-control" placeholder="Birth Date *" required />
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Password Fields -->
                         <div class="col-md-6">
                             <div class="form-group">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                     </div>
-                                    <input type="password" class="form-control" placeholder="Password *"  />
+                                    <input type="password" name="password" id="password" class="form-control" placeholder="Password *" required />
                                 </div>
                             </div>
                         </div>
+
                         <div class="col-md-6">
                             <div class="form-group">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                     </div>
-                                    <input type="password"  name="password" class="form-control" placeholder="Confirm Password *"/>
+                                    <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Confirm Password *" required />
                                 </div>
                             </div>
                         </div>
-             
 
-                        <div class="col-md-12">
-
-                            <input type="submit" class="btnRegister" name="student_register"  value="Register" />
+                        <div id="passwordAlert" class="alert alert-danger" style="display: none;">
+                            Passwords do not match. Please re-enter.
                         </div>
+
+                        <div class="col-md-10">
+                            <input type="hidden" name="validated_student_id" id="validated_student_id" />
+                            <input type="submit" class="btnRegister" name="student_register" value="Register" />
+                        </div>
+
                     </div>
                 </form>
 
             </div>
         </div>
     </div>
+    <script>
+       document.getElementById('registrationForm').addEventListener('submit', function(event) {
+    // Get the values of the password and confirm password fields
+    var password = document.getElementById('password').value;
+    var confirmPassword = document.getElementById('confirm_password').value;
+    var passwordAlert = document.getElementById('passwordAlert');
+
+    // Check if the passwords match
+    if (password !== confirmPassword) {
+        // Show the alert div and prevent form submission if passwords don't match
+        passwordAlert.style.display = 'block';
+        event.preventDefault(); // Stop form submission
+    } else {
+        // Hide the alert if passwords match
+        passwordAlert.style.display = 'none';
+    }
+});
+
+    </script>
+
 
     <script>
         $(document).ready(function() {
@@ -508,17 +594,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
 
                 // AJAX request to check if student ID exists
                 $.ajax({
-                    url: 'validate_student.php',
+                    url: 'validate_student.php', // Your PHP validation file
                     type: 'POST',
                     data: {
                         student_id: student_id
                     },
                     success: function(response) {
                         if (response === 'valid') {
+                            // Store the validated student ID in the hidden field
+                            $("#validated_student_id").val(student_id);
+
+                            // Proceed to registration if the student ID is valid
                             $(".validation-right").hide();
                             $(".register-right").show();
+                        } else if (response === 'already_registered') {
+                            // Show alert if the student ID is already registered
+                            $("#accessDeniedAlert").text("Student ID is already registered").show();
                         } else {
-                            $("#accessDeniedAlert").show();
+                            // Show alert if the student ID is invalid
+                            $("#accessDeniedAlert").text("Incorrect Student ID No.").show();
                         }
                     }
                 });
@@ -527,6 +621,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
 
         });
     </script>
+
+
+
     <script>
 
     </script>

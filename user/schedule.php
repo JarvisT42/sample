@@ -3,13 +3,15 @@
 session_start();
 include("../connection.php");
 
-$sql = "SELECT calendar FROM calendar_appointment";
+$sql = "SELECT calendar, morning, afternoon FROM calendar_appointment";
 $result = $conn->query($sql);
 
 $calendar_dates = [];
 if ($result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
     $calendar_dates[] = $row['calendar'];
+    $morning[] = $row['morning'];
+    $afternoon[] = $row['afternoon'];
   }
 }
 ?>
@@ -78,6 +80,10 @@ if ($result->num_rows > 0) {
           <br>
 
 
+
+
+
+
           <div class="slot_container p-6 rounded-lg shadow-md">
             <div class="border-b border-gray-300 mb-4"></div>
             <h2 class="text-2xl font-semibold text-center mb-4">Reservation Details</h2>
@@ -115,8 +121,8 @@ if ($result->num_rows > 0) {
                         Morning
                       </div>
                     </td>
-                    <td class="text-center available_slots_M border border-gray-500">10</td>
-                    <td class="text-center in_percentage_M border border-gray-500">50%</td>
+                    <td class="text-center available_slots_M border border-gray-500">0</td> <!-- Morning slots -->
+                    <td class="text-center in_percentage_M border border-gray-500">0%</td> <!-- Percentage for morning -->
                   </tr>
                   <tr class="afternoon-cell">
                     <td class="w-1/2 px-1 sm:px-6 py-3 text-center border border-gray-500">
@@ -127,11 +133,11 @@ if ($result->num_rows > 0) {
                         Afternoon
                       </div>
                     </td>
-                    <td class="text-center available_slots_A border border-gray-500">10</td>
-                    <td class="text-center in_percentage_A border border-gray-500">50%</td>
+                    <td class="text-center available_slots_A border border-gray-500">0</td> <!-- Afternoon slots -->
+                    <td class="text-center in_percentage_A border border-gray-500">0%</td> <!-- Percentage for afternoon -->
                   </tr>
-                  <!-- Add more rows for other time slots -->
                 </tbody>
+
               </table>
             </div>
 
@@ -148,6 +154,9 @@ if ($result->num_rows > 0) {
               </div>
             </form>
           </div>
+
+
+
 
           <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -269,7 +278,7 @@ if ($result->num_rows > 0) {
           }
 
           // Change the clicked date to pink
-          dayElement.style.backgroundColor = '#0a56f9'; // Change to coloy date background
+          dayElement.style.backgroundColor = '#0a56f9'; // Change to colored date background
           dayElement.style.color = '#fff'; // Change text color to white
           clickedDate = dayElement.getAttribute('data-date'); // Store the currently clicked date
 
@@ -288,8 +297,37 @@ if ($result->num_rows > 0) {
 
           // Display the formatted date in the selected date container
           selectedDateContainer.textContent = formattedDate;
+
+          // Fetch the available slots for the selected date
+          fetchAvailableSlots(clickedDate);
         });
       });
+
+      function fetchAvailableSlots(date) {
+        fetch('get_slots.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              date: date
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            // Calculate the remaining slots
+            const remainingMorningSlots = 10 - data.morning;
+            const remainingAfternoonSlots = 10 - data.afternoon;
+
+            // Update the available slots in the table
+            document.querySelector('.available_slots_M').textContent = data.morning;
+            document.querySelector('.in_percentage_M').textContent = `${(remainingMorningSlots / 10) * 100}%`;
+
+            document.querySelector('.available_slots_A').textContent = data.afternoon;
+            document.querySelector('.in_percentage_A').textContent = `${(remainingAfternoonSlots / 10) * 100}%`;
+          })
+          .catch(error => console.error('Error fetching slots:', error));
+      }
 
 
 

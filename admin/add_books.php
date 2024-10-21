@@ -53,7 +53,7 @@ session_start();
                         <li><a class="px-4 py-2 " href="edit_records.php">Edit Records</a></li>
 
                         <br>
-                     
+
                         <li class="#"><a href="damage.php">Damage Books</a></li>
                         <br>
                         <li><a href="#">Subject for Replacement</a></li>
@@ -77,160 +77,160 @@ session_start();
 
 
 
-                        <form id="categoryForm" class="space-y-4" method="POST" enctype="multipart/form-data">
+                            <form id="categoryForm" class="space-y-4" method="POST" enctype="multipart/form-data">
 
-<div class="grid grid-cols-7 items-center gap-4 mt-3">
-    <label for="category" class="text-left">CATEGORY:</label>
+                                <div class="grid grid-cols-7 items-center gap-4 mt-3">
+                                    <label for="category" class="text-left">CATEGORY:</label>
 
-    <?php
-    include("../connection.php");
+                                    <?php
+                                    include("../connection.php");
 
-    // Query to retrieve the list of tables from your database
-    $sql = "SHOW TABLES FROM gfi_library_database_books_records";
-    $result = mysqli_query($conn, $sql);
-    ?>
+                                    // Query to retrieve the list of tables from your database
+                                    $sql = "SHOW TABLES FROM gfi_library_database_books_records";
+                                    $result = mysqli_query($conn, $sql);
+                                    ?>
 
-    <select id="category" class="col-span-2 border rounded px-3 py-2" name="table" required>
-        <option value="" disabled selected>Select Category</option>
-        <?php
-        // Dynamically populate the <select> element with options from the database
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_array()) {
-                // Accessing the table name from the fetched row
-                $tableName = $row[0];
-                echo '<option value="' . htmlspecialchars($tableName) . '">' . htmlspecialchars($tableName) . '</option>';
-            }
-        }
-        ?>
-    </select>
+                                    <select id="category" class="col-span-2 border rounded px-3 py-2" name="table" required>
+                                        <option value="" disabled selected>Select Category</option>
+                                        <?php
+                                        // Dynamically populate the <select> element with options from the database
+                                        if ($result->num_rows > 0) {
+                                            while ($row = $result->fetch_array()) {
+                                                // Accessing the table name from the fetched row
+                                                $tableName = $row[0];
+                                                echo '<option value="' . htmlspecialchars($tableName) . '">' . htmlspecialchars($tableName) . '</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
 
-    <div class="flex items-center col-span-2">
-        <input type="checkbox" id="checkbox_id" name="add_category_checkbox" class="mr-2" />
-        <label for="checkbox_id" class="text-left">ADD CATEGORY:</label>
-    </div>
+                                    <div class="flex items-center col-span-2">
+                                        <input type="checkbox" id="checkbox_id" name="add_category_checkbox" class="mr-2" />
+                                        <label for="checkbox_id" class="text-left">ADD CATEGORY:</label>
+                                    </div>
 
-    <input id="add_category" name="add_category" placeholder="Add Category" class="col-span-2 border rounded px-3 py-2" disabled />
-</div>
+                                    <input id="add_category" name="add_category" placeholder="Add Category" class="col-span-2 border rounded px-3 py-2" disabled />
+                                </div>
 
 
-<div class="grid grid-cols-3 items-center gap-4">
-    <label for="tracking_id" class="text-left">Tracking Id</label>
-    <input id="tracking_id" name="tracking_id" placeholder="tracking_id" class="col-span-2 border rounded px-3 py-2" />
-</div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="tracking_id" class="text-left">Tracking Id</label>
+                                    <input id="tracking_id" name="tracking_id" placeholder="tracking_id" class="col-span-2 border rounded px-3 py-2" />
+                                </div>
 
-<!-- Other form fields remain unchanged -->
-<div class="grid grid-cols-3 items-center gap-4">
-    <label for="call_number" class="text-left">CALL NUMBER:</label>
-    <input id="call_number" name="call_number" placeholder="Call Number" class="col-span-2 border rounded px-3 py-2" />
+                                <!-- Other form fields remain unchanged -->
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="call_number" class="text-left">CALL NUMBER:</label>
+                                    <input id="call_number" name="call_number" placeholder="Call Number" class="col-span-2 border rounded px-3 py-2" />
 
-    <label for="department" class="text-left">DEPARTMENT:</label>
-    <input id="department" name="department" placeholder="Department" class="col-span-2 border rounded px-3 py-2" />
+                                    <label for="department" class="text-left">DEPARTMENT:</label>
+                                    <input id="department" name="department" placeholder="Department" class="col-span-2 border rounded px-3 py-2" />
 
-    <label for="book_title" class="text-left">BOOK TITLE:</label>
-    <input id="book_title" name="book_title" placeholder="Book Title" class="col-span-2 border rounded px-3 py-2" />
-</div>
+                                    <label for="book_title" class="text-left">BOOK TITLE:</label>
+                                    <input id="book_title" name="book_title" placeholder="Book Title" class="col-span-2 border rounded px-3 py-2" />
+                                </div>
 
-<div class="grid grid-cols-3 items-center gap-4">
-    <label for="author" class="text-left">AUTHOR:</label>
-    <input id="author" name="author" placeholder="Author" class="col-span-2 border rounded px-3 py-2" />
-</div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="author" class="text-left">AUTHOR:</label>
+                                    <input id="author" name="author" placeholder="Author" class="col-span-2 border rounded px-3 py-2" />
+                                </div>
 
-<div class="grid grid-cols-3 items-center gap-4">
-    <label for="date_of_publication_copyright" class="text-left">Date_of_publication_copyright</label>
-    <input id="date_of_publication_copyright" name="date_of_publication_copyright" placeholder="Publisher Name" class="col-span-2 border rounded px-3 py-2" />
-</div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="date_of_publication_copyright" class="text-left">Date_of_publication_copyright</label>
+                                    <input id="date_of_publication_copyright" name="date_of_publication_copyright" placeholder="Publisher Name" class="col-span-2 border rounded px-3 py-2" />
+                                </div>
 
-<div class="grid grid-cols-3 items-center gap-4">
-    <label for="book_copies" class="text-left">BOOK COPIES:</label>
-    <input id="book_copies" name="book_copies" type="number" class="col-span-2 border rounded px-3 py-2" />
-</div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="book_copies" class="text-left">BOOK COPIES:</label>
+                                    <input id="book_copies" name="book_copies" type="number" class="col-span-2 border rounded px-3 py-2" />
+                                </div>
 
-<div class="grid grid-cols-3 items-center gap-4">
-    <label for="publisher_name" class="text-left">PUBLISHER NAME:</label>
-    <input id="publisher_name" name="publisher_name" placeholder="Publisher Name" class="col-span-2 border rounded px-3 py-2" />
-</div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="publisher_name" class="text-left">PUBLISHER NAME:</label>
+                                    <input id="publisher_name" name="publisher_name" placeholder="Publisher Name" class="col-span-2 border rounded px-3 py-2" />
+                                </div>
 
-<div class="grid grid-cols-3 items-center gap-4">
-    <label for="subject" class="text-left">SUBJECT:</label>
-    <input id="subject" name="subject" placeholder="SUBJECT" class="col-span-2 border rounded px-3 py-2" />
-</div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="subject" class="text-left">SUBJECT:</label>
+                                    <input id="subject" name="subject" placeholder="SUBJECT" class="col-span-2 border rounded px-3 py-2" />
+                                </div>
 
-<div class="grid grid-cols-3 items-center gap-4">
-    <label for="image" class="text-left">UPLOAD IMAGE:</label>
-    <input type="file" id="image" name="image" accept="image/*" class="col-span-2 border rounded" />
-</div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="image" class="text-left">UPLOAD IMAGE:</label>
+                                    <input type="file" id="image" name="image" accept="image/*" class="col-span-2 border rounded" />
+                                </div>
 
-<div class="grid grid-cols-3 items-center gap-4">
-    <label for="status" class="text-left">STATUS:</label>
-    <select id="status" name="status" class="col-span-2 border rounded px-3 py-2">
-        <option value="" disabled selected>Select status</option>
-        <option value="new">New</option>
-        <option value="old">Old</option>
-        <option value="damage">Damage</option>
-    </select>
-</div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="status" class="text-left">STATUS:</label>
+                                    <select id="status" name="status" class="col-span-2 border rounded px-3 py-2">
+                                        <option value="" disabled selected>Select status</option>
+                                        <option value="new">New</option>
+                                        <option value="old">Old</option>
+                                        <option value="damage">Damage</option>
+                                    </select>
+                                </div>
 
-<div class="flex justify-end">
-    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-        </svg>
-        Save
-    </button>
-</div>
-</form>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                            <polyline points="17 21 17 13 7 13 7 21" />
+                                            <polyline points="7 3 7 8 15 8" />
+                                        </svg>
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
 
-<script>
-const checkbox = document.getElementById('checkbox_id');
-const categorySelect = document.getElementById('category');
-const addCategoryInput = document.getElementById('add_category');
+                            <script>
+                                const checkbox = document.getElementById('checkbox_id');
+                                const categorySelect = document.getElementById('category');
+                                const addCategoryInput = document.getElementById('add_category');
 
-checkbox.addEventListener('change', function () {
-    if (checkbox.checked) {
-        categorySelect.value = "";
-        categorySelect.disabled = true;
-        addCategoryInput.disabled = false;
-    } else {
-        categorySelect.disabled = false;
-        addCategoryInput.disabled = true;
-        addCategoryInput.value = "";
-    }
-});
+                                checkbox.addEventListener('change', function() {
+                                    if (checkbox.checked) {
+                                        categorySelect.value = "";
+                                        categorySelect.disabled = true;
+                                        addCategoryInput.disabled = false;
+                                    } else {
+                                        categorySelect.disabled = false;
+                                        addCategoryInput.disabled = true;
+                                        addCategoryInput.value = "";
+                                    }
+                                });
 
-const form = document.getElementById('categoryForm');
-    form.addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent the default form submission
+                                const form = document.getElementById('categoryForm');
+                                form.addEventListener('submit', function(event) {
+                                    event.preventDefault(); // Prevent the default form submission
 
-        const formData = new FormData(form); // Create a FormData object
+                                    const formData = new FormData(form); // Create a FormData object
 
-        // Send the form data using fetch
-        fetch('add_books_handle_category.php', {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json(); // Parse JSON response
-            } else {
-                throw new Error('Network response was not ok.');
-            }
-        })
-        .then(data => {
-            // Show alerts based on the response from PHP
-            if (data.status === 'success') {
-                alert(data.message); // Show success alert
-                window.location.reload(); // Reload the window
-            } else {
-                alert(data.message); // Show error alert (like table already exists)
-            }
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-    });
-</script>
+                                    // Send the form data using fetch
+                                    fetch('add_books_handle_category.php', {
+                                            method: 'POST',
+                                            body: formData,
+                                        })
+                                        .then(response => {
+                                            if (response.ok) {
+                                                return response.json(); // Parse JSON response
+                                            } else {
+                                                throw new Error('Network response was not ok.');
+                                            }
+                                        })
+                                        .then(data => {
+                                            // Show alerts based on the response from PHP
+                                            if (data.status === 'success') {
+                                                alert(data.message); // Show success alert
+                                                window.location.reload(); // Reload the window
+                                            } else {
+                                                alert(data.message); // Show error alert (like table already exists)
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('There was a problem with the fetch operation:', error);
+                                        });
+                                });
+                            </script>
 
 
 

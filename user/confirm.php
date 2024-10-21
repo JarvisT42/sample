@@ -51,8 +51,8 @@ $formattedDate = (new DateTime($selectedDate))->format('l, F j, Y');
         <div class="w-full mx-auto bg-white shadow-md rounded-lg overflow-hidden">
           <div class="p-6">
 
+            <form id="borrowForm" method="POST" action="borrow_books.php">
 
-            <form method="POST" action="borrow_books.php">
 
 
 
@@ -102,10 +102,13 @@ $formattedDate = (new DateTime($selectedDate))->format('l, F j, Y');
               </div>
 
               <div class="flex justify-between">
-                <button class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition duration-300 flex items-center border border-blue-600">
+                <a href="schedule.php" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition duration-300 flex items-center border border-blue-600">
                   <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>Back
-                </button>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-green-800 transition duration-300 flex items-center border border-green-600">
+                </a>
+
+
+
+                <button type="button" onclick="borrowBooks()" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-green-800 transition duration-300 flex items-center border border-green-600">
                   <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>Confirm
                 </button>
 
@@ -128,6 +131,77 @@ $formattedDate = (new DateTime($selectedDate))->format('l, F j, Y');
 
     </div>
   </main>
+  <script>
+    function checkBookAvailability(bookId, tableName, callback) {
+      fetch('check_book_availability.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            book_id: bookId,
+            table: tableName
+          })
+        })
+        .then(response => response.json())
+        .then(result => {
+          if (result.success) {
+            callback(true); // Book is available
+          } else {
+            alert(result.message); // Display error if book is unavailable
+
+            // After the alert, unset session variables and redirect
+            fetch('unset_session_and_redirect.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            }).then(() => {
+              window.location.href = 'borrow.php'; // Redirect to borrow.php
+            });
+
+            callback(false); // Book is not available
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while checking book availability.');
+
+          // After the error, unset session variables and redirect
+          fetch('unset_session_and_redirect.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          }).then(() => {
+            window.location.href = 'borrow.php'; // Redirect to borrow.php
+          });
+
+          callback(false); // Treat as unavailable in case of error
+        });
+    }
+
+    function borrowBooks() {
+      const bookBag = <?php echo json_encode($bookBag); ?>;
+      let allAvailable = true;
+
+      // Check each book for availability
+      bookBag.forEach((book, index) => {
+        checkBookAvailability(book.id, book.table, function(isAvailable) {
+          if (!isAvailable) {
+            allAvailable = false;
+          }
+
+          // Once all books have been checked, submit the form if available
+          if (index === bookBag.length - 1) {
+            if (allAvailable) {
+              document.getElementById('borrowForm').submit();
+            }
+          }
+        });
+      });
+    }
+  </script>
 
   <script>
     lucide.createIcons();

@@ -40,18 +40,19 @@ if ($result->num_rows > 0) {
 
     <main id="content" class="">
         <div class="p-4 sm:ml-64 ">
-            <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 h-screen">
+            <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 ">
 
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
                     <h1 class="text-3xl font-semibold">Edit Fines</h1>
                 </div>
 
                 <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-    The Edit Fines page allows administrators to manage and adjust fines for overdue items in the library system. This page provides an intuitive interface for updating fine amounts, setting thresholds for different types of media, and reviewing any existing penalties. With this feature, administrators can ensure that fine structures are flexible, fair, and up to date, promoting an organized and efficient library system.
-</div>
+                    The Edit Fines page allows administrators to manage and adjust fines for overdue items in the library system. This page provides an intuitive interface for updating fine amounts, setting thresholds for different types of media, and reviewing any existing penalties. With this feature, administrators can ensure that fine structures are flexible, fair, and up to date, promoting an organized and efficient library system.
+                </div>
 
 
-                <div class="flex items-center justify-center h-auto p-52">
+                <div class="flex items-center justify-center pt-20 px-52 pb-20">
+
                     <div class="w-full max-w-lg mx-auto p-8 border-2 border-gray-300 bg-white shadow-lg rounded-lg h-auto">
                         <div class="p-6 border border-gray-300 rounded-lg bg-gray-50 w-full">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Edit Fines</h2>
@@ -100,27 +101,30 @@ if ($result->num_rows > 0) {
             }
 
             fetch('edit_fines_update.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ fines: newFines })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert('Fines updated successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while updating fines.');
-            });
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fines: newFines
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Fines updated successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating fines.');
+                });
         }
     </script>
 
 </body>
+
 </html>
