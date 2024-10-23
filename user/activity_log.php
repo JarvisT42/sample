@@ -7,7 +7,7 @@ session_start();
 <html lang="en">
 
 <head>
-<?php include 'user_header.php'; ?>
+    <?php include 'user_header.php'; ?>
 
     <style>
         /* If you prefer inline styles, you can include them directly */
@@ -109,7 +109,7 @@ session_start();
                                     <svg class="w-3 h-3 text-gray-500 dark:text-gray-400 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
                                     </svg>
-                                    Last 30 days
+                                    Last 7 days
                                     <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
                                     </svg>
@@ -117,12 +117,7 @@ session_start();
                                 <!-- Dropdown menu -->
                                 <div id="dropdownRadio" class="z-20 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600">
                                     <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioButton">
-                                        <li>
-                                            <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                                                <input id="filter-radio-example-1" type="radio" value="" name="filter-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                                <label for="filter-radio-example-1" class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Last day</label>
-                                            </div>
-                                        </li>
+
                                         <li>
                                             <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                                 <input checked="" id="filter-radio-example-2" type="radio" value="" name="filter-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
@@ -184,7 +179,10 @@ session_start();
                             $id = intval($_SESSION["Id"]);
 
                             // Fetch the category and book_id based on the student_id
-                            $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status FROM GFI_Library_Database.borrow WHERE student_id = ? and status = 'borrowed'";
+                            $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status 
+                            FROM GFI_Library_Database.borrow 
+                            WHERE student_id = ? 
+                            AND status IN ('borrowed', 'pending')";
                             $stmt = $conn->prepare($categoryQuery);
                             $stmt->bind_param('i', $id); // Assuming student_id is an integer
                             $stmt->execute();
@@ -261,7 +259,7 @@ session_start();
                                                     echo 'Failed To Claim';
                                                 } elseif (!empty($row['status']) && $row['status'] === 'borrowed') {
                                                     echo 'Borrowed';
-                                                } elseif (!empty($row['status']) && $row['status'] === 'Pending') {
+                                                } elseif (!empty($row['status']) && $row['status'] === 'pending') {
                                                     echo 'Pending';
                                                 }
                                                 ?>
@@ -283,92 +281,92 @@ session_start();
 
                     <!-- Table 2 and Dropdown (hidden initially) -->
                     <div id="table2-container" class="hidden">
-    <div id="table2" class="overflow-x-auto">
-        <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
-            <?php
-            // Query for books with status 'returned'
-            $categoryQueryReturned = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status FROM GFI_Library_Database.borrow WHERE student_id = ? AND status = 'returned'";
-            $stmtReturned = $conn->prepare($categoryQueryReturned);
-            $stmtReturned->bind_param('i', $id); // Assuming student_id is an integer
-            $stmtReturned->execute();
-            $resultReturned = $stmtReturned->get_result();
+                        <div id="table2" class="overflow-x-auto">
+                            <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
+                                <?php
+                                // Query for books with status 'returned'
+                                $categoryQueryReturned = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status FROM GFI_Library_Database.borrow WHERE student_id = ? AND status = 'returned'";
+                                $stmtReturned = $conn->prepare($categoryQueryReturned);
+                                $stmtReturned->bind_param('i', $id); // Assuming student_id is an integer
+                                $stmtReturned->execute();
+                                $resultReturned = $stmtReturned->get_result();
 
-            // Initialize an array to hold the returned books
-            $returnedBooks = [];
+                                // Initialize an array to hold the returned books
+                                $returnedBooks = [];
 
-            // Fetch all rows for returned books
-            while ($rowReturned = $resultReturned->fetch_assoc()) {
-                $category = $rowReturned['Category'];
-                $bookId = $rowReturned['book_id'];
-                $dateToClaim = $rowReturned['Date_To_Claim'];
-                $issuedDate = $rowReturned['Issued_Date'];
-                $status = $rowReturned['status'];
+                                // Fetch all rows for returned books
+                                while ($rowReturned = $resultReturned->fetch_assoc()) {
+                                    $category = $rowReturned['Category'];
+                                    $bookId = $rowReturned['book_id'];
+                                    $dateToClaim = $rowReturned['Date_To_Claim'];
+                                    $issuedDate = $rowReturned['Issued_Date'];
+                                    $status = $rowReturned['status'];
 
-                // Prepare the SQL to fetch book details from the category-specific table
-                $queryReturned = "SELECT Title, Author FROM `$category` WHERE id = ?";
-                $bookStmtReturned = $conn2->prepare($queryReturned);
-                $bookStmtReturned->bind_param('i', $bookId);
-                $bookStmtReturned->execute();
-                $bookResultReturned = $bookStmtReturned->get_result();
+                                    // Prepare the SQL to fetch book details from the category-specific table
+                                    $queryReturned = "SELECT Title, Author FROM `$category` WHERE id = ?";
+                                    $bookStmtReturned = $conn2->prepare($queryReturned);
+                                    $bookStmtReturned->bind_param('i', $bookId);
+                                    $bookStmtReturned->execute();
+                                    $bookResultReturned = $bookStmtReturned->get_result();
 
-                // Fetch the book details and store them in the $returnedBooks array
-                if ($bookRowReturned = $bookResultReturned->fetch_assoc()) {
-                    $returnedBooks[] = [
-                        'Title' => $bookRowReturned['Title'],
-                        'Author' => $bookRowReturned['Author'],
-                        'Date_To_Claim' => $dateToClaim,
-                        'Issued_Date' => $issuedDate,
-                        'status' => $status
-                    ];
-                }
+                                    // Fetch the book details and store them in the $returnedBooks array
+                                    if ($bookRowReturned = $bookResultReturned->fetch_assoc()) {
+                                        $returnedBooks[] = [
+                                            'Title' => $bookRowReturned['Title'],
+                                            'Author' => $bookRowReturned['Author'],
+                                            'Date_To_Claim' => $dateToClaim,
+                                            'Issued_Date' => $issuedDate,
+                                            'status' => $status
+                                        ];
+                                    }
 
-                $bookStmtReturned->close();
-            }
+                                    $bookStmtReturned->close();
+                                }
 
-            $stmtReturned->close();
-            ?>
+                                $stmtReturned->close();
+                                ?>
 
-            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">Book Title</th>
-                        <th scope="col" class="px-6 py-3">Author</th>
-                        <th scope="col" class="px-6 py-3">Date To Claim</th>
-                        <th scope="col" class="px-6 py-3">Issued Date</th>
-                        <th scope="col" class="px-6 py-3">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    // Loop through the returned books to display them in the table
-                    foreach ($returnedBooks as $rowReturned) {
-                    ?>
-                        <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                <?php echo htmlspecialchars($rowReturned['Title']); ?>
-                            </th>
-                            <td class="px-6 py-4">
-                                <?php echo htmlspecialchars($rowReturned['Author']); ?>
-                            </td>
-                            <td class="px-6 py-4">
-                                <?php echo htmlspecialchars($rowReturned['Date_To_Claim']); ?>
-                            </td>
-                            <td class="px-6 py-4">
-                                <?php echo htmlspecialchars($rowReturned['Issued_Date']); ?>
-                            </td>
-                            <td class="px-6 py-4">
-                                <?php echo htmlspecialchars($rowReturned['status']); ?>
-                            </td>
-                        </tr>
-                    <?php
-                    }
-                    ?>
-                </tbody>
-            </table>
+                                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3">Book Title</th>
+                                            <th scope="col" class="px-6 py-3">Author</th>
+                                            <th scope="col" class="px-6 py-3">Date To Claim</th>
+                                            <th scope="col" class="px-6 py-3">Returned Date</th>
+                                            <th scope="col" class="px-6 py-3">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        // Loop through the returned books to display them in the table
+                                        foreach ($returnedBooks as $rowReturned) {
+                                        ?>
+                                            <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                    <?php echo htmlspecialchars($rowReturned['Title']); ?>
+                                                </th>
+                                                <td class="px-6 py-4">
+                                                    <?php echo htmlspecialchars($rowReturned['Author']); ?>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <?php echo htmlspecialchars($rowReturned['Date_To_Claim']); ?>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <?php echo htmlspecialchars($rowReturned['Issued_Date']); ?>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <?php echo htmlspecialchars($rowReturned['status']); ?>
+                                                </td>
+                                            </tr>
+                                        <?php
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
 
-        </div>
-    </div>
-</div>
+                            </div>
+                        </div>
+                    </div>
 
 
 

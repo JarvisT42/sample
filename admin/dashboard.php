@@ -423,71 +423,73 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
                     <!-- Right Section (Dues and Borrowing) -->
                     <div class="rounded-lg border bg-white text-gray-700 shadow-lg transition duration-300 hover:shadow-xl">
-    <div class="p-8">
-        <!-- Upcoming Dues -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            
-            <h2 class="font-semibold text-xl mb-6 flex items-center justify-between">
-                Upcoming Dues
-                <span class="text-md font-normal text-gray-500">3 Total</span>
-            </h2>
-            <div class="space-y-6">
-                <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
-                    <div class="flex items-start">
-                        <span class="bg-green-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
-                        <p class="text-lg font-medium">Due Soon</p>
-                    </div>
-                    <span class="text-md text-gray-500">1 Due</span>
-                </div>
-                <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
-                    <div class="flex items-start">
-                        <span class="bg-red-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
-                        <p class="text-lg font-medium">Due Today</p>
-                    </div>
-                    <span class="text-md text-gray-500">2 Dues</span>
-                </div>
-                <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
-                    <div class="flex items-start">
-                        <span class="bg-blue-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
-                        <p class="text-lg font-medium">Due Later</p>
-                    </div>
-                    <span class="text-md text-gray-500">0 Dues</span>
-                </div>
-            </div>
-        </div>
+                        <div class="p-8">
+                            <!-- Upcoming Dues -->
+                            <div class="bg-white rounded-lg shadow-md p-6">
 
-        <!-- Today's Borrowing -->
-        <div class="bg-white rounded-lg shadow-md p-6 mt-8">
-            <h2 class="font-semibold text-xl mb-6 flex items-center justify-between">
-                Today's Borrowing
-                <span class="text-md font-normal text-gray-500">3 Total</span>
-            </h2>
-            <div class="space-y-6">
-                <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
-                    <div class="flex items-start">
-                        <span class="bg-green-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
-                        <p class="text-lg font-medium">Borrow Tomorrow</p>
+                                <h2 class="font-semibold text-xl mb-6 flex items-center justify-between">
+                                    Book Return Deadlines
+                                    <span class="text-md font-normal text-gray-500">3 Total</span>
+                                </h2>
+                                <div class="space-y-6">
+                                    <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
+                                        <div class="flex items-start">
+                                            <span class="bg-green-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
+                                            <p class="text-lg font-medium">Due Soon</p>
+                                        </div>
+                                        <span class="text-md text-gray-500">1 Book Due</span>
+                                    </div>
+                                    <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
+                                        <div class="flex items-start">
+                                            <span class="bg-red-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
+                                            <p class="text-lg font-medium">Due Today</p>
+                                        </div>
+                                        <span class="text-md text-gray-500">2 Books Due</span>
+                                    </div>
+                                    <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
+                                        <div class="flex items-start">
+                                            <span class="bg-blue-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
+                                            <p class="text-lg font-medium">Due Later</p>
+                                        </div>
+                                        <span class="text-md text-gray-500">0 Books Due</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- Today's Borrowing -->
+                            <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+                                <h2 class="font-semibold text-xl mb-6 flex items-center justify-between">
+                                    Upcoming Borrowing Requests
+                                    <span class="text-md font-normal text-gray-500">3 Total</span>
+                                </h2>
+                                <div class="space-y-6">
+                                    <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
+                                        <div class="flex items-start">
+                                            <span class="bg-green-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
+                                            <p class="text-lg font-medium">To Borrow Tomorrow</p>
+                                        </div>
+                                        <span class="text-md text-gray-500">1 Request</span>
+                                    </div>
+                                    <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
+                                        <div class="flex items-start">
+                                            <span class="bg-red-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
+                                            <p class="text-lg font-medium">To Borrow Today</p>
+                                        </div>
+                                        <span class="text-md text-gray-500">2 Requests</span>
+                                    </div>
+                                    <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
+                                        <div class="flex items-start">
+                                            <span class="bg-blue-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
+                                            <p class="text-lg font-medium">To Borrow Later</p>
+                                        </div>
+                                        <span class="text-md text-gray-500">0 Requests</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                    <span class="text-md text-gray-500">1 Borrow</span>
-                </div>
-                <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
-                    <div class="flex items-start">
-                        <span class="bg-red-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
-                        <p class="text-lg font-medium">Borrow Today</p>
-                    </div>
-                    <span class="text-md text-gray-500">2 Borrows</span>
-                </div>
-                <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
-                    <div class="flex items-start">
-                        <span class="bg-blue-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
-                        <p class="text-lg font-medium">Borrow Later</p>
-                    </div>
-                    <span class="text-md text-gray-500">0 Borrows</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
                 </div>
 

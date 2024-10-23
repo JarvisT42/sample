@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->execute()) {
                     // Include the connection script for book update
                     include '../connection2.php';  
+                    
                     // Prepare to update the number of copies
                     $bookDeduction = "UPDATE `$table` SET No_Of_Copies = No_Of_Copies - 1 WHERE id = ?";
     
@@ -66,7 +67,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt2->bind_param("i", $bookId);
                         
                         if ($stmt2->execute()) {
-                            $successfulInserts++; // Count successful insertions
+                            // Insert into most_borrowed_books after successful deduction
+                            $insert_most_borrowed = "INSERT INTO GFI_Library_Database.most_borrowed_books (book_id, category, date)
+                                                     VALUES (?, ?, ?)";
+
+                            if ($stmt3 = $conn2->prepare($insert_most_borrowed)) {
+                                $stmt3->bind_param("iss", $bookId, $table, $issued_date);
+                                if ($stmt3->execute()) {
+                                    $successfulInserts++; // Count successful insertions
+                                } else {
+                                    $_SESSION['error_message'] = 'Error inserting into most_borrowed_books: ' . $stmt3->error;
+                                }
+                                $stmt3->close();
+                            } else {
+                                $_SESSION['error_message'] = 'Error preparing most_borrowed_books query: ' . $conn2->error;
+                            }
                         } else {
                             $_SESSION['error_message'] = 'Error updating book copies: ' . $stmt2->error;
                         }

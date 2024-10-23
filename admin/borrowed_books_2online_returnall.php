@@ -9,9 +9,12 @@ if (!empty($data['student_id']) && !empty($data['books'])) {
     $books = $data['books']; // Array of books containing book_id, category, and total_fines
 
     $success = true;
-    
+
+    // Get the current date
+    $returnedDate = date('Y-m-d');
+
     // Prepare the update query
-    $updateQuery = "UPDATE borrow SET status = 'returned', Total_Fines = ? WHERE student_id = ? AND book_id = ? AND category = ?";
+    $updateQuery = "UPDATE borrow SET status = 'returned', Total_Fines = ?, Return_Date = ? WHERE student_id = ? AND book_id = ? AND category = ?";
     $stmt = $conn->prepare($updateQuery);
 
     foreach ($books as $book) {
@@ -20,7 +23,7 @@ if (!empty($data['student_id']) && !empty($data['books'])) {
         $category = $book['category'];
 
         // Bind the parameters and execute the query
-        if (!$stmt->bind_param('diis', $total_fines, $student_id, $book_id, $category) || !$stmt->execute()) {
+        if (!$stmt->bind_param('dsisi', $total_fines, $returnedDate, $student_id, $book_id, $category) || !$stmt->execute()) {
             $success = false;
             break;
         }

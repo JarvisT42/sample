@@ -37,6 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_login'])) {
             $_SESSION["Middle_Initial"] = $row['Middle_Initial'];
             $_SESSION["Last_Name"] = $row['Last_Name'];
             $_SESSION['email'] = $row['Email_Address'];
+            $_SESSION['phoneNo.'] = $row['Mobile_Number'];
 
             header("Location: user/dashboard.php");
             exit();

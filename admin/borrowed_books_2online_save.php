@@ -10,9 +10,11 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit();
 }
 
-// Prepare and bind the update query
-$updateQuery = "UPDATE borrow SET status = 'returned', Over_Due_Fines = ?, Book_Fines = ? WHERE student_id = ? AND book_id = ? AND category = ?";
-// $updateQuery = "UPDATE borrow SET status = 'returned', Total_Fines = ? WHERE student_id = ? AND book_id = ? AND category = ?";
+// Get the current date
+$returnedDate = date('Y-m-d');
+
+// Prepare and bind the update query, including Damage_Description and Returned_Date
+$updateQuery = "UPDATE borrow SET status = 'returned', Over_Due_Fines = ?, Book_Fines = ?, Damage_Description = ?, Return_Date = ? WHERE student_id = ? AND book_id = ? AND category = ?";
 
 $stmt = $conn->prepare($updateQuery);
 
@@ -25,12 +27,13 @@ if (!$stmt) {
 // Bind parameters (adjust data types accordingly)
 $fines = $data['fines'];
 $bookFines = $data['book_fines']; // Ensure you include this in the fetch data from JS
+$damageDescription = $data['damage_description']; // Add damage description
 $studentId = $data['student_id'];
 $bookId = $data['book_id'];
 $category = $data['category'];
 
-// Change the bind_param types if necessary
-$stmt->bind_param('ddsss', $fines, $bookFines, $studentId, $bookId, $category); // 'ddsss' for two doubles and three strings
+// Change the bind_param types if necessary, 's' for string
+$stmt->bind_param('ddsssss', $fines, $bookFines, $damageDescription, $returnedDate, $studentId, $bookId, $category); // 'ddsssss' for two doubles and five strings
 
 // Execute the query
 if ($stmt->execute()) {

@@ -203,9 +203,6 @@ if (isset($_GET['student_id'])) {
                                                         </div>
                                                     </div>
                                                     <div class="w-full md:w-32 h-40 bg-gray-200 border border-gray-300 flex items-center justify-center mb-4 md:mb-0">
-                                                        <?php
-                                                        // Handle book cover image...
-                                                        ?>
                                                         <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-full h-full border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
                                                     </div>
                                                 </div>
@@ -217,9 +214,7 @@ if (isset($_GET['student_id'])) {
                                                         </div>
                                                         <div>
                                                             <p class="text-sm font-semibold">Due Date:</p>
-                                                            <p class="text-sm due-date" data-index="<?php echo $overall_index; ?>">
-                                                                <?php echo htmlspecialchars($due_date); ?>
-                                                            </p>
+                                                            <p class="text-sm due-date" data-index="<?php echo $overall_index; ?>"><?php echo htmlspecialchars($due_date); ?></p>
                                                         </div>
                                                         <div>
                                                             <p class="text-sm font-semibold">Fines: ₱ <span id="fine-amount-<?php echo $overall_index; ?>"><?php echo $fine_amount; ?></span>.00</p>
@@ -244,7 +239,6 @@ if (isset($_GET['student_id'])) {
                                                                 <option value="Damage">Damage</option>
                                                                 <option value="Lost">Lost</option>
                                                             </select>
-
                                                         </div>
                                                         <div>
                                                             <p class="text-sm font-semibold">Fines:</p>
@@ -253,9 +247,16 @@ if (isset($_GET['student_id'])) {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <div id="damageTextArea-<?php echo $overall_index; ?>" style="display: none;" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                                                        <div class="col-span-3">
+                                                            <p class="text-sm font-semibold">Describe the Damage:</p>
+                                                            <textarea id="damageDescription-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-2 w-full" rows="4" placeholder="Provide a description of the damage"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Text area for damage description -->
+
                                                 </div>
                                             </div>
-
 
                                             <div class="flex justify-end space-x-2 mt-4">
                                                 <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm renew-button"
@@ -271,17 +272,7 @@ if (isset($_GET['student_id'])) {
                                                     onclick="openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($student_id); ?>', '<?php echo htmlspecialchars($book_id); ?>')">
                                                     Return
                                                 </button>
-
-
-
-
-
-
                                             </div>
-
-
-
-
                                         </li>
 
 
@@ -337,7 +328,8 @@ if (isset($_GET['student_id'])) {
             function toggleFinesInput(index) {
                 const statusSelect = document.getElementById(`statusSelect-${index}`);
                 const fineInput = document.getElementById(`fineInput-${index}`);
-                const returnButton = document.querySelector(`.return-button[data-index="${index}"]`); // Get the related return button
+                const returnButton = document.querySelector(`.return-button[data-index="${index}"]`);
+                const damageTextArea = document.getElementById(`damageTextArea-${index}`); // Text area for damage description
 
                 // Enable fine input for "Damage" or "Lost"
                 if (statusSelect.value === "Damage" || statusSelect.value === "Lost") {
@@ -354,8 +346,13 @@ if (isset($_GET['student_id'])) {
                 // Change the button label to 'Next' if 'Lost' is selected
                 if (statusSelect.value === "Lost") {
                     returnButton.innerText = "Next";
+                    damageTextArea.style.display = 'none'; // Hide the text area if "Lost" is selected
+                } else if (statusSelect.value === "Damage") {
+                    returnButton.innerText = "Return"; // Set to 'Return'
+                    damageTextArea.style.display = 'block'; // Show the text area for "Damage"
                 } else {
                     returnButton.innerText = "Return"; // Reset to 'Return' for other statuses
+                    damageTextArea.style.display = 'none'; // Hide the text area for other statuses
                 }
             }
         </script>
@@ -485,6 +482,10 @@ if (isset($_GET['student_id'])) {
                 <!-- Updated fines display -->
                 <p id="BookFines" class="mb-4"></p>
 
+                <!-- Damage description (only shown if applicable) -->
+                <p id="damageDescriptionLabel" class="mb-2" style="display:none;"><strong>Damage Description:</strong></p>
+                <p id="damageDescription" class="mb-4" style="display:none;"></p>
+
                 <!-- Display for student ID and book ID -->
                 <p id="modalStudentId" class="mb-2"></p>
                 <p id="modalBookId" class="mb-2"></p>
@@ -518,6 +519,7 @@ if (isset($_GET['student_id'])) {
 
 
     <script>
+        
         function openReturnModal(title, author, category, fines, fineInputId, studentId, bookId) {
             // Set the book details in the modal
             document.getElementById('modalBookTitle').innerText = 'Title: ' + title;
@@ -542,8 +544,20 @@ if (isset($_GET['student_id'])) {
             const confirmButton = document.getElementById('confirmReturn');
             if (statusSelect === "Lost") {
                 confirmButton.innerText = 'Pay'; // Change the label to 'Pay'
+                document.getElementById('damageDescriptionLabel').style.display = 'none'; // Hide damage description label
+                document.getElementById('damageDescription').style.display = 'none'; // Hide damage description
+            } else if (statusSelect === "Damage") {
+                confirmButton.innerText = 'Confirm Return'; // Set to 'Return'
+
+                // Show and set the damage description if applicable
+                let damageDesc = document.getElementById(`damageDescription-${fineInputId.split('-')[1]}`).value; // Get the damage description
+                document.getElementById('damageDescriptionLabel').style.display = 'block';
+                document.getElementById('damageDescription').style.display = 'block';
+                document.getElementById('damageDescription').innerText = damageDesc || 'No description provided'; // Set the damage description or fallback
             } else {
                 confirmButton.innerText = 'Confirm Return'; // Reset to default
+                document.getElementById('damageDescriptionLabel').style.display = 'none'; // Hide damage description label
+                document.getElementById('damageDescription').style.display = 'none'; // Hide damage description
             }
 
             // Display the modal
@@ -551,40 +565,38 @@ if (isset($_GET['student_id'])) {
         }
 
 
+
         // Close modal when the close button is clicked
         document.getElementById('closeModal').onclick = function() {
             document.getElementById('returnModal').classList.add('hidden');
         }
 
-        // Confirm return logic
         // Confirm return or pay logic
         document.getElementById('confirmReturn').onclick = function() {
-            // Get the values from the modal
             const overdueFines = document.getElementById('OverDueFines').innerText.replace('Over Due Fines: ₱ ', ''); // Extract overdue fines
             const bookFines = document.getElementById('BookFines').innerText.replace('Book Fines: ₱ ', ''); // Correct extraction of book fines
             const studentId = document.getElementById('modalStudentId').innerText.replace('Student ID: ', '');
             const bookId = document.getElementById('modalBookId').innerText.replace('Book ID: ', '');
-            const category = document.getElementById('modalBookCategory').innerText.replace('Category: ', ''); // Extract category text
+            const category = document.getElementById('modalBookCategory').innerText.replace('Category: ', '');
+            const damageDesc = document.getElementById('damageDescription').innerText; // Extract damage description
 
-            // Create the data object to send
             const data = {
-                fines: parseFloat(overdueFines) || 0, // Ensure it's a number, default to 0 if not available
-                book_fines: parseFloat(bookFines) || 0, // Ensure it's a number, default to 0 if not available
+                fines: parseFloat(overdueFines) || 0,
+                book_fines: parseFloat(bookFines) || 0,
                 student_id: studentId,
                 book_id: bookId,
-                category: category
+                category: category,
+                damage_description: damageDesc // Include damage description
             };
 
-            // Check if the button label is "Pay" or "Confirm Return"
             const confirmButton = document.getElementById('confirmReturn');
             if (confirmButton.innerText === 'Pay') {
-                // If "Pay" is clicked, send the data to `borrowed_books_2online_pay.php`
                 fetch('borrowed_books_2online_pay.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(data) // Send the data in JSON format
+                        body: JSON.stringify(data)
                     })
                     .then(response => response.json())
                     .then(result => {
@@ -600,13 +612,12 @@ if (isset($_GET['student_id'])) {
                         alert('An error occurred while processing the payment.');
                     });
             } else {
-                // If "Confirm Return" is clicked, use the existing return logic
                 fetch('borrowed_books_2online_save.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(data) // Send the data in JSON format
+                        body: JSON.stringify(data)
                     })
                     .then(response => response.json())
                     .then(result => {

@@ -51,21 +51,34 @@ if (!empty($bookBag)) {
             
             // Execute the query
             if ($stmt->execute()) {
-                // Deduct the number of copies based on the selected time
+                // Deduct the number of calendar slots based on the selected time
                 $columnToUpdate = ($selectedTime === 'morning') ? 'morning' : 'afternoon';
-                $bookDeduction = "UPDATE calendar_appointment SET $columnToUpdate = $columnToUpdate - 1 WHERE calendar = ?";
-                
-                if ($stmt2 = $conn->prepare($bookDeduction)) {
+                $calendarUpdateSql = "UPDATE calendar_appointment SET $columnToUpdate = $columnToUpdate - 1 WHERE calendar = ?";
+
+                if ($stmt2 = $conn->prepare($calendarUpdateSql)) {
                     $stmt2->bind_param("s", $selectedDate);
                     if (!$stmt2->execute()) {
-                        $_SESSION['error_message'] = 'Error updating book copies: ' . $stmt2->error;
+                        $_SESSION['error_message'] = 'Error updating calendar slots: ' . $stmt2->error;
                     }
                     $stmt2->close();
                 } else {
+                    $_SESSION['error_message'] = 'Error preparing calendar update query: ' . $conn->error;
+                }
+
+                // Now deduct the number of book copies
+                $bookDeductionSql = "UPDATE `$table` SET No_Of_Copies = No_Of_Copies - 1 WHERE id = ?";
+                if ($stmt3 = $conn2->prepare($bookDeductionSql)) {
+                    $stmt3->bind_param("i", $book_id);
+                    if (!$stmt3->execute()) {
+                        $_SESSION['error_message'] = 'Error updating number of book copies: ' . $stmt3->error;
+                    }
+                    $stmt3->close();
+                } else {
                     $_SESSION['error_message'] = 'Error preparing book deduction query: ' . $conn2->error;
                 }
+
             } else {
-                $_SESSION['error_message'] = 'Error saving data: ' . $stmt->error;
+                $_SESSION['error_message'] = 'Error saving borrow record: ' . $stmt->error;
             }
 
             $stmt->close();
@@ -78,7 +91,9 @@ if (!empty($bookBag)) {
 // Clear the session variables but before that, store necessary data in variables
 $firstName = $_SESSION["First_Name"];
 $lastName = $_SESSION["Last_Name"];
-$email = $_SESSION["Email_Address"];
+$email = $_SESSION["email"];
+$phoneNo = $_SESSION["phoneNo."];
+
 $bookBagTitles = array_map(function ($book) {
     return $book['title'] . '|' . $book['author'];
 }, $_SESSION['book_bag']);
@@ -92,6 +107,6 @@ unset($_SESSION['selected_date']);
 unset($_SESSION['selected_time']);
 
 // Redirect to the success page, passing data via URL parameters
-header("Location: success_booked.php?firstName=$firstName&lastName=$lastName&email=$email&date=$selectedDate&time=$selectedTime&books=$bookBagTitlesStr");
+header("Location: success_booked.php?firstName=$firstName&lastName=$lastName&email=$email&phoneNo=$phoneNo&date=$selectedDate&time=$selectedTime&books=$bookBagTitlesStr");
 exit();
 ?>

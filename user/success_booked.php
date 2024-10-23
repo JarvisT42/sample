@@ -6,6 +6,7 @@ session_start();
 $firstName = htmlspecialchars($_GET['firstName']);
 $lastName = htmlspecialchars($_GET['lastName']);
 $email = htmlspecialchars($_GET['email']);
+$phoneNo = htmlspecialchars($_GET['phoneNo']);
 $selectedDate = htmlspecialchars($_GET['date']);
 $selectedTime = htmlspecialchars($_GET['time']);
 $bookBagTitlesStr = urldecode($_GET['books']);
@@ -51,8 +52,10 @@ $bookBagTitles = unserialize($bookBagTitlesStr);
                     foreach ($bookBagTitles as $index => $bookTitle) {
                       list($title, $author) = explode('|', $bookTitle);
                       $rowClass = $index % 2 === 0 ? 'bg-gray-300' : 'bg-gray-200';
-                      echo "<div class=\"$rowClass p-2 m-1 rounded border border-gray-400\">" . htmlspecialchars($title) . ' by ' . htmlspecialchars($author) . "</div>";
-                    }
+                      echo "<div class=\"{$rowClass} p-2 m-1 rounded border border-gray-400\">" . 
+                      "Title: " . htmlspecialchars($title) . " | Author: " . htmlspecialchars($author) . 
+                      "</div>";
+                                     }
                   }
                   ?>
                 </div>
@@ -70,7 +73,7 @@ $bookBagTitles = unserialize($bookBagTitlesStr);
                 <div class="bg-gray-100 p-2 font-semibold flex items-center border-b border-gray-300"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Email</div>
                 <div class="p-2 border-b border-gray-300"><?php echo $email; ?></div>
                 <div class="bg-gray-100 p-2 font-semibold flex items-center border-b border-gray-300"><i data-lucide="phone" class="w-4 h-4 mr-2"></i>Mobile Number</div>
-                <div class="p-2 border-b border-gray-300"></div>
+                <div class="p-2 border-b border-gray-300"><?php echo $phoneNo; ?></div>
               </div>
             </div>
 

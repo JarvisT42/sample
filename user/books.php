@@ -15,21 +15,22 @@ session_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="borrow.css">
     <!-- Include Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@^2.2/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
     <style>
-        .active-books {
+        .active-books_first {
             background-color: #f0f0f0;
-            color: #000;
+    /* Example for light mode */
+    color: #000;
         }
     </style>
 </head>
 
 <body>
     <?php include './src/components/sidebar.php'; ?>
+
 
     <main id="content" class="">
 
@@ -40,26 +41,13 @@ session_start();
 
                 <!-- Title Box -->
                 <!-- Title and Button Box -->
-                <?php include './src/components/books.php'; ?>
-
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
-                    <ul class="flex flex-wrap gap-2 p-5 border border-dashed rounded-md w-full">
+                    <h1 class="text-3xl font-semibold">Books</h1> <!-- Adjusted text size -->
+                    <!-- Button beside the title -->
+                </div>
 
-
-                        <li><a class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" href="#">All</a></li>
-                        <br>
-                        <li><a class="px-4 py-2 " href="add_books.php">Add Books</a></li>
-                        <br>
-                        <li><a class="px-4 py-2 " href="edit_records.php">Edit Records</a></li>
-                        <br>
-
-                        <li class="#"><a href="damage.php">Damage Books</a></li>
-                        <br>
-
-                        <li><a class="px-4 py-2 " href="subject_for_replacement.php">Subject for Replacement</a></li>
-                    </ul> <!-- Button beside the title -->
-
-
+                <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+                    The Borrow Page is your gateway to accessing and managing book loans efficiently. On this page, you can search for and borrow books from our collection with ease. Simply browse or search for the titles you wish to borrow, select your preferred books, and follow the streamlined borrowing process. The page also provides a clear overview of the available books and their details.
                 </div>
 
 
@@ -121,7 +109,7 @@ session_start();
                                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                                 </svg>
-                            </div> <input type="text" id="table-search-users" class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full md:w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
+                            </div> <input type="text" id="table-search-users" class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full md:w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for Title or Author">
 
 
 

@@ -126,7 +126,7 @@ if (isset($_GET['student_id'])) {
 
                                         <!-- Right side: Checkbox -->
                                         <div class="flex items-center">
-                                            
+
                                             <input type="checkbox" id="select-all-<?php echo $date; ?>" class="select-all-checkbox ml-2" onclick="toggleSelectAll('<?php echo $date; ?>')">
                                             <label for="select-all-<?php echo $date; ?>" class="ml-1 text-sm">Select All</label>
                                         </div>
@@ -148,11 +148,16 @@ if (isset($_GET['student_id'])) {
                                         // Initialize variables
                                         $title = 'Unknown Title';
                                         $author = 'Unknown Author';
+                                        $publication_date = 'Unknown Publication Date';
+
                                         $record_cover = null; // Initialize with null
 
                                         if ($row = $result->fetch_assoc()) {
                                             $title = $row['Title']; // Get the title
-                                            $author = $row['Author']; // Get the author
+                                            $author = $row['Author']; // Get the author publication_date
+                                            $publication_date = $row['Date_Of_Publication_Copyright']; // Get the author publication_date
+
+                                            
                                             $record_cover = $row['record_cover']; // Get the record cover
                                         }
 
@@ -172,7 +177,7 @@ if (isset($_GET['student_id'])) {
                                                             <div class="font-medium bg-gray-200 p-2">Main Author:</div>
                                                             <div class="bg-gray-100 p-2"><?php echo $author; ?></div>
                                                             <div class="font-medium bg-gray-100 p-2">Published:</div>
-                                                            <div class="bg-gray-200 p-2"><?php echo htmlspecialchars($book['publication_date']); ?></div>
+                                                            <div class="bg-gray-200 p-2"><?php echo $publication_date; ?></div>
                                                             <div class="font-medium bg-gray-200 p-2">Table:</div>
                                                             <div class="bg-gray-100 p-2"><?php echo htmlspecialchars($book['Category']); ?></div>
                                                             <div class="font-medium bg-gray-100 p-2">Copies:</div>
@@ -195,13 +200,13 @@ if (isset($_GET['student_id'])) {
                                                 </div>
 
                                                 <div class="flex-shrink-0 ml-2">
-    <input type="checkbox" 
-           id="book-checkbox-<?php echo $date . '-' . $index; ?>" 
-           name="selected_books[]" 
-           value="<?php echo $book['book_id'] . '|' . htmlspecialchars($book['Category']); ?>" 
-           class="book-checkbox-<?php echo $date; ?> mr-1">
-    <label for="book-checkbox-<?php echo $date . '-' . $index; ?>" class="text-sm text-gray-600">Select</label>
-</div>
+                                                    <input type="checkbox"
+                                                        id="book-checkbox-<?php echo $date . '-' . $index; ?>"
+                                                        name="selected_books[]"
+                                                        value="<?php echo $book['book_id'] . '|' . htmlspecialchars($book['Category']); ?>"
+                                                        class="book-checkbox-<?php echo $date; ?> mr-1">
+                                                    <label for="book-checkbox-<?php echo $date . '-' . $index; ?>" class="text-sm text-gray-600">Select</label>
+                                                </div>
 
                                             </div>
                                         </li>
