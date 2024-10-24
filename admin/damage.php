@@ -46,15 +46,14 @@ session_start();
                     <ul class="flex flex-wrap gap-2 p-5 border border-dashed rounded-md w-full">
 
 
-                        <li><a class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" href="#">All</a></li>
+                        <li><a class="px-4 py-2 " href="books.php">All</a></li>
                         <br>
                         <li><a class="px-4 py-2 " href="add_books.php">Add Books</a></li>
                         <br>
                         <li><a class="px-4 py-2 " href="edit_records.php">Edit Records</a></li>
                         <br>
-                        <li><a class="px-4 py-2" href="damage.php">Damage Books</a></li>
+                        <li><a class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" href="damage.php">Damage Books</a></li>
 
-                        
                         <br>
 
                         <!-- <li><a class="px-4 py-2 " href="subject_for_replacement.php">Subject for Replacement</a></li> -->
@@ -200,7 +199,7 @@ session_start();
                             const recordsPerPage = 5; // Number of records per page
 
                             function loadTableData(tableName) {
-                                fetch(`fetch_table_data.php?table=${encodeURIComponent(tableName)}`)
+                                fetch(`damage_fetch_table_data.php?table=${encodeURIComponent(tableName)}`)
                                     .then(response => response.json())
                                     .then(data => {
                                         allRecords = data.data; // Store the fetched records

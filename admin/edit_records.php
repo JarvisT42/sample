@@ -39,9 +39,9 @@ session_start();
 
                         <br>
                        
-                        <li class="#"><a href="damage.php">Damage Books</a></li>
+                        <li><a class="px-4 py-2" href="damage.php">Damage Books</a></li>
                         <br>
-                        <li><a href="#">Subject for Replacement</a></li>
+                        <!-- <li><a href="#">Subject for Replacement</a></li> -->
                     </ul> <!-- Button beside the title -->
 
 

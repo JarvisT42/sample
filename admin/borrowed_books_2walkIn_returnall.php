@@ -10,8 +10,11 @@ if (!empty($data['walk_in_id']) && !empty($data['books'])) {
 
     $success = true;
     
+    $returnedDate = date('Y-m-d');
+
+
     // Prepare the update query
-    $updateQuery = "UPDATE borrow SET status = 'returned', Total_Fines = ? WHERE walk_in_id = ? AND book_id = ? AND category = ?";
+    $updateQuery = "UPDATE borrow SET status = 'returned', Total_Fines = ?, Return_Date = ? WHERE walk_in_id = ? AND book_id = ? AND category = ?";
     $stmt = $conn->prepare($updateQuery);
 
     foreach ($books as $book) {
@@ -20,7 +23,8 @@ if (!empty($data['walk_in_id']) && !empty($data['books'])) {
         $category = $book['category'];
 
         // Bind the parameters and execute the query
-        if (!$stmt->bind_param('diis', $total_fines, $walk_in_id, $book_id, $category) || !$stmt->execute()) {
+        if (!$stmt->bind_param('dsisi', $total_fines, $returnedDate, $walk_in_id, $book_id, $category) || !$stmt->execute()) {
+
             $success = false;
             break;
         }

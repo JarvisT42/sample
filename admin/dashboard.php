@@ -425,68 +425,170 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                     <div class="rounded-lg border bg-white text-gray-700 shadow-lg transition duration-300 hover:shadow-xl">
                         <div class="p-8">
                             <!-- Upcoming Dues -->
+
+
                             <div class="bg-white rounded-lg shadow-md p-6">
+                                <?php
+                                // Calculate today's date
+                                $today = date('Y-m-d');
+
+                                // Calculate a "Due Soon" date range (e.g., next 3 days)
+                                $dueSoonStart = date('Y-m-d');
+                                $dueSoonEnd = date('Y-m-d', strtotime('+3 days'));
+
+                                // Due Today
+                                $sql = "SELECT COUNT(*) as total_due_today FROM borrow WHERE status = 'pending' AND Return_Date = ?";
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param('s', $today);
+                                $stmt->execute();
+                                $stmt->bind_result($total_due_today);
+                                $stmt->fetch();
+                                $stmt->close();
+
+                                // Due Soon (within the next 3 days but not today)
+                                $sql = "SELECT COUNT(*) as total_due_soon FROM borrow WHERE status = 'pending' AND Return_Date > ? AND Return_Date <= ?";
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param('ss', $dueSoonStart, $dueSoonEnd);
+                                $stmt->execute();
+                                $stmt->bind_result($total_due_soon);
+                                $stmt->fetch();
+                                $stmt->close();
+
+                                // Due Later (beyond the next 3 days)
+                                $sql = "SELECT COUNT(*) as total_due_later FROM borrow WHERE status = 'pending' AND Return_Date > ?";
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param('s', $dueSoonEnd);
+                                $stmt->execute();
+                                $stmt->bind_result($total_due_later);
+                                $stmt->fetch();
+                                $stmt->close();
+
+                                // Calculate the total
+                                $total_books_due = $total_due_today + $total_due_soon + $total_due_later;
+                                ?>
 
                                 <h2 class="font-semibold text-xl mb-6 flex items-center justify-between">
                                     Book Return Deadlines
-                                    <span class="text-md font-normal text-gray-500">3 Total</span>
+                                    <span class="text-md font-normal text-gray-500">
+                                        <?php echo $total_books_due; ?> Total
+                                    </span>
                                 </h2>
+
                                 <div class="space-y-6">
+                                    <!-- Due Soon -->
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-green-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
                                             <p class="text-lg font-medium">Due Soon</p>
                                         </div>
-                                        <span class="text-md text-gray-500">1 Book Due</span>
+                                        <span class="text-md text-gray-500"><?php echo $total_due_soon; ?> Books Due</span>
                                     </div>
+
+                                    <!-- Due Today -->
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-red-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
                                             <p class="text-lg font-medium">Due Today</p>
                                         </div>
-                                        <span class="text-md text-gray-500">2 Books Due</span>
+                                        <span class="text-md text-gray-500"><?php echo $total_due_today; ?> Books Due</span>
                                     </div>
+
+                                    <!-- Due Later -->
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-blue-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
                                             <p class="text-lg font-medium">Due Later</p>
                                         </div>
-                                        <span class="text-md text-gray-500">0 Books Due</span>
+                                        <span class="text-md text-gray-500"><?php echo $total_due_later; ?> Books Due</span>
                                     </div>
                                 </div>
                             </div>
 
 
+
                             <!-- Today's Borrowing -->
                             <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+                                <?php
+                                // Calculate tomorrow's date
+                                $tomorrow = date('Y-m-d', strtotime('+1 day'));
+
+                                // Calculate today's date
+                                $today = date('Y-m-d');
+
+                                // Query to count how many books are scheduled to be borrowed tomorrow
+                                $sql = "SELECT COUNT(*) as total_requests FROM borrow WHERE status = 'pending' AND Date_To_Claim = ? and Return_Date = ''";
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param('s', $tomorrow);
+                                $stmt->execute();
+                                $stmt->bind_result($total_requests_tomorrow);
+                                $stmt->fetch();
+                                $stmt->close();
+
+                                // Query to count how many books are scheduled to be borrowed today
+                                $sql = "SELECT COUNT(*) as total_requests FROM borrow WHERE status = 'pending' AND Date_To_Claim = ? and Return_Date = ''";
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param('s', $today);
+                                $stmt->execute();
+                                $stmt->bind_result($total_requests_today);
+                                $stmt->fetch();
+                                $stmt->close();
+
+                                // Query to count how many books are scheduled to be borrowed later (after tomorrow)
+                                $sql = "SELECT COUNT(*) as total_requests FROM borrow WHERE status = 'pending' AND Date_To_Claim > ? and Return_Date = ''";
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param('s', $tomorrow);
+                                $stmt->execute();
+                                $stmt->bind_result($total_requests_later);
+                                $stmt->fetch();
+                                $stmt->close();
+
+                                // Calculate the total requests by summing today's, tomorrow's, and later requests
+                                $total_requests = $total_requests_today + $total_requests_tomorrow + $total_requests_later;
+                                ?>
+
                                 <h2 class="font-semibold text-xl mb-6 flex items-center justify-between">
                                     Upcoming Borrowing Requests
-                                    <span class="text-md font-normal text-gray-500">3 Total</span>
+                                    <span class="text-md font-normal text-gray-500">
+                                        <?php echo $total_requests; ?> Total
+                                    </span>
                                 </h2>
+
                                 <div class="space-y-6">
+                                    <!-- To Borrow Tomorrow -->
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-green-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
                                             <p class="text-lg font-medium">To Borrow Tomorrow</p>
                                         </div>
-                                        <span class="text-md text-gray-500">1 Request</span>
+                                        <span class="text-md text-gray-500"><?php echo $total_requests_tomorrow; ?> Requests</span>
                                     </div>
+
+                                    <!-- To Borrow Today -->
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-red-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
                                             <p class="text-lg font-medium">To Borrow Today</p>
                                         </div>
-                                        <span class="text-md text-gray-500">2 Requests</span>
+                                        <span class="text-md text-gray-500"><?php echo $total_requests_today; ?> Requests</span>
                                     </div>
+
+                                    <!-- To Borrow Later -->
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-blue-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
                                             <p class="text-lg font-medium">To Borrow Later</p>
                                         </div>
-                                        <span class="text-md text-gray-500">0 Requests</span>
+                                        <span class="text-md text-gray-500"><?php echo $total_requests_later; ?> Requests</span>
                                     </div>
                                 </div>
                             </div>
+
+
+
+
+
+
+
 
                         </div>
                     </div>

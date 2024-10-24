@@ -1,5 +1,6 @@
 <?php
 include '../connection.php'; // Include your database connection
+include '../connection2.php'; // Include your second database connection
 
 // Retrieve the posted JSON data
 $data = json_decode(file_get_contents("php://input"), true);
@@ -10,8 +11,11 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit();
 }
 
-// Prepare and bind the update query
-$updateQuery = "UPDATE borrow SET status = 'returned', Over_Due_Fines = ?, Book_Fines = ? WHERE walk_in_id = ? AND book_id = ? AND category = ?";
+// Get the current date
+$returnedDate = date('Y-m-d');
+
+// Prepare and bind the update query for the borrow record
+$updateQuery = "UPDATE borrow SET status = 'returned', Over_Due_Fines = ?, Book_Fines = ?, Damage_Description = ?, Return_Date = ? WHERE walk_in_id = ? AND book_id = ? AND category = ?";
 
 $stmt = $conn->prepare($updateQuery);
 
@@ -24,21 +28,50 @@ if (!$stmt) {
 // Bind parameters (adjust data types accordingly)
 $fines = $data['fines'];
 $bookFines = $data['book_fines']; // Ensure you include this in the fetch data from JS
-$walkinId = $data['walkin_id']; // Change to walkin_id
+$damageDescription = $data['damage_description']; // Add damage description
+$walkinId = $data['walkin_id']; // Changed to walkin_id
 $bookId = $data['book_id'];
 $category = $data['category'];
 
-// Change the bind_param types if necessary
-$stmt->bind_param('ddsss', $fines, $bookFines, $walkinId, $bookId, $category); // 'ddsss' for two doubles and three strings
+// Bind parameters to the first update query
+$stmt->bind_param('ddsssss', $fines, $bookFines, $damageDescription, $returnedDate, $walkinId, $bookId, $category); // 'ddsssss' for two doubles and five strings
 
-// Execute the query
+// Execute the first query (for borrow update)
 if ($stmt->execute()) {
-    echo json_encode(['success' => true]);
+
+    // Prepare the second query to increment No_Of_Copies in the specific category table
+    $bookAdditionSql = "UPDATE `$category` SET No_Of_Copies = No_Of_Copies + 1 WHERE id = ?";
+    $bookStmt = $conn2->prepare($bookAdditionSql);
+
+    // Check if the second query statement preparation was successful
+    if (!$bookStmt) {
+        echo json_encode(['success' => false, 'message' => 'Statement preparation failed: ' . $conn2->error]);
+        exit();
+    }
+
+    // Bind the bookId to the second query (assuming id is an integer)
+    $bookStmt->bind_param('i', $bookId); // Assuming 'id' is an integer, adjust type if necessary
+
+    // Execute the second query (for updating No_Of_Copies)
+    if ($bookStmt->execute()) {
+        // If both queries were successful
+        echo json_encode(['success' => true]);
+    } else {
+        // If the second query fails
+        echo json_encode(['success' => false, 'message' => 'Failed to update book copies: ' . $bookStmt->error]);
+    }
+
+    // Close the second statement
+    $bookStmt->close();
+
 } else {
+    // If the first query fails
     echo json_encode(['success' => false, 'message' => 'Database update failed: ' . $stmt->error]);
 }
 
-// Close statement and connection
+// Close the first statement and connection
 $stmt->close();
 $conn->close();
+$conn2->close();
+
 ?>

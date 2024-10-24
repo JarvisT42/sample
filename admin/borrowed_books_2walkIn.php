@@ -32,7 +32,7 @@ if (isset($_GET['walk_in_id'])) {
       WHERE a.walk_in_id = ? AND a.status = 'borrowed'";
 
         $stmt = $conn->prepare($categoryQuery);
-        $stmt->bind_param('i', $walk_in_id); // Assuming student_id is an integer
+        $stmt->bind_param('i', $walk_in_id); // Assumin
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -181,7 +181,7 @@ if (isset($_GET['walk_in_id'])) {
                                         }
                                         ?>
 
-                                        <li class="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mb-2 flex flex-col">
+<li class="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mb-2 flex flex-col">
                                             <div class="flex-1">
                                                 <div class="flex flex-col md:flex-row justify-between mb-6">
                                                     <div class="flex-1 mb-4 md:mb-0">
@@ -193,10 +193,16 @@ if (isset($_GET['walk_in_id'])) {
                                                         </div>
                                                     </div>
                                                     <div class="w-full md:w-32 h-40 bg-gray-200 border border-gray-300 flex items-center justify-center mb-4 md:mb-0">
-                                                        <?php
-                                                        // Handle book cover image...
-                                                        ?>
-                                                        <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-full h-full border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
+                                                    <?php
+                                                    // Handle the image display
+                                                    if (!empty($record_cover)) { // Use the fetched record_cover
+                                                        $imageData = base64_encode($record_cover);
+                                                        $imageSrc = 'data:image/jpeg;base64,' . $imageData;
+                                                    } else {
+                                                        $imageSrc = 'path/to/default/image.jpg'; // Provide a default image source
+                                                    }
+                                                    ?>
+                                                    <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-full h-full border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
                                                     </div>
                                                 </div>
                                                 <div class="bg-blue-100 p-4 rounded-lg">
@@ -207,9 +213,7 @@ if (isset($_GET['walk_in_id'])) {
                                                         </div>
                                                         <div>
                                                             <p class="text-sm font-semibold">Due Date:</p>
-                                                            <p class="text-sm due-date" data-index="<?php echo $overall_index; ?>">
-                                                                <?php echo htmlspecialchars($due_date); ?>
-                                                            </p>
+                                                            <p class="text-sm due-date" data-index="<?php echo $overall_index; ?>"><?php echo htmlspecialchars($due_date); ?></p>
                                                         </div>
                                                         <div>
                                                             <p class="text-sm font-semibold">Fines: ₱ <span id="fine-amount-<?php echo $overall_index; ?>"><?php echo $fine_amount; ?></span>.00</p>
@@ -242,31 +246,32 @@ if (isset($_GET['walk_in_id'])) {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <div id="damageTextArea-<?php echo $overall_index; ?>" style="display: none;" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                                                        <div class="col-span-3">
+                                                            <p class="text-sm font-semibold">Describe the Damage:</p>
+                                                            <textarea id="damageDescription-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-2 w-full" rows="4" placeholder="Provide a description of the damage"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Text area for damage description -->
+
                                                 </div>
                                             </div>
 
-
                                             <div class="flex justify-end space-x-2 mt-4">
                                                 <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm renew-button"
-                                                    data-walk-in-id="<?php echo htmlspecialchars($walk_in_id); ?>"
+                                                    data-student-id="<?php echo htmlspecialchars($walk_in_id); ?>"
                                                     data-book-id="<?php echo htmlspecialchars($book_id); ?>"
                                                     data-category="<?php echo htmlspecialchars($category); ?>"
                                                     data-due-date="<?php echo htmlspecialchars($due_date); ?>">
                                                     Renew
                                                 </button>
 
-
                                                 <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
                                                     data-index="<?php echo $overall_index; ?>"
                                                     onclick="openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($walk_in_id); ?>', '<?php echo htmlspecialchars($book_id); ?>')">
                                                     Return
                                                 </button>
-
                                             </div>
-
-
-
-
                                         </li>
 
 
@@ -432,7 +437,8 @@ if (isset($_GET['walk_in_id'])) {
             function toggleFinesInput(index) {
                 const statusSelect = document.getElementById(`statusSelect-${index}`);
                 const fineInput = document.getElementById(`fineInput-${index}`);
-                const returnButton = document.querySelector(`.return-button[data-index="${index}"]`); // Get the related return button
+                const returnButton = document.querySelector(`.return-button[data-index="${index}"]`);
+                const damageTextArea = document.getElementById(`damageTextArea-${index}`); // Text area for damage description
 
                 // Enable fine input for "Damage" or "Lost"
                 if (statusSelect.value === "Damage" || statusSelect.value === "Lost") {
@@ -449,8 +455,13 @@ if (isset($_GET['walk_in_id'])) {
                 // Change the button label to 'Next' if 'Lost' is selected
                 if (statusSelect.value === "Lost") {
                     returnButton.innerText = "Next";
+                    damageTextArea.style.display = 'none'; // Hide the text area if "Lost" is selected
+                } else if (statusSelect.value === "Damage") {
+                    returnButton.innerText = "Return"; // Set to 'Return'
+                    damageTextArea.style.display = 'block'; // Show the text area for "Damage"
                 } else {
                     returnButton.innerText = "Return"; // Reset to 'Return' for other statuses
+                    damageTextArea.style.display = 'none'; // Hide the text area for other statuses
                 }
             }
         </script>
@@ -462,10 +473,7 @@ if (isset($_GET['walk_in_id'])) {
 
 
 
-
-
-        <!-- Modal Structure -->
-        <div id="returnModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
+<div id="returnModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
             <div class="bg-white rounded-lg p-6 w-11/12 md:w-1/3">
                 <h2 class="text-lg font-semibold mb-4">Return Book</h2>
                 <p id="modalBookTitle" class="mb-2"></p>
@@ -478,7 +486,11 @@ if (isset($_GET['walk_in_id'])) {
                 <!-- Updated fines display -->
                 <p id="BookFines" class="mb-4"></p>
 
-                <!-- Display for walk-in ID and book ID -->
+                <!-- Damage description (only shown if applicable) -->
+                <p id="damageDescriptionLabel" class="mb-2" style="display:none;"><strong>Damage Description:</strong></p>
+                <p id="damageDescription" class="mb-4" style="display:none;"></p>
+
+                <!-- Display for student ID and book ID -->
                 <p id="modalWalkinId" class="mb-2"></p>
                 <p id="modalBookId" class="mb-2"></p>
 
@@ -488,6 +500,10 @@ if (isset($_GET['walk_in_id'])) {
                 </div>
             </div>
         </div>
+
+
+
+     
 
 
 
@@ -503,9 +519,9 @@ if (isset($_GET['walk_in_id'])) {
 
 
 
-
     <script>
-        function openReturnModal(title, author, category, fines, fineInputId, walkinId, bookId) {
+                function openReturnModal(title, author, category, fines, fineInputId, walkinId, bookId) {
+
             // Set the book details in the modal
             document.getElementById('modalBookTitle').innerText = 'Title: ' + title;
             document.getElementById('modalBookAuthor').innerText = 'Author: ' + author;
@@ -518,7 +534,7 @@ if (isset($_GET['walk_in_id'])) {
             let updatedFines = document.getElementById(fineInputId).value; // Get value from the specific fines input field
             document.getElementById('BookFines').innerText = 'Book Fines: ₱ ' + (updatedFines || '0'); // Display updated fines or 0 if none
 
-            // Display the walkin ID and book ID in the modal
+            // Display the student ID and book ID in the modal
             document.getElementById('modalWalkinId').innerText = 'Walkin ID: ' + walkinId; // Correct ID usage
             document.getElementById('modalBookId').innerText = 'Book ID: ' + bookId;
 
@@ -529,8 +545,20 @@ if (isset($_GET['walk_in_id'])) {
             const confirmButton = document.getElementById('confirmReturn');
             if (statusSelect === "Lost") {
                 confirmButton.innerText = 'Pay'; // Change the label to 'Pay'
+                document.getElementById('damageDescriptionLabel').style.display = 'none'; // Hide damage description label
+                document.getElementById('damageDescription').style.display = 'none'; // Hide damage description
+            } else if (statusSelect === "Damage") {
+                confirmButton.innerText = 'Confirm Return'; // Set to 'Return'
+
+                // Show and set the damage description if applicable
+                let damageDesc = document.getElementById(`damageDescription-${fineInputId.split('-')[1]}`).value; // Get the damage description
+                document.getElementById('damageDescriptionLabel').style.display = 'block';
+                document.getElementById('damageDescription').style.display = 'block';
+                document.getElementById('damageDescription').innerText = damageDesc || 'No description provided'; // Set the damage description or fallback
             } else {
                 confirmButton.innerText = 'Confirm Return'; // Reset to default
+                document.getElementById('damageDescriptionLabel').style.display = 'none'; // Hide damage description label
+                document.getElementById('damageDescription').style.display = 'none'; // Hide damage description
             }
 
             // Display the modal
@@ -538,40 +566,39 @@ if (isset($_GET['walk_in_id'])) {
         }
 
 
+
         // Close modal when the close button is clicked
         document.getElementById('closeModal').onclick = function() {
             document.getElementById('returnModal').classList.add('hidden');
         }
 
-        // Confirm return logic
-        // Confirm return logic
+        // Confirm return or pay logic
         document.getElementById('confirmReturn').onclick = function() {
-            // Get the values from the modal
-            const overdueFines = document.getElementById('OverDueFines').innerText.replace('Over Due Fines: ₱ ', ''); // Extract overdue 
-            const bookFines = document.getElementById('BookFines').innerText.replace('Book Fines: ₱ ', ''); // Correct extraction of book 
+            const overdueFines = document.getElementById('OverDueFines').innerText.replace('Over Due Fines: ₱ ', ''); // Extract overdue fines
+            const bookFines = document.getElementById('BookFines').innerText.replace('Book Fines: ₱ ', ''); // Correct extraction of book fines
             const walkinId = document.getElementById('modalWalkinId').innerText.replace('Walkin ID: ', ''); // Use correct ID
-            const bookId = document.getElementById('modalBookId').innerText.replace('Book ID: ', '');
-            const category = document.getElementById('modalBookCategory').innerText.replace('Category: ', ''); // Extract category text
 
-            // Create the data object to send
+            const bookId = document.getElementById('modalBookId').innerText.replace('Book ID: ', '');
+            const category = document.getElementById('modalBookCategory').innerText.replace('Category: ', '');
+            const damageDesc = document.getElementById('damageDescription').innerText; // Extract damage description
+
             const data = {
-                fines: parseFloat(overdueFines) || 0, // Ensure it's a number, default to 0 if not available
-                book_fines: parseFloat(bookFines) || 0, // Ensure it's a number, default to 0 if not available
+                fines: parseFloat(overdueFines) || 0,
+                book_fines: parseFloat(bookFines) || 0,
                 walkin_id: walkinId,
                 book_id: bookId,
-                category: category
+                category: category,
+                damage_description: damageDesc // Include damage description
             };
 
-            // Check if the button label is "Pay" or "Confirm Return"
             const confirmButton = document.getElementById('confirmReturn');
             if (confirmButton.innerText === 'Pay') {
-                // If "Pay" is clicked, send the data to `borrowed_books_2online_pay.php`
                 fetch('borrowed_books_2walkIn_pay.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(data) // Send the data in JSON format
+                        body: JSON.stringify(data)
                     })
                     .then(response => response.json())
                     .then(result => {
@@ -587,13 +614,12 @@ if (isset($_GET['walk_in_id'])) {
                         alert('An error occurred while processing the payment.');
                     });
             } else {
-                // If "Confirm Return" is clicked, use the existing return logic
                 fetch('borrowed_books_2walkIn_save.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(data) // Send the data in JSON format
+                        body: JSON.stringify(data)
                     })
                     .then(response => response.json())
                     .then(result => {
@@ -614,6 +640,8 @@ if (isset($_GET['walk_in_id'])) {
             document.getElementById('returnModal').classList.add('hidden');
         };
     </script>
+
+   
 
 
 

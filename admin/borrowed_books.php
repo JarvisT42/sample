@@ -327,7 +327,7 @@ session_start();
                                             <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">Number of Books Borrowed</th>
                                             <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/5">Issued Date</th>
                                             <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Return Date</th>
-                                            <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Action</th>
+                                            <!-- <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Action</th> -->
                                         </tr>
                                     </thead>
                                     <tbody id="returned-table-body">
@@ -387,9 +387,9 @@ session_start();
                                                         ?>
                                                     </td>
 
-                                                    <td class="px-6 py-4">
+                                                    <!-- <td class="px-6 py-4">
                                                         <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">View</button>
-                                                    </td>
+                                                    </td> -->
                                                 </tr>
                                             <?php endwhile; ?>
                                         <?php else: ?>

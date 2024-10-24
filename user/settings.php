@@ -1,8 +1,28 @@
 <?php
-# Initialize the session
 session_start();
+include '../connection.php';
 
+if (!isset($_SESSION['Id'])) {
+    die('User not logged in');
+}
+
+$user_id = $_SESSION['Id'];
+
+// Fetch user profile data from the database
+$sql = "SELECT * FROM students WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $user = $result->fetch_assoc();
+} else {
+    $user = null;
+    echo "No user found with this ID.";
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -49,7 +69,8 @@ session_start();
 
                 <div class="w-full mx-auto bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="p-6">
-                        <h1 class="text-2xl font-bold mb-6">Profile: Mariah Carayban</h1>
+                        <h1 class="text-2xl font-bold mb-6">Profile: <?php echo $user['First_Name'] . ' ' . $user['Last_Name']; ?></h1>
+
 
                         <div class="flex flex-col md:flex-row gap-8">
 
@@ -84,49 +105,27 @@ session_start();
                             </div>
 
                             <div class="w-full md:w-2/3">
-                                <h2 class="text-xl font-semibold mb-4">Account Setting</h2>
-                                <div class="space-y-4">
 
-                                    <div class="flex items-center">
-                                        <input type="email" placeholder="email@yourcompany.com" class="w-full border rounded-md px-3 py-2">
-
-                                        <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
-
-
-                                    </div>
-
-
-
-                                    <div class="flex items-center">
-                                        <input type="text" placeholder="Username" class="w-full border rounded-md px-3 py-2">
-                                        <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input type="password" placeholder="Password" class="w-full border rounded-md px-3 py-2">
-                                        <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input type="password" placeholder="Confirm Password" class="w-full border rounded-md px-3 py-2">
-                                        <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
-                                    </div>
-                                </div>
 
                                 <h2 class="text-xl font-semibold mt-8 mb-4">Profile Setting</h2>
                                 <div class="space-y-4">
                                     <div class="flex items-center">
-                                        <input type="text" placeholder="First Name" class="w-full border rounded-md px-3 py-2">
-                                        <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
+                                        
+                               
+
+                                    <input type="text" name="first_name" value="<?php echo $user['First_Name']; ?>" class="w-full border rounded-md px-3 py-2">
+                                    <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
                                     </div>
                                     <div class="flex items-center">
                                         <input type="text" placeholder="Last Name" class="w-full border rounded-md px-3 py-2">
                                         <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
                                     </div>
-                                   
+
                                     <div class="flex items-center">
                                         <input type="date" class="w-full border rounded-md px-3 py-2">
                                         <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
                                     </div>
-                                   
+
                                     <div class="flex items-center">
                                         <select class="w-full border rounded-md px-3 py-2">
                                             <option>Bs information system</option>
@@ -140,14 +139,44 @@ session_start();
                                     </div>
                                 </div>
 
+
                                 <h2 class="text-xl font-semibold mt-8 mb-4">Contact Setting</h2>
-                                <div class="space-y-4">
+                                <div class="space-y-4  mb-4">
+                                    <div class="flex items-center">
+
+                                        <input type="email" name="email" value="<?php echo $user['Email_Address']; ?>" class="w-full border rounded-md px-3 py-2">
+
+
+                                        <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
+
+
+                                    </div>
+
                                     <div class="flex items-center">
                                         <input type="tel" placeholder="Mobile Phone" class="w-full border rounded-md px-3 py-2">
                                         <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
                                     </div>
-                                   
+
                                 </div>
+
+                                <h2 class="text-xl font-semibold mb-4">Account Setting</h2>
+                                <div class="space-y-4">
+
+
+
+
+
+
+                                    <div class="flex items-center">
+                                        <input type="password" placeholder="Password" class="w-full border rounded-md px-3 py-2">
+                                        <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="password" placeholder="Confirm Password" class="w-full border rounded-md px-3 py-2">
+                                        <button class="ml-2 bg-orange-500 text-white p-2 rounded-md"><i data-lucide="pencil" class="w-5 h-5"></i></button>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>

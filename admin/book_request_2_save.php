@@ -59,4 +59,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit(); // Make sure to exit after header redirection
 }
 ?>
-c

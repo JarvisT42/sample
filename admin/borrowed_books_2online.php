@@ -138,6 +138,7 @@ if (isset($_GET['student_id'])) {
                                         $title = 'Unknown Title';
                                         $author = 'Unknown Author';
                                         $status = 'Unknown Status';
+                                        
                                         $record_cover = null; // Initialize with null
 
                                         if ($row = $result->fetch_assoc()) {
@@ -203,7 +204,16 @@ if (isset($_GET['student_id'])) {
                                                         </div>
                                                     </div>
                                                     <div class="w-full md:w-32 h-40 bg-gray-200 border border-gray-300 flex items-center justify-center mb-4 md:mb-0">
-                                                        <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-full h-full border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
+                                                    <?php
+                                                    // Handle the image display
+                                                    if (!empty($record_cover)) { // Use the fetched record_cover
+                                                        $imageData = base64_encode($record_cover);
+                                                        $imageSrc = 'data:image/jpeg;base64,' . $imageData;
+                                                    } else {
+                                                        $imageSrc = 'path/to/default/image.jpg'; // Provide a default image source
+                                                    }
+                                                    ?>
+                                                    <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-full h-full border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
                                                     </div>
                                                 </div>
                                                 <div class="bg-blue-100 p-4 rounded-lg">
@@ -519,6 +529,38 @@ if (isset($_GET['student_id'])) {
 
 
     <script>
+        function openReturnModal(title, author, category, fines, fineInputId, walkinId, bookId) {
+            // Set the book details in the modal
+            document.getElementById('modalBookTitle').innerText = 'Title: ' + title;
+            document.getElementById('modalBookAuthor').innerText = 'Author: ' + author;
+            document.getElementById('modalBookCategory').innerText = 'Category: ' + category;
+
+            // Display the original fines value (read-only)
+            document.getElementById('OverDueFines').innerText = 'Over Due Fines: ₱ ' + fines;
+
+            // Get the value from the fine input field and display it in the modal
+            let updatedFines = document.getElementById(fineInputId).value; // Get value from the specific fines input field
+            document.getElementById('BookFines').innerText = 'Book Fines: ₱ ' + (updatedFines || '0'); // Display updated fines or 0 if none
+
+            // Display the walkin ID and book ID in the modal
+            document.getElementById('modalWalkinId').innerText = 'Walkin ID: ' + walkinId; // Correct ID usage
+            document.getElementById('modalBookId').innerText = 'Book ID: ' + bookId;
+
+            // Check if the button clicked was "Next" (which means the book is marked as "Lost")
+            const statusSelect = document.getElementById(`statusSelect-${fineInputId.split('-')[1]}`).value; // Get the status of the book
+
+            // Update the label of the "Confirm Return" button to "Pay" if the status is "Lost"
+            const confirmButton = document.getElementById('confirmReturn');
+            if (statusSelect === "Lost") {
+                confirmButton.innerText = 'Pay'; // Change the label to 'Pay'
+            } else {
+                confirmButton.innerText = 'Confirm Return'; // Reset to default
+            }
+
+            // Display the modal
+            document.getElementById('returnModal').classList.remove('hidden');
+        }
+
         
         function openReturnModal(title, author, category, fines, fineInputId, studentId, bookId) {
             // Set the book details in the modal
