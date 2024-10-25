@@ -89,7 +89,7 @@ if ($table === 'All fields') {
         while ($row = $result->fetch_array()) {
             $tableName = $row[0];
             $tableName = $conn2->real_escape_string($tableName);
-            $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status FROM `$tableName`";
+            $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status, Available_To_Borrow  FROM `$tableName`";
 
             $tableResult = $conn2->query($sql);
 
@@ -116,7 +116,9 @@ if ($table === 'All fields') {
                         'copies' => $tableRow['No_Of_Copies'],
                         'inBag' => $isInBag,
                         'currentlyBorrowed' => $isCurrentlyBorrowed,
-                        'status' => $tableRow['status']
+                        'status' => $tableRow['status'],
+                        'availableToBorrow' => $tableRow['Available_To_Borrow']
+
                     ];
                 }
             }
@@ -126,7 +128,7 @@ if ($table === 'All fields') {
     echo json_encode(['data' => $allData, 'bookBagCount' => $bookBagCount]);
 } else {
     $table = $conn2->real_escape_string($table);
-    $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status FROM `$table`";
+    $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status, Available_To_Borrow FROM `$table`";
 
     $result = $conn2->query($sql);
 
@@ -154,7 +156,9 @@ if ($table === 'All fields') {
                 'copies' => $row['No_Of_Copies'],
                 'inBag' => $isInBag,
                 'currentlyBorrowed' => $isCurrentlyBorrowed,
-                'status' => $row['status']
+                'status' => $row['status'],
+                'availableToBorrow' => $row['Available_To_Borrow']
+
             ];
         }
     }

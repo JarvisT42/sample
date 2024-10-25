@@ -14,7 +14,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_login'])) {
     $password = $_POST['password'];
 
     // Prepare SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM students WHERE Email_Address = ?");
+    // $stmt = $conn->prepare("SELECT * FROM students WHERE Email_Address = ? and status != 'inactive' or  status != 'banned'");
+    $stmt = $conn->prepare("SELECT * FROM students WHERE Email_Address = ? AND status != 'inactive' AND status != 'banned'");
+
     $stmt->bind_param("s", $email);
 
     // Execute the statement

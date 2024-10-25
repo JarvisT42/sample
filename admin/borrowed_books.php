@@ -10,15 +10,14 @@ session_start();
     <?php include 'admin_header.php'; ?>
 
     <style>
-        /* If you prefer inline styles, you can include them directly */
-
-
-
-        .active-activity-logs {
+        .active-borrowed-books {
             background-color: #f0f0f0;
-            /* Example for light mode */
             color: #000;
-            /* Example for light mode */
+        }
+
+        .active-request {
+            background-color: #f0f0f0;
+            color: #000;
         }
     </style>
     <style>
@@ -472,6 +471,18 @@ session_start();
         document.getElementById('dropdownRadioButton').addEventListener('click', function() {
             const dropdown = document.getElementById('dropdownRadio');
             dropdown.classList.toggle('hidden');
+        });
+    </script>
+
+<script>
+        // Function to automatically show the dropdown if on book_request.php
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownRequest = document.getElementById('dropdown-request');
+
+            // Open the dropdown menu for 'Request'
+            dropdownRequest.classList.remove('hidden');
+            dropdownRequest.classList.add('block'); // Make the dropdown visible
+
         });
     </script>
 </body>

@@ -49,7 +49,7 @@
                         <a href="book_request.php" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 active-book-request">Book Request</a>
                     </li>
                     <li>
-                        <a href="borrow.php" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 active">Borrow</a>
+                        <a href="borrow.php" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 active-book-borrow">Borrow</a>
                     </li>
                     <li>
                         <a href="borrowed_books.php" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 active-borrowed-books">View Borrowed Books</a>

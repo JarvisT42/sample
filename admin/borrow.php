@@ -19,6 +19,17 @@ session_start();
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
 
 </head>
+<style>
+    .active-book-borrow {
+        background-color: #f0f0f0;
+        color: #000;
+    }
+
+    .active-request {
+        background-color: #f0f0f0;
+        color: #000;
+    }
+</style>
 
 <body>
     <?php include './src/components/sidebar.php'; ?>
@@ -131,49 +142,49 @@ session_start();
                                 </span>
                             </button>
 
-                            
-<script>
-    // JavaScript function to handle button click
-    document.getElementById("bookBagButton").addEventListener("click", function() {
-        // Get the book bag count
-        const bookBagCount = document.getElementById("bookBagCount").innerText;
 
-        // Get the role value
-        const role = document.getElementById("role").value;
+                            <script>
+                                // JavaScript function to handle button click
+                                document.getElementById("bookBagButton").addEventListener("click", function() {
+                                    // Get the book bag count
+                                    const bookBagCount = document.getElementById("bookBagCount").innerText;
 
-        // Get the full name value
-        const fullName = document.getElementById("full_name").value.trim();
+                                    // Get the role value
+                                    const role = document.getElementById("role").value;
 
-        // Get the due date value
-        const dueDate = document.getElementById("date").value;
+                                    // Get the full name value
+                                    const fullName = document.getElementById("full_name").value.trim();
 
-        // Check if role is not selected
-        if (!role) {
-            alert("Please select a role.");
-            return; // Stop the function if the role is not selected
-        }
+                                    // Get the due date value
+                                    const dueDate = document.getElementById("date").value;
 
-        // Check if the full name is empty
-        if (!fullName) {
-            alert("Please enter a full name.");
-            return; // Stop the function if the full name is empty
-        }
+                                    // Check if role is not selected
+                                    if (!role) {
+                                        alert("Please select a role.");
+                                        return; // Stop the function if the role is not selected
+                                    }
 
-        // Check if the due date is empty
-        if (!dueDate) {
-            alert("Please enter a due date.");
-            return; // Stop the function if the due date is empty
-        }
+                                    // Check if the full name is empty
+                                    if (!fullName) {
+                                        alert("Please enter a full name.");
+                                        return; // Stop the function if the full name is empty
+                                    }
 
-        // Check if count is 0
-        if (parseInt(bookBagCount) === 0) {
-            alert("Book bag is empty");
-        } else {
-            // Redirect to book_bag.php with the role, full name, and due date as URL parameters
-            window.location.href = "book_bag.php?role=" + encodeURIComponent(role) + "&full_name=" + encodeURIComponent(fullName) + "&due_date=" + encodeURIComponent(dueDate);
-        }
-    });
-</script>
+                                    // Check if the due date is empty
+                                    if (!dueDate) {
+                                        alert("Please enter a due date.");
+                                        return; // Stop the function if the due date is empty
+                                    }
+
+                                    // Check if count is 0
+                                    if (parseInt(bookBagCount) === 0) {
+                                        alert("Book bag is empty");
+                                    } else {
+                                        // Redirect to book_bag.php with the role, full name, and due date as URL parameters
+                                        window.location.href = "book_bag.php?role=" + encodeURIComponent(role) + "&full_name=" + encodeURIComponent(fullName) + "&due_date=" + encodeURIComponent(dueDate);
+                                    }
+                                });
+                            </script>
 
 
 
@@ -513,6 +524,17 @@ session_start();
         </div>
 
     </main>
+    <script>
+        // Function to automatically show the dropdown if on book_request.php
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownRequest = document.getElementById('dropdown-request');
+
+            // Open the dropdown menu for 'Request'
+            dropdownRequest.classList.remove('hidden');
+            dropdownRequest.classList.add('block'); // Make the dropdown visible
+
+        });
+    </script>
 
     <script src="./src/components/header.js"></script>
 

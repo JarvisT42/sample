@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $subject = isset($_POST['subject']) ? $_POST['subject'] : '';
     $status = isset($_POST['status']) ? $_POST['status'] : '';
     $image = isset($_FILES['image']) ? $_FILES['image'] : null; // Get image file info
+    $available_to_borrow = isset($_POST['available_to_borrow']) ? 'Yes' : 'No'; // Get available to borrow checkbox value
 
     // Add new category to the database
     if (!empty($add_category)) {
@@ -32,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($result->num_rows > 0) {
             echo json_encode(['status' => 'error', 'message' => "Table \"$add_category\" already exists."]);
         } else {
-            // SQL to create table with columns
+            // SQL to create table with columns including Available_To_Borrow
             $sql = "CREATE TABLE `$add_category_sanitized` (
                 id INT(11) AUTO_INCREMENT PRIMARY KEY,
                 Tracking_Id VARCHAR(250) NOT NULL,
@@ -46,7 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 Date_Encoded TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 Subjects VARCHAR(250) NOT NULL,
                 record_cover LONGBLOB,
-                Status VARCHAR(250) NOT NULL
+                Status VARCHAR(250) NOT NULL,
+                Available_To_Borrow VARCHAR(250) NOT NULL
             )";
 
             // Execute the table creation query
@@ -58,16 +60,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $imageData = file_get_contents($image['tmp_name']);
                 }
 
-                // Prepare the insert statement
+                // Prepare the insert statement with Available_To_Borrow
                 $insert_sql = "INSERT INTO `$add_category_sanitized` 
-                (Tracking_Id, Call_Number, Department, Title, Author, Publisher, Date_Of_Publication_Copyright, No_Of_Copies, Subjects, Status, record_cover) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                (Tracking_Id, Call_Number, Department, Title, Author, Publisher, Date_Of_Publication_Copyright, No_Of_Copies, Subjects, Status, record_cover, Available_To_Borrow) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                 // Prepare the statement
                 $stmt = $conn2->prepare($insert_sql);
                 if ($stmt) {
                     // Bind parameters (ensure correct types)
-                    $stmt->bind_param("sssssssssss", $tracking_id, $call_number, $department, $book_title, $author, $publisher_name, $date_of_publication_copyright, $book_copies, $subject, $status, $imageData);
+                    $stmt->bind_param("ssssssssssss", $tracking_id, $call_number, $department, $book_title, $author, $publisher_name, $date_of_publication_copyright, $book_copies, $subject, $status, $imageData, $available_to_borrow);
 
                     // Execute the insert query
                     if ($stmt->execute()) {
@@ -93,16 +95,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $imageData = file_get_contents($image['tmp_name']);
         }
 
-        // Prepare the insert statement
+        // Prepare the insert statement with Available_To_Borrow
         $insert_sql = "INSERT INTO `$table` 
-        (Tracking_Id, Call_Number, Department, Title, Author, Publisher, Date_Of_Publication_Copyright, No_Of_Copies, Subjects, Status, record_cover) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        (Tracking_Id, Call_Number, Department, Title, Author, Publisher, Date_Of_Publication_Copyright, No_Of_Copies, Subjects, Status, record_cover, Available_To_Borrow) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         // Prepare the statement
         $stmt = $conn2->prepare($insert_sql);
         if ($stmt) {
             // Bind parameters (ensure correct types)
-            $stmt->bind_param("sssssssssss", $tracking_id, $call_number, $department, $book_title, $author, $publisher_name, $date_of_publication_copyright, $book_copies, $subject, $status, $imageData);
+            $stmt->bind_param("ssssssssssss", $tracking_id, $call_number, $department, $book_title, $author, $publisher_name, $date_of_publication_copyright, $book_copies, $subject, $status, $imageData, $available_to_borrow);
 
             // Execute the insert query
             if ($stmt->execute()) {

@@ -54,7 +54,7 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
 
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
-                    <h1 class="text-3xl font-semibold">Create Account</h1> <!-- Adjusted text size -->
+                    <h1 class="text-3xl font-semibold">Create Admin Account</h1> <!-- Adjusted text size -->
                     <!-- Button beside the title -->
                 </div>
 

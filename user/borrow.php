@@ -201,9 +201,9 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             const recordsPerPage = 5; // Number of records per page
 
 
-                            
+
                             function loadTableData(tableName) {
-                               
+
                                 fetch(`fetch_table_data.php?table=${encodeURIComponent(tableName)}`)
                                     .then(response => response.json())
                                     .then(data => {
@@ -235,21 +235,20 @@ if ($_SESSION["loggedin"] !== TRUE) {
                         <div class="text-sm text-gray-600">Published</div>
                         <div class="text-sm text-gray-600">${record.publicationDate}</div>
                         <div class="text-sm text-gray-600">copies ${record.copies}</div>
-                    
                     </div>
 
-                      <div class="flex items-center space-x-2 mb-2">
-                        
-                        <div class="text-sm text-gray-600">Book Status: ${record.status}</div> <!-- Add status here -->
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="text-sm text-gray-600">Book Status: ${record.status}</div>
                     </div>
 
+                   
 
                     <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
                         ${record.table}
                     </div>
                 </div>
                 <div class="flex-shrink-0">
-                    ${record.copies <= 1
+                    ${record.copies <= 1 || record.availableToBorrow === 'No'
                         ? `<span class="text-red-600">Not Available</span>`
                         : record.currentlyBorrowed
                             ? `<span class="text-yellow-600">Currently Borrowed</span>`

@@ -68,10 +68,10 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                         <div class="p-6">
                             <div class="flex items-center justify-between">
                                 <p class="text-lg font-medium text-muted-foreground">TOTAL PENDING BORROW BOOKS</p>
-                                <div class="flex items-center text-red-600">
+                                <!-- <div class="flex items-center text-red-600">
                                     <i class="fas fa-arrow-down mr-1 h-4 w-4"></i>
                                     <span class="text-sm font-medium">5.12%</span>
-                                </div>
+                                </div> -->
                             </div>
                             <div class="mt-2 flex items-center justify-between">
                                 <?php

@@ -37,6 +37,16 @@ include '../connection.php';  // Ensure you have your database connection
         <div class="p-4 sm:ml-64">
             <div class="p-4 border-2 min-h-screen border-gray-200 border-dashed rounded-lg dark:border-gray-700">
                 <div class="relative min-h-screen overflow-x-auto shadow-md sm:rounded-lg p-6">
+                    <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
+                        <h1 class="text-3xl font-semibold">Book Request</h1>
+                    </div>
+
+                    <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+                        The Book Request page allows administrators to view and manage requests submitted by students for library materials. This interface provides a comprehensive list of all online requests, enabling admins to efficiently track requested books and streamline the lending process. By centralizing this information, administrators can ensure timely processing of requests and maintain an organized library system.
+                    </div>
+
+
+
                     <div class="flex flex-col sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
                         <label for="table-search" class="sr-only">Search</label>
                         <div class="relative">

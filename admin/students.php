@@ -75,9 +75,9 @@ $result = $conn->query($query);
                 <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">
                     <i class="fas fa-phone-alt"></i> Contact
                 </th>
-                <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">
+                <!-- <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">
                     <i class="fas fa-user-tag"></i> Type
-                </th>
+                </th> -->
                 <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">
                     <i class="fas fa-graduation-cap"></i> Year Level
                 </th>
@@ -107,9 +107,9 @@ $result = $conn->query($query);
                         <td class="px-6 py-4">
                             <?php echo htmlspecialchars($row['Mobile_Number']); ?>
                         </td>
-                        <td class="px-6 py-4">
+                        <!-- <td class="px-6 py-4">
                             Student
-                        </td>
+                        </td> -->
                         <td class="px-6 py-4">
                             <?php echo htmlspecialchars($row['Year_Level']); ?>
                         </td>
@@ -158,27 +158,27 @@ $result = $conn->query($query);
                      
                     <div class="grid grid-cols-3 items-center gap-4 mt-3">
                         <label for="name" class="text-left">Name:</label>
-                        <input id="name" name="name" placeholder="Enter Name" class="col-span-2 border rounded px-3 py-2" readonly />
+                        <input id="name" name="name" placeholder="Name" class="col-span-2 border rounded px-3 py-2" readonly />
                     </div>
 
                     <div class="grid grid-cols-3 items-center gap-4">
                         <label for="gender" class="text-left">Gender:</label>
-                        <input id="gender" name="gender" placeholder="Enter Gender" class="col-span-2 border rounded px-3 py-2" readonly />
+                        <input id="gender" name="gender" placeholder="Gender" class="col-span-2 border rounded px-3 py-2" readonly />
                     </div>
 
                     <div class="grid grid-cols-3 items-center gap-4">
                         <label for="email" class="text-left">Email:</label>
-                        <input id="email" name="email" placeholder="Enter Email" class="col-span-2 border rounded px-3 py-2" readonly />
+                        <input id="email" name="email" placeholder="Email" class="col-span-2 border rounded px-3 py-2" readonly />
                     </div>
 
                     <div class="grid grid-cols-3 items-center gap-4">
                         <label for="contact" class="text-left">Contact:</label>
-                        <input id="contact" name="contact" placeholder="Enter Contact" class="col-span-2 border rounded px-3 py-2" readonly />
+                        <input id="contact" name="contact" placeholder="Contact" class="col-span-2 border rounded px-3 py-2" readonly />
                     </div>
 
                     <div class="grid grid-cols-3 items-center gap-4">
                         <label for="year_level" class="text-left">Year Level:</label>
-                        <input id="year_level" name="year_level" placeholder="Enter Year Level" class="col-span-2 border rounded px-3 py-2" readonly />
+                        <input id="year_level" name="year_level" placeholder="Year Level" class="col-span-2 border rounded px-3 py-2" readonly />
                     </div>
 
                     <div class="grid grid-cols-3 items-center gap-4">

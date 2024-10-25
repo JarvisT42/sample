@@ -435,6 +435,54 @@ if ($_SESSION["loggedin"] !== TRUE) {
                         </div>
                     </div>
 
+
+
+
+
+
+
+
+                    <div class="rounded-lg border bg-white text-gray-700 shadow-lg transition duration-300 hover:shadow-xl">
+                        <div class="p-8">
+                            <!-- Upcoming Dues -->
+
+
+                            <div class="bg-white rounded-lg shadow-md p-6">
+                                
+
+
+                            <img src="../src/assets/images/library.png" alt="Your Image Description">
+
+
+
+                            </div>
+
+
+
+                            <!-- Today's Borrowing -->
+                            <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+                              
+                            <h1>LIBRARY</h1>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    
+
+
+
+
+
+
+
+
+
+
+
+
+
                 </div>
 
 
