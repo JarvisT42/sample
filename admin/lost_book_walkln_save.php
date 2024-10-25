@@ -40,8 +40,7 @@ $stmt->bind_param('ddsssss', $fines, $bookFines, $damageDescription, $returnedDa
 if ($stmt->execute()) {
 
     // Prepare the second query to increment No_Of_Copies in the specific category table
-    $bookAdditionSql = "UPDATE `$category` SET No_Of_Copies = No_Of_Copies + 1, status = 'damage' WHERE id = ?";
-
+    $bookAdditionSql = "UPDATE `$category` SET No_Of_Copies = No_Of_Copies + 1 WHERE id = ?";
     $bookStmt = $conn2->prepare($bookAdditionSql);
 
     // Check if the second query statement preparation was successful

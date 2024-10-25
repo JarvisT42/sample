@@ -7,94 +7,109 @@ if (isset($_GET['id']) && isset($_GET['table'])) {
     $book_id = $_GET['id'];
     $category = $_GET['table'];
 } else {
-    // If no ID or table is provided, redirect to another page (like books.php)
+    // Redirect if no ID or table is provided
     echo "<script>window.location.href='books.php';</script>";
     exit;
 }
 
 // Check if the form has been submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Sanitize and fetch form data
-    $tracking_id = htmlspecialchars($_POST['tracking_id']);
-    $call_number = htmlspecialchars($_POST['call_number']);
-    $department = htmlspecialchars($_POST['department']);
-    $title = htmlspecialchars($_POST['book_title']);
-    $author = htmlspecialchars($_POST['author']);
-    $publisher = htmlspecialchars($_POST['publisher_name']);
-    $no_of_copies = intval($_POST['book_copies']);
-    $date_of_publication = htmlspecialchars($_POST['date_of_publication_copyright']);
-    $subjects = htmlspecialchars($_POST['subject']);
-    $status = htmlspecialchars($_POST['status']);
-
-    // Handle image upload
-    $cover_image = null;
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        // Read the image file
-        $cover_image = file_get_contents($_FILES['image']['tmp_name']);
-    }
-
-    // Prepare the SQL update query
-    if ($cover_image) {
-        // If a new image is uploaded, include record_cover in the update
-        $sql = "UPDATE `$category` SET 
-                    Tracking_Id = ?, 
-                    Call_Number = ?, 
-                    Department = ?, 
-                    Title = ?, 
-                    Author = ?, 
-                    Publisher = ?, 
-                    No_Of_Copies = ?, 
-                    Date_Of_Publication_Copyright = ?, 
-                    Subjects = ?, 
-                    Status = ?, 
-                    record_cover = ?
-                WHERE id = ?";
-        
-        $stmt = $conn2->prepare($sql);
+    if (isset($_POST['delete']) && $_POST['delete'] == '1') {
+        // Handle delete request
+        $delete_sql = "DELETE FROM `$category` WHERE id = ?";
+        $stmt = $conn2->prepare($delete_sql);
         if ($stmt) {
-            $stmt->bind_param("ssssssissssi", $tracking_id, $call_number, $department, $title, $author, $publisher, $no_of_copies, $date_of_publication, $subjects, $status, $cover_image, $book_id);
+            $stmt->bind_param("i", $book_id);
+            $stmt->execute();
+            echo "<script>alert('Book deleted successfully!'); window.location.href='books.php';</script>";
+            exit;
         } else {
-            echo json_encode(['status' => 'error', 'message' => "Error preparing update statement: " . $conn2->error]);
+            echo "<script>alert('Error deleting book.');</script>";
         }
-    } else {
-        // If no image is uploaded, update all fields except record_cover
-        $sql = "UPDATE `$category` SET 
-                    Tracking_Id = ?, 
-                    Call_Number = ?, 
-                    Department = ?, 
-                    Title = ?, 
-                    Author = ?, 
-                    Publisher = ?, 
-                    No_Of_Copies = ?, 
-                    Date_Of_Publication_Copyright = ?, 
-                    Subjects = ?, 
-                    Status = ?
-                WHERE id = ?";
-        
-        $stmt = $conn2->prepare($sql);
-        if ($stmt) {
-            $stmt->bind_param("ssssssisssi", $tracking_id, $call_number, $department, $title, $author, $publisher, $no_of_copies, $date_of_publication, $subjects, $status, $book_id);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => "Error preparing update statement: " . $conn2->error]);
-        }
-    }
+    } elseif (isset($_POST['update'])) {
+        // Handle update request
+        $tracking_id = htmlspecialchars($_POST['tracking_id']);
+        $call_number = htmlspecialchars($_POST['call_number']);
+        $department = htmlspecialchars($_POST['department']);
+        $title = htmlspecialchars($_POST['book_title']);
+        $author = htmlspecialchars($_POST['author']);
+        $publisher = htmlspecialchars($_POST['publisher_name']);
+        $no_of_copies = intval($_POST['book_copies']);
+        $date_of_publication = htmlspecialchars($_POST['date_of_publication_copyright']);
+        $subjects = htmlspecialchars($_POST['subject']);
+        $status = htmlspecialchars($_POST['status']);
+        $available_to_borrow = isset($_POST['available_to_borrow']) ? 'Yes' : 'No';
 
-    // Execute the query and check if it was successful
-    if ($stmt && $stmt->execute()) {
-        echo "<script>alert('Book details updated successfully!'); window.location.href='books.php';</script>";
-    } else {
-        echo "<script>alert('Error updating book details.');</script>";
+        // Handle image upload
+        $cover_image = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $cover_image = file_get_contents($_FILES['image']['tmp_name']);
+        }
+
+        // Prepare the SQL update query
+        if ($cover_image) {
+            // Include `record_cover` if a new image is uploaded
+            $sql = "UPDATE `$category` SET 
+                        Tracking_Id = ?, 
+                        Call_Number = ?, 
+                        Department = ?, 
+                        Title = ?, 
+                        Author = ?, 
+                        Publisher = ?, 
+                        No_Of_Copies = ?, 
+                        Date_Of_Publication_Copyright = ?, 
+                        Subjects = ?, 
+                        Status = ?, 
+                        Available_To_Borrow = ?, 
+                        record_cover = ?
+                    WHERE id = ?";
+
+            $stmt = $conn2->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("ssssssisssssi", $tracking_id, $call_number, $department, $title, $author, $publisher, $no_of_copies, $date_of_publication, $subjects, $status, $available_to_borrow, $cover_image, $book_id);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => "Error preparing update statement: " . $conn2->error]);
+            }
+        } else {
+            // Update all fields except `record_cover`
+            $sql = "UPDATE `$category` SET 
+                        Tracking_Id = ?, 
+                        Call_Number = ?, 
+                        Department = ?, 
+                        Title = ?, 
+                        Author = ?, 
+                        Publisher = ?, 
+                        No_Of_Copies = ?, 
+                        Date_Of_Publication_Copyright = ?, 
+                        Subjects = ?, 
+                        Status = ?, 
+                        Available_To_Borrow = ?
+                    WHERE id = ?";
+
+            $stmt = $conn2->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("ssssssissssi", $tracking_id, $call_number, $department, $title, $author, $publisher, $no_of_copies, $date_of_publication, $subjects, $status, $available_to_borrow, $book_id);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => "Error preparing update statement: " . $conn2->error]);
+            }
+        }
+
+        // Execute the query and check if it was successful
+        if ($stmt && $stmt->execute()) {
+            echo "<script>alert('Book details updated successfully!'); window.location.href='books.php';</script>";
+        } else {
+            echo "<script>alert('Error updating book details.');</script>";
+        }
     }
 }
 
-// Prepare and execute the SQL query to fetch book details for the form (if not already POST request)
+// Fetch the book details if the record exists
 $sql = "SELECT * FROM `$category` WHERE id = ?";
 $stmt = $conn2->prepare($sql);
-$stmt->bind_param("i", $book_id); // Bind the book ID as an integer
+$stmt->bind_param("i", $book_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Fetch the book details if the record exists
 if ($result->num_rows > 0) {
     $book = $result->fetch_assoc();
     $tracking_id = $book['Tracking_Id'];
@@ -108,11 +123,13 @@ if ($result->num_rows > 0) {
     $date_encoded = $book['Date_Encoded'];
     $subjects = $book['Subjects'];
     $status = $book['Status'];
+    $available_to_borrow = $book['Available_To_Borrow'];
 } else {
     echo "<script>alert('No book found with this ID'); window.location.href='books.php';</script>";
     exit;
 }
 ?>
+
 
 
 
@@ -133,11 +150,11 @@ if ($result->num_rows > 0) {
                     <ul class="flex flex-wrap gap-2 p-5 border border-dashed rounded-md w-full">
                         <li><a class="px-4 py-2" href="books.php">All</a></li>
                         <br>
-                        <li><a class="px-4 py-2" href="add_books.php">Add Books</a></li>                        <br>
+                        <li><a class="px-4 py-2" href="add_books.php">Add Books</a></li> <br>
 
                         <li><a class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" href="edit_records.php">Edit Records</a></li>
                         <br>
-                        <li><a href="damage.php">Damage Books</a></li>                        <br>
+                        <li><a href="damage.php">Damage Books</a></li> <br>
 
                         <li><a href="#">Subject for Replacement</a></li>
                     </ul>
@@ -152,6 +169,16 @@ if ($result->num_rows > 0) {
                         <div class="p-6 bg-white rounded-b-lg shadow-md">
                             <form id="editBookForm" class="space-y-4" method="POST" enctype="multipart/form-data">
                                 <!-- Category -->
+
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="available_to_borrow" class="text-left">AVAILABLE TO BORROW:</label>
+                                    <input type="checkbox" id="available_to_borrow" name="available_to_borrow" value="Yes"
+                                        class="col-span-2 border rounded px-3 py-2"
+                                        <?php echo ($available_to_borrow == 'Yes') ? 'checked' : ''; ?> />
+                                </div>
+
+
+
                                 <div class="grid grid-cols-3 items-center gap-4">
                                     <label for="category" class="text-left">Category</label>
                                     <input id="category" name="category" value="<?php echo htmlspecialchars($category); ?>" class="col-span-2 border rounded px-3 py-2" readonly />
@@ -189,7 +216,7 @@ if ($result->num_rows > 0) {
 
                                 <!-- Date of Publication -->
                                 <div class="grid grid-cols-3 items-center gap-4">
-                                <label for="date_of_publication_copyright" class="text-left">Date of Publication:</label>
+                                    <label for="date_of_publication_copyright" class="text-left">Date of Publication:</label>
                                     <input id="date_of_publication_copyright" name="date_of_publication_copyright" value="<?php echo htmlspecialchars($date_of_publication); ?>" class="col-span-2 border rounded px-3 py-2" />
                                 </div>
 
@@ -229,8 +256,18 @@ if ($result->num_rows > 0) {
                                 </div>
 
                                 <!-- Submit Button -->
-                                <div class="flex justify-end">
-                                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
+                                <div class="flex justify-end gap-4">
+                                    <button type="submit" name="delete" value="1" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                                        onclick="return confirm('Are you sure you want to delete this book? This action cannot be undone.');">
+                                        Delete Book
+                                    </button>
+                                    <!-- Save Changes Button -->
+                                    <button type="submit" name="update" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                        Save Changes
+                                    </button>
+
+                                    <!-- Delete Button -->
+
                                 </div>
                             </form>
                         </div>
@@ -242,4 +279,5 @@ if ($result->num_rows > 0) {
 
     <script src="./src/components/header.js"></script>
 </body>
+
 </html>

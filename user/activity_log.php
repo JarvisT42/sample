@@ -84,7 +84,7 @@ session_start();
                                 <div class="flex items-center">
                                     <input checked id="inline-checked-radio" type="radio" name="inline-radio-group" class="hidden peer">
                                     <label for="inline-checked-radio" class="ms-2 cursor-pointer text-sm font-semibold px-6 py-3 rounded-lg bg-gray-100 text-gray-900 dark:text-gray-300 hover:text-blue-600 hover:bg-blue-50 peer-checked:underline peer-checked:bg-blue-500 peer-checked:text-white shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
-                                        Pending
+                                        Transaction
                                     </label>
                                 </div>
 
@@ -182,7 +182,7 @@ session_start();
                             $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status 
                             FROM GFI_Library_Database.borrow 
                             WHERE student_id = ? 
-                            AND status IN ('borrowed', 'pending')";
+                            AND status IN ('borrowed', 'pending', 'lost')";
                             $stmt = $conn->prepare($categoryQuery);
                             $stmt->bind_param('i', $id); // Assuming student_id is an integer
                             $stmt->execute();
@@ -261,6 +261,10 @@ session_start();
                                                     echo 'Borrowed';
                                                 } elseif (!empty($row['status']) && $row['status'] === 'pending') {
                                                     echo 'Pending';
+                                                }
+                                                else{
+                                                                                                       echo 'Lost';
+ 
                                                 }
                                                 ?>
                                             </td>

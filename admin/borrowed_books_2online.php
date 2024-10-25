@@ -197,7 +197,8 @@ if (isset($_GET['student_id'])) {
                                                 <div class="flex flex-col md:flex-row justify-between mb-6">
                                                     <div class="flex-1 mb-4 md:mb-0">
                                                         <h1 class="text-2xl font-bold mb-1">Title:</h1>
-                                                        <p class="text-xl mb-4"><?php echo $title; ?> (Index: <?php echo $overall_index; ?>)</p>
+                                                        <p class="text-xl mb-4"><?php echo $title; ?> </p>
+                                                        
                                                         <div class="mb-4">
                                                             <h2 class="text-lg font-semibold text-gray-600 mb-1">Borrow Category:</h2>
                                                             <p class="text-sm text-gray-500"><?php echo htmlspecialchars($book['Category']); ?></p>
@@ -497,8 +498,9 @@ if (isset($_GET['student_id'])) {
                 <p id="damageDescription" class="mb-4" style="display:none;"></p>
 
                 <!-- Display for student ID and book ID -->
-                <p id="modalStudentId" class="mb-2"></p>
-                <p id="modalBookId" class="mb-2"></p>
+                <p id="modalStudentId" class="mb-2 hidden"></p>
+<p id="modalBookId" class="mb-2 hidden"></p>
+
 
                 <div class="flex justify-end space-x-2">
                     <button id="closeModal" class="bg-red-500 text-white py-2 px-4 rounded">Close</button>
@@ -552,7 +554,7 @@ if (isset($_GET['student_id'])) {
             // Update the label of the "Confirm Return" button to "Pay" if the status is "Lost"
             const confirmButton = document.getElementById('confirmReturn');
             if (statusSelect === "Lost") {
-                confirmButton.innerText = 'Pay'; // Change the label to 'Pay'
+                confirmButton.innerText = 'Book Lost'; // Change the label to 'Pay'
             } else {
                 confirmButton.innerText = 'Confirm Return'; // Reset to default
             }
@@ -585,7 +587,7 @@ if (isset($_GET['student_id'])) {
             // Update the label of the "Confirm Return" button to "Pay" if the status is "Lost"
             const confirmButton = document.getElementById('confirmReturn');
             if (statusSelect === "Lost") {
-                confirmButton.innerText = 'Pay'; // Change the label to 'Pay'
+                confirmButton.innerText = 'Book Lost'; // Change the label to 'Pay'
                 document.getElementById('damageDescriptionLabel').style.display = 'none'; // Hide damage description label
                 document.getElementById('damageDescription').style.display = 'none'; // Hide damage description
             } else if (statusSelect === "Damage") {
@@ -632,7 +634,7 @@ if (isset($_GET['student_id'])) {
             };
 
             const confirmButton = document.getElementById('confirmReturn');
-            if (confirmButton.innerText === 'Pay') {
+            if (confirmButton.innerText === 'Book Lost') {
                 fetch('borrowed_books_2online_pay.php', {
                         method: 'POST',
                         headers: {
@@ -643,7 +645,7 @@ if (isset($_GET['student_id'])) {
                     .then(response => response.json())
                     .then(result => {
                         if (result.success) {
-                            alert('Payment processed successfully!');
+                            alert('Save successfully!');
                             location.reload(); // Reload the page after successful payment
                         } else {
                             alert('Error: ' + result.message);

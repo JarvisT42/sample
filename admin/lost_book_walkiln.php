@@ -11,9 +11,9 @@ if (isset($_GET['walk_in_id'])) {
 
     // Fetch the student ID and full name based on walk_in_id
     $studentQuery = "
-  SELECT walk_in_id, Full_Name
+  SELECT walk_in_id, Full_Name, Over_Due_Fines
   FROM GFI_Library_Database.borrow 
-  WHERE walk_in_id = ? AND status = 'borrowed'";
+  WHERE walk_in_id = ? AND status = 'lost'";
 
     $stmtStudent = $conn->prepare($studentQuery);
     $stmtStudent->bind_param('s', $walk_in_id); // Assuming walk_in_id is a string
@@ -27,9 +27,9 @@ if (isset($_GET['walk_in_id'])) {
 
         // Fetch the category, book_id, and issued date based on the student_id
         $categoryQuery = "
-      SELECT a.Category, a.book_id, a.Issued_Date, a.Due_Date
+      SELECT a.Category, a.book_id, a.Issued_Date, a.Due_Date, Over_Due_Fines
       FROM GFI_Library_Database.borrow AS a
-      WHERE a.walk_in_id = ? AND a.status = 'borrowed'";
+      WHERE a.walk_in_id = ? AND a.status = 'lost'";
 
         $stmt = $conn->prepare($categoryQuery);
         $stmt->bind_param('i', $walk_in_id); // Assumin
@@ -67,7 +67,7 @@ if (isset($_GET['walk_in_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.js"></script>
 
     <style>
-        .active-borrowed-books {
+        .active-replacement-books {
             background-color: #f0f0f0;
             color: #000;
         }
@@ -116,13 +116,14 @@ if (isset($_GET['walk_in_id'])) {
                                 <div class="bg-blue-200 p-4 rounded-lg">
                                     <div class="bg-blue-200 rounded-lg flex items-center justify-between ">
                                         <!-- Left side: Date to Claim -->
-                                        <h3 class="text-lg font-semibold text-white">Issued Date: <?php echo $date; ?></h3>
+                                        <!-- <h3 class="text-lg font-semibold text-white">Issued Date: <?php echo $date; ?></h3> -->
                                     </div>
 
                                     <?php foreach ($books_group as $book): ?>
                                         <?php
                                         $category = $book['Category'];
                                         $book_id = $book['book_id'];
+                                        $overDueFines = $book['Over_Due_Fines'];
 
                                         // Fetch the Title, Author, and record_cover from conn2 based on book_id
                                         $titleQuery = "SELECT * FROM `$category` WHERE id = ?";
@@ -187,6 +188,8 @@ if (isset($_GET['walk_in_id'])) {
                                                     <div class="flex-1 mb-4 md:mb-0">
                                                         <h1 class="text-2xl font-bold mb-1">Title:</h1>
                                                         <p class="text-xl mb-4"><?php echo $title; ?></p>
+                                                        <h1 class="text-2xl font-bold mb-1">Author:</h1>
+                                                        <p class="text-xl mb-4"><?php echo $author; ?> </p>
                                                         <div class="mb-4">
                                                             <h2 class="text-lg font-semibold text-gray-600 mb-1">Borrow Category:</h2>
                                                             <p class="text-sm text-gray-500"><?php echo htmlspecialchars($book['Category']); ?></p>
@@ -206,7 +209,7 @@ if (isset($_GET['walk_in_id'])) {
                                                     </div>
                                                 </div>
                                                 <div class="bg-blue-100 p-4 rounded-lg">
-                                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4 hidden">
                                                         <div>
                                                             <p class="text-sm font-semibold">Issued Date:</p>
                                                             <p class="text-sm"><?php echo htmlspecialchars($book['Issued_Date']); ?></p>
@@ -216,11 +219,26 @@ if (isset($_GET['walk_in_id'])) {
                                                             <p class="text-sm due-date" data-index="<?php echo $overall_index; ?>"><?php echo htmlspecialchars($due_date); ?></p>
                                                         </div>
                                                         <div>
-                                                            <p class="text-sm font-semibold">Fines: ₱ <span id="fine-amount-<?php echo $overall_index; ?>"><?php echo $fine_amount; ?></span>.00</p>
+                                                            <p class="text-sm font-semibold">Fines: ₱ <span id="fine-amount-<?php echo $overall_index; ?>"><?php echo $overDueFines; ?></span>.00</p>
                                                         </div>
                                                     </div>
+                                                    <div class="flex justify-end space-x-2 mt-4">
+                                                <!-- <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm renew-button"
+                                                    data-student-id="<?php echo htmlspecialchars($walk_in_id); ?>"
+                                                    data-book-id="<?php echo htmlspecialchars($book_id); ?>"
+                                                    data-category="<?php echo htmlspecialchars($category); ?>"
+                                                    data-due-date="<?php echo htmlspecialchars($due_date); ?>">
+                                                    Renew
+                                                </button> -->
+
+                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
+                                                    data-index="<?php echo $overall_index; ?>"
+                                                    onclick="openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($walk_in_id); ?>', '<?php echo htmlspecialchars($book_id); ?>')">
+                                                    Return
+                                                </button>
+                                            </div>
                                                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                                        <div>
+                                                        <div style="display: none;">
                                                             <p class="text-sm font-semibold">Renew</p>
                                                             <select class="renew-dropdown border border-gray-300 rounded p-1 mr-16" data-index="<?php echo $overall_index; ?>" data-due-date="<?php echo htmlspecialchars($due_date); ?>">
                                                                 <option value="0">0 Days</option>
@@ -231,7 +249,8 @@ if (isset($_GET['walk_in_id'])) {
                                                                 <option value="15">15 Days</option>
                                                             </select>
                                                         </div>
-                                                        <div>
+
+                                                        <div style="display: none;">
                                                             <p class="text-sm font-semibold">Book Status:</p>
                                                             <select id="statusSelect-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-1 mr-16" onchange="toggleFinesInput(<?php echo $overall_index; ?>)">
                                                                 <option value="<?php echo $status; ?>"><?php echo $status; ?></option>
@@ -239,12 +258,14 @@ if (isset($_GET['walk_in_id'])) {
                                                                 <option value="Lost">Lost</option>
                                                             </select>
                                                         </div>
-                                                        <div>
+
+                                                        <div style="display: none;">
                                                             <p class="text-sm font-semibold">Fines:</p>
                                                             <div class="flex items-center">
                                                                 P:<input id="fineInput-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-1 w-32 finesInput" type="number" disabled placeholder="Disabled">
                                                             </div>
                                                         </div>
+
                                                     </div>
                                                     <div id="damageTextArea-<?php echo $overall_index; ?>" style="display: none;" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                                                         <div class="col-span-3">
@@ -257,21 +278,7 @@ if (isset($_GET['walk_in_id'])) {
                                                 </div>
                                             </div>
 
-                                            <div class="flex justify-end space-x-2 mt-4">
-                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm renew-button"
-                                                    data-student-id="<?php echo htmlspecialchars($walk_in_id); ?>"
-                                                    data-book-id="<?php echo htmlspecialchars($book_id); ?>"
-                                                    data-category="<?php echo htmlspecialchars($category); ?>"
-                                                    data-due-date="<?php echo htmlspecialchars($due_date); ?>">
-                                                    Renew
-                                                </button>
-
-                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
-                                                    data-index="<?php echo $overall_index; ?>"
-                                                    onclick="openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($walk_in_id); ?>', '<?php echo htmlspecialchars($book_id); ?>')">
-                                                    Return
-                                                </button>
-                                            </div>
+                                       
                                         </li>
 
 
@@ -481,7 +488,7 @@ if (isset($_GET['walk_in_id'])) {
                 <p id="modalBookCategory" class="mb-2"></p>
 
                 <!-- Original fines display (unchanged) -->
-                <p id="OverDueFines" class="mb-4"></p>
+                <p id="OverDueFines" class="mb-4 hidden"></p>
 
                 <!-- Updated fines display -->
                 <p id="BookFines" class="mb-4"></p>
@@ -604,7 +611,7 @@ if (isset($_GET['walk_in_id'])) {
                     .then(response => response.json())
                     .then(result => {
                         if (result.success) {
-                            alert('Save successfully!');
+                            alert('Payment processed successfully!');
                             location.reload(); // Reload the page after successful payment
                         } else {
                             alert('Error: ' + result.message);
@@ -615,7 +622,7 @@ if (isset($_GET['walk_in_id'])) {
                         alert('An error occurred while processing the payment.');
                     });
             } else {
-                fetch('borrowed_books_2walkIn_save.php', {
+                fetch('lost_book_walkln_save.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

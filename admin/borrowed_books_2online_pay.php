@@ -11,7 +11,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 }
 
 // Prepare and bind the update query
-$updateQuery = "UPDATE borrow SET status = 'loss', Over_Due_Fines = ?, Book_Fines = ? WHERE student_id = ? AND book_id = ? AND category = ?";
+$updateQuery = "UPDATE borrow SET status = 'lost', Over_Due_Fines = ?, Book_Fines = ? WHERE student_id = ? AND book_id = ? AND category = ?";
 
 $stmt = $conn->prepare($updateQuery);
 
