@@ -28,8 +28,8 @@ if (isset($_GET['student_id'])) {
     // Fetch student details for full name
     $studentQuery = "
     SELECT First_Name, Middle_Initial, Last_Name 
-    FROM GFI_Library_Database.students 
-    WHERE id = ?";
+    FROM students 
+    WHERE student_id = ?";
     $stmtStudent = $conn->prepare($studentQuery);
     $stmtStudent->bind_param('i', $student_id);
     $stmtStudent->execute();

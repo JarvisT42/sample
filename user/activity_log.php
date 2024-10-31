@@ -176,7 +176,7 @@ session_start();
                             include("../connection2.php");
 
                             // Sanitize the student ID to prevent SQL injection
-                            $id = intval($_SESSION["Id"]);
+                            $id = intval($_SESSION["Student_Id"]);
 
                             // Fetch the category and book_id based on the student_id
                             $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status 

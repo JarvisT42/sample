@@ -1,34 +1,45 @@
 <?php
-include '../connection.php'; // Include your database connection
+include '../connection.php';
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-// Retrieve the posted JSON data
 $data = json_decode(file_get_contents('php://input'), true);
-// Check if student_id or walkIn_id is set and prepare the update query
+$renewStatus = 'yes';
+
+if (!$data) {
+    echo json_encode(['success' => false, 'message' => 'Invalid data received']);
+    exit;
+}
+
+// Check for student_id, faculty_id, or walk_in_id and prepare the appropriate query
 if (isset($data['student_id']) && !empty($data['student_id'])) {
-    // Prepare and bind the update query for student_id and book_id
-    $updateQuery = "UPDATE borrow SET Due_Date = ? WHERE student_id = ? AND book_id = ? AND category = ?";
+    $updateQuery = "UPDATE borrow SET Due_Date = ?, renew = ? WHERE student_id = ? AND book_id = ? AND category = ?";
     $stmt = $conn->prepare($updateQuery);
-    $stmt->bind_param('ssss', $data['due_date'], $data['student_id'], $data['book_id'], $data['category']);
-}
-elseif (isset($data['walk_in_id']) && !empty($data['walk_in_id'])) {  // Use 'walk_in_id' here
-    // Prepare and bind the update query for walk_in_id and book_id
-    $updateQuery = "UPDATE borrow SET Due_Date = ? WHERE walk_in_id = ? AND book_id = ? AND category = ?";
+    $stmt->bind_param('sssss', $data['due_date'], $renewStatus, $data['student_id'], $data['book_id'], $data['category']);
+    
+} elseif (isset($data['faculty_id']) && !empty($data['faculty_id'])) {
+    $updateQuery = "UPDATE borrow SET Due_Date = ?, renew = ? WHERE faculty_id = ? AND book_id = ? AND category = ?";
     $stmt = $conn->prepare($updateQuery);
-    $stmt->bind_param('ssss', $data['due_date'], $data['walk_in_id'], $data['book_id'], $data['category']);
-}
- else {
-    // If neither ID is provided, return an error response
-    echo json_encode(['success' => false, 'message' => 'No valid ID provided.']);
-    exit; // Exit the script
-}
+    $stmt->bind_param('sssss', $data['due_date'], $renewStatus, $data['faculty_id'], $data['book_id'], $data['category']);
 
-// Execute the query
-if ($stmt->execute()) {
-    echo json_encode(['success' => true]);
+
+    
+} elseif (isset($data['walk_in_id']) && !empty($data['walk_in_id'])) {
+    $updateQuery = "UPDATE borrow SET Due_Date = ?, renew = ? WHERE walk_in_id = ? AND book_id = ? AND category = ?";
+    $stmt = $conn->prepare($updateQuery);
+    $stmt->bind_param('sssss', $data['due_date'], $renewStatus, $data['walk_in_id'], $data['book_id'], $data['category']);
 } else {
-    echo json_encode(['success' => false, 'message' => 'Database update failed.']);
+    echo json_encode(['success' => false, 'message' => 'No valid ID provided.']);
+    exit;
 }
 
-// Close statement and connection
+// Execute the statement and return success or failure
+if ($stmt->execute()) {
+    echo json_encode(['success' => true, 'message' => 'Due date updated successfully']);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Database update failed: ' . $stmt->error]);
+}
+
 $stmt->close();
 $conn->close();
+?>

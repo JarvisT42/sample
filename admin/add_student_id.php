@@ -379,7 +379,17 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
 
     <script src="./src/components/header.js"></script>
+    <script>
+        // Function to automatically show the dropdown if on book_request.php
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownRequest = document.getElementById('dropdown-setting');
 
+            // Open the dropdown menu for 'Request'
+            dropdownRequest.classList.remove('hidden');
+            dropdownRequest.classList.add('block'); // Make the dropdown visible
+
+        });
+    </script>
 
 </body>
 

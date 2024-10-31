@@ -135,76 +135,90 @@ $formattedDate = (new DateTime($selectedDate))->format('l, F j, Y');
     </div>
   </main>
   <script>
-    function checkBookAvailability(bookId, tableName, callback) {
-      fetch('check_book_availability.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            book_id: bookId,
-            table: tableName
-          })
+  function checkBookAvailability(bookId, tableName, callback) {
+    fetch('check_book_availability.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          book_id: bookId,
+          table: tableName
         })
-        .then(response => response.json())
-        .then(result => {
-          if (result.success) {
-            callback(true); // Book is available
-          } else {
-            alert(result.message); // Display error if book is unavailable
+      })
+      .then(response => response.json())
+      .then(result => {
+        console.log("Availability check result for book ID " + bookId + ":", result); // Log result for each book
+        if (result.success) {
+          callback(true); // Book is available
+        } else {
+          alert(result.message || 'Book is unavailable.'); // Display error if book is unavailable
 
-            // After the alert, unset session variables and redirect
-            fetch('unset_session_and_redirect.php', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              }
-            }).then(() => {
-              window.location.href = 'borrow.php'; // Redirect to borrow.php
-            });
-
-            callback(false); // Book is not available
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('An error occurred while checking book availability.');
-
-          // After the error, unset session variables and redirect
+          // After the alert, unset session variables and redirect
           fetch('unset_session_and_redirect.php', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             }
           }).then(() => {
+            console.log("Redirecting to borrow.php after unsetting session."); // Log before redirect
             window.location.href = 'borrow.php'; // Redirect to borrow.php
           });
 
-          callback(false); // Treat as unavailable in case of error
-        });
-    }
+          callback(false); // Book is not available
+        }
+      })
+      .catch(error => {
+        console.error("Error checking availability for book ID " + bookId + ":", error); // Log fetch error
+        alert('An error occurred while checking book availability.');
 
-    function borrowBooks() {
-      const bookBag = <?php echo json_encode($bookBag); ?>;
-      let allAvailable = true;
-
-      // Check each book for availability
-      bookBag.forEach((book, index) => {
-        checkBookAvailability(book.id, book.table, function(isAvailable) {
-          if (!isAvailable) {
-            allAvailable = false;
+        // After the error, unset session variables and redirect
+        fetch('unset_session_and_redirect.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           }
-
-          // Once all books have been checked, submit the form if available
-          if (index === bookBag.length - 1) {
-            if (allAvailable) {
-              document.getElementById('borrowForm').submit();
-            }
-          }
+        }).then(() => {
+          console.log("Redirecting to borrow.php after error in fetch."); // Log before redirect
+          window.location.href = 'borrow.php'; // Redirect to borrow.php
         });
+
+        callback(false); // Treat as unavailable in case of error
       });
+  }
+
+  function borrowBooks() {
+    const bookBag = <?php echo json_encode($bookBag); ?>;
+    console.log("Book bag contents:", bookBag); // Debugging statement
+
+    if (!bookBag.length) {
+        console.error("Book bag is empty. No books to check."); // Error message if empty
+        alert("No books in your bag to borrow."); // Optional alert for the user
+        return;
     }
-  </script>
+
+    let allAvailable = true;
+    // Check each book for availability
+    bookBag.forEach((book, index) => {
+        console.log("Checking availability for book ID:", book.id); // Log each book check
+        checkBookAvailability(book.id, book.table, function(isAvailable) {
+            if (!isAvailable) {
+                allAvailable = false;
+            }
+
+            // Once all books have been checked, submit the form if available
+            if (index === bookBag.length - 1) {
+                console.log("All books checked. Availability:", allAvailable); // Log final availability result
+                if (allAvailable) {
+                    console.log("All books available. Submitting form."); // Log form submission
+                    document.getElementById('borrowForm').submit();
+                }
+            }
+        });
+    });s
+  }
+</script>
+
 
   <script>
     lucide.createIcons();

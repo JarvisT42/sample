@@ -3,53 +3,7 @@ session_start();
 include '../connection.php'; // Ensure you have your database connection
 include '../connection2.php'; // Ensure you have your database connection
 
-if (isset($_GET['walk_in_id'])) {
-    $walk_in_id = htmlspecialchars($_GET['walk_in_id']);
-    // Proceed with your logic for online borrowing
 
-    // Check if student_id is set in the query parameters
-
-    // Fetch the student ID and full name based on walk_in_id
-    $studentQuery = "
-  SELECT walk_in_id, Full_Name
-  FROM GFI_Library_Database.borrow 
-  WHERE walk_in_id = ? AND status = 'borrowed'";
-
-    $stmtStudent = $conn->prepare($studentQuery);
-    $stmtStudent->bind_param('s', $walk_in_id); // Assuming walk_in_id is a string
-    $stmtStudent->execute();
-    $studentResult = $stmtStudent->get_result();
-
-    if ($studentResult->num_rows > 0) {
-        $studentData = $studentResult->fetch_assoc();
-
-        $fullName = $studentData['Full_Name'];
-
-        // Fetch the category, book_id, and issued date based on the student_id
-        $categoryQuery = "
-      SELECT a.Category, a.book_id, a.Issued_Date, a.Due_Date
-      FROM GFI_Library_Database.borrow AS a
-      WHERE a.walk_in_id = ? AND a.status = 'borrowed'";
-
-        $stmt = $conn->prepare($categoryQuery);
-        $stmt->bind_param('i', $walk_in_id); // Assuming student_id is an integer
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        // Fetch all data into an array
-        $books = $result->fetch_all(MYSQLI_ASSOC) ?: []; // Use short-circuit evaluation for empty check
-
-        $stmt->close(); // Close the book query statement
-    } else {
-        $fullName = 'Unknown Student'; // Fallback if no student found
-    }
-    $stmtStudent->close(); // Close the student statement
-
-} else {
-    // Handle the case where student_id is not provided
-    echo "No student ID provided.";
-    exit; // Stop execution if no student_id
-}
 ?>
 
 
@@ -84,221 +38,54 @@ if (isset($_GET['walk_in_id'])) {
     <main id="content" class="">
         <div class="p-4 sm:ml-64">
             <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-                <div class="bg-gray-100 p-6 w-full mx-auto">
-                    <div class="bg-white p-4 shadow-sm rounded-lg mb-2">
-                        <div class="bg-gray-100 p-2 flex justify-between items-center">
-                            <h1 class="m-0">Student Name: <?php echo $fullName; ?></h1>
-
-                        </div>
+                <div class="w-[400px] border-4 border-purple-700">
+                    <div class="space-y-1 text-center p-4">
+                        <h2 class="text-xl font-semibold">Gensantos Foundation College Inc.</h2>
+                        <p class="text-sm text-muted-foreground">Bulaong Extension Brgy. Dadiangas West General Santos City</p>
+                        <p class="text-lg font-semibold">LIBRARY OVERDUE SLIP</p>
                     </div>
-
-                    <?php if (!empty($books)): ?>
-                        <?php
-                        // Group books by Date_To_Claim
-                        $grouped_books = [];
-                        foreach ($books as $book) {
-                            $date_to_claim = htmlspecialchars($book['Issued_Date']);
-                            $grouped_books[$date_to_claim][] = $book;
-                        }
-                        ?>
-
-                        <div id="book-request-form" class="space-y-6">
-
-
-                            <input type="hidden" name="walk_in_id" value="<?php echo htmlspecialchars($walk_in_id); ?>">
-
-                            <?php
-                            // Initialize the overall index counter
-                            $overall_index = 0;
-                            ?>
-
-                            <?php foreach ($grouped_books as $date => $books_group): ?>
-                                <div class="bg-blue-200 p-4 rounded-lg">
-                                    <div class="bg-blue-200 rounded-lg flex items-center justify-between ">
-                                        <!-- Left side: Date to Claim -->
-                                        <h3 class="text-lg font-semibold text-white">Issued Date: <?php echo $date; ?></h3>
-                                    </div>
-
-                                    <?php foreach ($books_group as $book): ?>
-                                        <?php
-                                        $category = $book['Category'];
-                                        $book_id = $book['book_id'];
-
-                                        // Fetch the Title, Author, and record_cover from conn2 based on book_id
-                                        $titleQuery = "SELECT * FROM `$category` WHERE id = ?";
-                                        $stmt2 = $conn2->prepare($titleQuery);
-                                        $stmt2->bind_param('i', $book_id);
-                                        $stmt2->execute();
-                                        $result = $stmt2->get_result();
-
-                                        // Initialize variables
-                                        $title = 'Unknown Title';
-                                        $author = 'Unknown Author';
-                                        $status = 'Unknown Status';
-                                        $record_cover = null; // Initialize with null
-
-                                        if ($row = $result->fetch_assoc()) {
-                                            $title = $row['Title']; // Get the title
-                                            $author = $row['Author']; // Get the author
-                                            $status = $row['Status']; // Get the author
-                                            $record_cover = $row['record_cover']; // Get the record cover
-                                        }
-
-                                        $stmt2->close();
-                                        include '../connection.php';
-
-                                        // Get the fines value from the database
-                                        $fines_value = 0;
-                                        $sql = "SELECT fines FROM library_fines LIMIT 1";
-                                        $result = $conn->query($sql);
-
-                                        if ($result && $result->num_rows > 0) {
-                                            $row = $result->fetch_assoc();
-                                            $fines_value = (int)$row['fines'];
-                                        }
-
-
-
-                                        // Get the issued date from the book array
-                                        $issued_date = $book['Issued_Date'];
-
-                                        if (empty($book['Due_Date'])) {
-                                            // Calculate the due date (3 days after the issued date)
-                                            $due_date = date('Y-m-d', strtotime($issued_date . ' + 3 days'));
-                                        } else {
-                                            // Use the existing due date from $book['Due_Date']
-                                            $due_date = $book['Due_Date'];
-                                        }
-
-                                        // Calculate the fines based on the due date
-                                        $current_date = date('Y-m-d');
-                                        $fine_amount = 0;
-
-                                        if ($current_date > $due_date) {
-                                            // Calculate overdue days
-                                            $overdue_days = (strtotime($current_date) - strtotime($due_date)) / (60 * 60 * 24);
-                                            $fine_amount = $overdue_days * $fines_value;
-                                        }
-                                        ?>
-
-                                        <li class="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mb-2 flex flex-col">
-                                            <div class="flex-1">
-                                                <div class="flex flex-col md:flex-row justify-between mb-6">
-                                                    <div class="flex-1 mb-4 md:mb-0">
-                                                        <h1 class="text-2xl font-bold mb-1">Title:</h1>
-                                                        <p class="text-xl mb-4"><?php echo $title; ?> (Index: <?php echo $overall_index; ?>)</p>
-                                                        <div class="mb-4">
-                                                            <h2 class="text-lg font-semibold text-gray-600 mb-1">Borrow Category:</h2>
-                                                            <p class="text-sm text-gray-500"><?php echo htmlspecialchars($book['Category']); ?></p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="w-full md:w-32 h-40 bg-gray-200 border border-gray-300 flex items-center justify-center mb-4 md:mb-0">
-                                                        <?php
-                                                        // Handle book cover image...
-                                                        ?>
-                                                        <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-full h-full border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
-                                                    </div>
-                                                </div>
-                                                <div class="bg-blue-100 p-4 rounded-lg">
-                                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Issued Date:</p>
-                                                            <p class="text-sm"><?php echo htmlspecialchars($book['Issued_Date']); ?></p>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Due Date:</p>
-                                                            <p class="text-sm due-date" data-index="<?php echo $overall_index; ?>">
-                                                                <?php echo htmlspecialchars($due_date); ?>
-                                                            </p>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Fines: ₱ <span id="fine-amount-<?php echo $overall_index; ?>"><?php echo $fine_amount; ?></span>.00</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Renew</p>
-                                                            <select class="renew-dropdown border border-gray-300 rounded p-1 mr-16" data-index="<?php echo $overall_index; ?>" data-due-date="<?php echo htmlspecialchars($due_date); ?>">
-                                                                <option value="0">0 Days</option>
-                                                                <option value="3">3 Days</option>
-                                                                <option value="6">6 Days</option>
-                                                                <option value="9">9 Days</option>
-                                                                <option value="12">12 Days</option>
-                                                                <option value="15">15 Days</option>
-                                                            </select>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Book Status:</p>
-                                                            <select id="statusSelect-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-1 mr-16" onchange="toggleFinesInput(<?php echo $overall_index; ?>)">
-                                                                <option value="<?php echo $status; ?>"><?php echo $status; ?></option>
-                                                                <option value="Damage">Damage</option>
-                                                                <option value="Lost">Lost</option>
-                                                            </select>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Fines:</p>
-                                                            <div class="flex items-center">
-                                                                P:<input id="fineInput-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-1 w-32 finesInput" type="number" disabled placeholder="Disabled">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="flex justify-end space-x-2 mt-4">
-                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm renew-button"
-                                                    data-walk-in-id="<?php echo htmlspecialchars($walk_in_id); ?>"
-                                                    data-book-id="<?php echo htmlspecialchars($book_id); ?>"
-                                                    data-category="<?php echo htmlspecialchars($category); ?>"
-                                                    data-due-date="<?php echo htmlspecialchars($due_date); ?>">
-                                                    Renew
-                                                </button>
-
-
-                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
-                                                    data-index="<?php echo $overall_index; ?>"
-                                                    onclick="openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($walk_in_id); ?>', '<?php echo htmlspecialchars($book_id); ?>')">
-                                                    Return
-                                                </button>
-
-                                            </div>
-
-
-
-
-                                        </li>
-
-
-
-
-                                        <?php
-                                        // Increment overall index for each book displayed
-                                        $overall_index++;
-                                        ?>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php endforeach; ?>
-
-                            <div class="flex items-center justify-end">
-                                <button type="button" onclick="openReturnAllModal()" class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Return All</button>
-
+                    <div class="p-4 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label for="name">NAME:</label>
+                                <input id="name" placeholder="_____________" class="w-full border border-gray-300 rounded p-2" />
+                            </div>
+                            <div class="space-y-2">
+                                <label for="date">DATE:</label>
+                                <input id="date" placeholder="_____________" class="w-full border border-gray-300 rounded p-2" />
                             </div>
                         </div>
-
-                    <?php else: ?>
-                        <p>No books available.</p>
-                    <?php endif; ?>
-
-
-
-                    <script>
-
-
-
-                    </script>
+                        <div class="flex gap-4">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="student" />
+                                <label for="student">STUDENT</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="faculty-full" />
+                                <label for="faculty-full">FACULTY (FULLTIME)</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="faculty-part" />
+                                <label for="faculty-part">FACULTY (PARTTIME)</label>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="books">NO. OF BOOK/S BORROWED:</label>
+                            <input id="books" placeholder="_____________" class="w-full border border-gray-300 rounded p-2" />
+                        </div>
+                        <div class="space-y-2">
+                            <label for="days">DAY/S OVERDUE:</label>
+                            <input id="days" placeholder="_____________" class="w-full border border-gray-300 rounded p-2" />
+                        </div>
+                        <div class="space-y-2">
+                            <label for="amount">TOTAL AMOUNT TO BE PAID:</label>
+                            <input id="amount" placeholder="_____________" class="w-full border border-gray-300 rounded p-2" />
+                        </div>
+                    </div>
                 </div>
+
             </div>
+        </div>
         </div>
 
 

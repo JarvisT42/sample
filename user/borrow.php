@@ -22,7 +22,16 @@ if ($_SESSION["loggedin"] !== TRUE) {
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
 
 </head>
+<style>
+            .preview-image img {
+    outline: none; /* Remove outline for images */
+}
 
+.preview-image:focus,
+.preview-image img:focus {
+    outline: none; /* Remove outline when focused */
+}
+</style>
 <body>
     <?php include './src/components/sidebar.php'; ?>
 
@@ -45,7 +54,8 @@ if ($_SESSION["loggedin"] !== TRUE) {
                 </div>
 
                 <!-- Main Content Box -->
-                <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 ">
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 min-h-screen">
+
                     <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900">
                         <div class="flex items-center space-x-4">
                             <!-- Dropdown Button -->
@@ -182,7 +192,14 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             </li>
                         </ul>
                     </nav>
-
+                    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+                        <div class="relative">
+                            <!-- Close button -->
+                            <button id="closeModal" class="absolute top-2 right-2 text-white text-2xl font-bold">&times;</button>
+                            <!-- Image preview -->
+                            <img id="modalImage" src="" alt="Image Preview" class="max-w-full max-h-screen rounded-lg shadow-lg">
+                        </div>
+                    </div>
 
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -200,7 +217,9 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             let currentPage = 1; // To track the current page
                             const recordsPerPage = 5; // Number of records per page
 
-
+                            const imageModal = document.getElementById('imageModal');
+                            const modalImage = document.getElementById('modalImage');
+                            const closeModal = document.getElementById('closeModal');
 
                             function loadTableData(tableName) {
 
@@ -265,16 +284,49 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             </a>`
                     }
                 </div>
-                <div class="flex-shrink-0">
-                    <a href="#">
-                        <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">
-                    </a>
-                </div>
+               <div class="flex-shrink-0">
+                            <a href="#" class="preview-image">
+                                <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">
+                            </a>
+                        </div>
             </div>
         </li>
     `).join('');
-}
 
+
+
+
+    // Attach click event to each image with the preview-image class
+    document.querySelectorAll('.preview-image img').forEach(image => {
+                                    image.addEventListener('click', function(event) {
+                                        event.preventDefault();
+                                        modalImage.src = this.src; // Set the clicked image as the modal image
+                                        imageModal.classList.remove('hidden'); // Show the modal
+                                    });
+                                });
+                            }
+
+                            // Close modal when the close button is clicked
+                            closeModal.addEventListener('click', () => {
+                                imageModal.classList.add('hidden');
+                                modalImage.src = "";
+                            });
+
+                            // Close modal when clicking outside the image area
+                            imageModal.addEventListener('click', (event) => {
+                                if (event.target === imageModal) {
+                                    imageModal.classList.add('hidden');
+                                    modalImage.src = "";
+                                }
+                            });
+
+                            function setupPagination(totalRecords) {
+                                const totalPages = Math.ceil(totalRecords / recordsPerPage);
+                                const paginationContainer = document.querySelector('nav ul');
+                                paginationContainer.innerHTML = '';
+
+                                // Add pagination logic here, similar to your original code...
+                            }
 
                             function setupPagination(totalRecords) {
                                 const totalPages = Math.ceil(totalRecords / recordsPerPage);

@@ -25,12 +25,12 @@ body {
   background: #f8f9fa;
   font-weight: bold;
   color: #b63a29;
-  margin-top: 30%;
   margin-bottom: 3%;
   cursor: pointer;
 }
 
 .register-right,
+.registerFaculty-right,
 .login-right,
 .validation-right,
 .forgot-password-right {
@@ -108,31 +108,62 @@ body {
   color: #495057;
 }
 
+/* Media Query for smaller screens */
+@media (max-width: 768px) {
+  .sign-in-up {
+      margin-top: 1%;
+      padding: 2%;
+  }
 
+  .register-left input,
+  .login-left input {
+      width: 80%;
+  }
 
-.sign-in-up .nav-tabs{
-  margin-top: 3%;
-  border: none;
-  background: #b63a29;
-  border-radius: 1.5rem;
-  width: 28%;
-  float: right;
+  .register-left,
+  .login-left {
+      margin-top: 2%;
+  }
+
+  .register-left img,
+  .login-left img {
+      width: 40%;
+      margin-top: 10%;
+  }
+
+  .sign-in-up .register-form,
+  .sign-in-up .login-form,
+  .sign-in-up .validation-form,
+  .sign-in-up .forgot-password-form {
+      padding: 5%;
+  }
+
+  .register-right,
+  .registerFaculty-right,
+  .login-right,
+  .validation-right,
+  .forgot-password-right {
+      border-top-left-radius: 5% 50%;
+      border-bottom-left-radius: 5% 50%;
+      padding: 2%;
+  }
+
+  .btnRegister,
+  .btnlogin {
+      width: 100%;
+      font-size: 1rem;
+  }
 }
-.sign-in-up .nav-tabs .nav-link{
-  padding: 2%;
-  height: 34px;
-  font-weight: 600;
-  color: #fff;
-  border-top-right-radius: 1.5rem;
-  border-bottom-right-radius: 1.5rem;
-}
-.sign-in-up .nav-tabs .nav-link:hover{
-  border: none;
-}
-.sign-in-up .nav-tabs .nav-link.active{
-  width: 100px;
-  color: #b63a29;
-  border: 2px solid #b63a29;
-  border-top-left-radius: 1.5rem;
-  border-bottom-left-radius: 1.5rem;
+
+@media (max-width: 576px) {
+
+  .register-left,
+  .login-left,
+  .register-right,
+  .login-right,
+  .validation-right,
+  .registerFaculty-right,
+  .forgot-password-right {
+      border-radius: 0;
+  }
 }

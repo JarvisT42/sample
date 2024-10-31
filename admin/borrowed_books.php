@@ -172,6 +172,8 @@ session_start();
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Student Name</th>
+                                        <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Role</th>
+
                                         <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Way of Borrow</th>
                                         <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/3">Course</th>
                                         <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">Number of Books Borrowed</th>
@@ -194,33 +196,45 @@ session_start();
 
 
 
-                                    // Query to fetch all pending borrow entries along with student names and their borrowing method
                                     $sql = "SELECT 
-                                b.student_id,  -- Add this line
+                                b.student_id,  
+                                b.faculty_id,  
+
                                 b.Way_Of_Borrow,
                                  b.walk_in_id,
+                                 b.role,
                                 CASE 
-                                    WHEN b.Way_Of_Borrow = 'online' THEN CONCAT(s.First_Name, ' ', s.Last_Name) 
+                                 WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN CONCAT(s.First_Name, ' ', s.Last_Name)
+    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN CONCAT(f.First_Name, ' ', f.Last_Name)
+
+ 
                                     WHEN b.Way_Of_Borrow = 'walk-in' THEN b.Full_Name 
                                     ELSE '' 
                                 END AS First_Name,
                                 CASE 
-                                    WHEN b.Way_Of_Borrow = 'online' THEN s.S_Course
-                                    WHEN b.Way_Of_Borrow = 'walk-in' THEN '' 
+                                    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN s.S_Course
+                                    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN 'n/a' 
+
+                                    WHEN b.Way_Of_Borrow = 'walk-in' THEN 'n/a' 
+
                                     ELSE '' 
                                 END AS Course,
                                 b.Due_Date,
                                 b.Issued_Date,
                                 COUNT(b.student_id) AS borrow_count,
+                                COUNT(b.faculty_id) AS borrow_count,
+
                                 MIN(CASE 
                                     WHEN b.Due_Date = '' THEN DATE_ADD(b.Issued_Date, INTERVAL 3 DAY)
                                     ELSE b.Due_Date
                                 END) AS nearest_date,
                                 MIN(b.Time) AS Time  
                             FROM borrow b
-                            LEFT JOIN students s ON b.student_id = s.id  
+                            LEFT JOIN students s ON b.student_id = s.Student_Id
+                            LEFT JOIN faculty f ON b.faculty_id = f.Faculty_Id
+
                             WHERE b.status = 'borrowed'
-                            GROUP BY b.Way_Of_Borrow, b.student_id, b.Full_Name, b.Return_Date";
+                            GROUP BY b.Way_Of_Borrow, b.student_id, b.faculty_id, b.Full_Name, b.Return_Date";
 
 
 
@@ -232,10 +246,11 @@ session_start();
                                     <?php if ($borrowData && $borrowData->num_rows > 0): ?>
                                         <?php while ($row = $borrowData->fetch_assoc()): ?>
                                             <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-300">
-                                           
+
 
                                                 <td scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white break-words student-name" style="max-width: 300px;">
                                                     <?php echo htmlspecialchars($row['First_Name']); ?> </td>
+                                                <td class="px-6 py-4"><?php echo htmlspecialchars($row['role']); ?></td>
 
                                                 <td class="px-6 py-4"><?php echo htmlspecialchars($row['Way_Of_Borrow']); ?></td>
 
@@ -272,13 +287,13 @@ session_start();
 
 
 
+
                                                 <td class="px-6 py-4">
                                                     <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                                        onclick="redirectToBookRequest('<?php echo htmlspecialchars($row['Way_Of_Borrow']); ?>', '<?php echo htmlspecialchars($row['walk_in_id'] ?? ''); ?>', '<?php echo htmlspecialchars($row['student_id'] ?? ''); ?>')">
+                                                        onclick="redirectToBookRequest('<?php echo htmlspecialchars($row['role']); ?>', '<?php echo htmlspecialchars($row['Way_Of_Borrow']); ?>', '<?php echo htmlspecialchars($row['walk_in_id'] ?? ''); ?>', '<?php echo htmlspecialchars($row['student_id'] ?? ''); ?>', '<?php echo htmlspecialchars($row['faculty_id'] ?? ''); ?>')">
                                                         Next
                                                     </button>
                                                 </td>
-
 
 
 
@@ -297,18 +312,38 @@ session_start();
                             </table>
 
                             <script>
-                                function redirectToBookRequest(wayOfBorrow, walkInId, studentId) {
-                                    let url;
-                                    if (wayOfBorrow === 'online') {
-                                        url = 'borrowed_books_2online.php?student_id=' + studentId; // Append student_id if needed
-                                    } else if (wayOfBorrow === 'walk-in') {
-                                        url = 'borrowed_books_2walkIn.php?walk_in_id=' + walkInId; // Append walk_in_id if needed
+                                function redirectToBookRequest(role, wayOfBorrow, walkInId, studentId, facultyId) {
+                                    let url = 'borrowed_books_2.php?';
+
+                                    // Check if it's a walk-in borrow
+                                    if (wayOfBorrow === 'walk-in') {
+                                        if (role === 'Faculty' && walkInId) {
+                                            // For faculty walk-ins, use faculty_id
+                                            url += 'walk_in_id=' + walkInId;
+                                        } else if (role === 'Student' && walkInId) {
+                                            // For student walk-ins, use walk_in_id
+                                            url += 'walk_in_id=' + walkInId;
+                                        } else {
+                                            alert("Unable to determine the correct ID for walk-in user.");
+                                            return;
+                                        }
+                                    } else {
+                                        // For online borrow, use student_id or faculty_id
+                                        if (role === 'Faculty' && facultyId) {
+                                            url += 'faculty_id=' + facultyId;
+                                        } else if (role === 'Student' && studentId) {
+                                            url += 'student_id=' + studentId;
+                                        } else {
+                                            alert("Unable to determine the correct ID for online user.");
+                                            return;
+                                        }
                                     }
-                                    if (url) {
-                                        window.location.href = url; // Redirect to the chosen URL
-                                    }
+
+                                    // Redirect to the constructed URL
+                                    window.location.href = url;
                                 }
                             </script>
+
 
                         </div>
                     </div>
@@ -353,7 +388,7 @@ session_start();
                                         b.Return_Date,
                                         COUNT(b.student_id) AS borrow_count
                                         FROM borrow b
-                                        LEFT JOIN students s ON b.student_id = s.id  
+                                        LEFT JOIN students s ON b.student_id = s.student_id
                                         WHERE b.status = 'returned'
                                         GROUP BY b.Way_Of_Borrow, b.student_id, b.Full_Name";
 
@@ -474,7 +509,7 @@ session_start();
         });
     </script>
 
-<script>
+    <script>
         // Function to automatically show the dropdown if on book_request.php
         document.addEventListener('DOMContentLoaded', function() {
             const dropdownRequest = document.getElementById('dropdown-request');

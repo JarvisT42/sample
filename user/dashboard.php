@@ -9,6 +9,8 @@ if ($_SESSION["loggedin"] !== TRUE) {
     echo "<script>" . "window.location.href='../index.php';" . "</script>";
     exit;
 }
+$Student_Id = $_SESSION["Student_Id"];
+
 ?>
 
 
@@ -78,12 +80,11 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             <div class="mt-2 flex items-center justify-between">
                                 <?php
 
-                                $id = $_SESSION["Id"];
                                 // Prepared statement to prevent SQL injection
 
 
                                 // Query to count borrowed books
-                                $sql = "SELECT COUNT(*) AS total_borrowed FROM borrow WHERE status = 'pending' and student_id = $id"; // Replace 'books' with your table name and 'status' with your field
+                                $sql = "SELECT COUNT(*) AS total_borrowed FROM borrow WHERE status = 'pending' and student_id = $Student_Id"; // Replace 'books' with your table name and 'status' with your field
                                 $result = $conn->query($sql);
 
                                 if ($result->num_rows > 0) {
@@ -117,12 +118,11 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             <div class="mt-2 flex items-center justify-between">
                                 <?php
 
-                                $id = $_SESSION["Id"];
                                 // Prepared statement to prevent SQL injection
 
 
                                 // Query to count borrowed books
-                                $sql = "SELECT COUNT(*) AS total_borrowed FROM borrow WHERE status = 'borrowed' and student_id = $id"; // Replace 'books' with your table name and 'status' with your field
+                                $sql = "SELECT COUNT(*) AS total_borrowed FROM borrow WHERE status = 'borrowed' and student_id = $Student_Id"; // Replace 'books' with your table name and 'status' with your field
                                 $result = $conn->query($sql);
 
                                 if ($result->num_rows > 0) {
@@ -159,8 +159,7 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             </div>
                             <div class="mt-2 flex items-center justify-between">
                                 <?php
-                                // Start session and retrieve the student id from the session
-                                $id = $_SESSION["Id"]; // Retrieve student id from the session
+                         
 
                                 // Prepared statement to retrieve the Issued_Date and Due_Date of borrowed books
                                 $stmt = $conn->prepare("SELECT Issued_Date, Due_Date FROM borrow WHERE status = 'borrowed' AND student_id = ?");
@@ -236,15 +235,20 @@ if ($_SESSION["loggedin"] !== TRUE) {
                         die("Connection failed: " . $e->getMessage());
                     }
 
-                    // Step 2: Connect to the second database (gfi_library_database_books_records)
-                    $dbname2 = "gfi_library_database_books_records";
+                   // Second database connection
+                   $host2 = "localhost";
+                   $dbname2 = "gfi_library_database_books_records";
+                   $username2 = "root";
+                   $password2 = "";
+                   
+                   try {
+                       $pdo2 = new PDO("mysql:host=$host2;dbname=$dbname2", $username2, $password2);
+                       $pdo2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                   } catch (PDOException $e) {
+                       die("Connection to second database failed: " . $e->getMessage());
+                   }
 
-                    try {
-                        $pdo2 = new PDO("mysql:host=$host;dbname=$dbname2", $username, $password);
-                        $pdo2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                    } catch (PDOException $e) {
-                        die("Connection failed: " . $e->getMessage());
-                    }
+                   
 
                     // Step 3: Get the current year
                     $currentYear = date("Y");  // e.g., 2024

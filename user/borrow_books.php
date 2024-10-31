@@ -1,10 +1,14 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 include '../connection.php';  // Assuming you have a connection script
 include '../connection2.php';  // Assuming you have a connection script for book update
 
 // Get the student name, selected time, date, and email from session
-$id = $_SESSION["Id"];
+$id = $_SESSION["Student_Id"];
 $email = $_SESSION["email"];
 $selectedDate = $_SESSION["selected_date"];
 $selectedTime = $_SESSION["selected_time"];

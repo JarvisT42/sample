@@ -102,7 +102,7 @@
                         <a href="edit_fines.php" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 active-catalog-setting">Edit Fines</a>
                     </li>
                     <li>
-                        <a href="add_student_id.php" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 active-catalog-setting">Add Student ID.</a>
+                        <a href="add_student_id.php" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 active-student_id">Add Student ID.</a>
                     </li>
                     <li>
                         <a href="add_admin_account.php" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 active-add-account">Register</a>

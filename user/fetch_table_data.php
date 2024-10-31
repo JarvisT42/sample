@@ -1,11 +1,11 @@
 <?php
 session_start(); // Start the session
 
-if (!isset($_SESSION['Id'])) {
+if (!isset($_SESSION['Student_Id'])) {
     die("Student ID not set in session.");
 }
 
-$studentId = $_SESSION['Id']; // Assuming student_id is stored in session
+$studentId = $_SESSION['Student_Id']; // Assuming student_id is stored in session
 
 if (!isset($_SESSION['book_bag'])) {
     $_SESSION['book_bag'] = [];

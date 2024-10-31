@@ -4,12 +4,12 @@ include '../connection.php'; // Include your database connection script
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-if (!isset($_SESSION['Id'])) {
+if (!isset($_SESSION['Student_Id'])) {
     echo json_encode(['status' => 'error', 'message' => 'Student not logged in']);
     exit;
 }
 
-$studentId = $_SESSION['Id']; // Assuming the student ID is stored in the session
+$studentId = $_SESSION['Student_Id']; // Assuming the student ID is stored in the session
 
 // Check how many books the student currently has borrowed
 $query = "SELECT COUNT(*) AS borrowed_count FROM borrow WHERE student_id = ? AND status = 'pending'";

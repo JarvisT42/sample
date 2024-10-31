@@ -22,9 +22,18 @@ session_start();
     <style>
         .active-books_first {
             background-color: #f0f0f0;
-    /* Example for light mode */
-    color: #000;
+            /* Example for light mode */
+            color: #000;
         }
+        .preview-image img {
+    outline: none; /* Remove outline for images */
+}
+
+.preview-image:focus,
+.preview-image img:focus {
+    outline: none; /* Remove outline when focused */
+}
+
     </style>
 </head>
 
@@ -37,7 +46,7 @@ session_start();
 
         <div class="p-4 sm:ml-64">
 
-            <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+            <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 min-h-screen">
 
                 <!-- Title Box -->
                 <!-- Title and Button Box -->
@@ -52,7 +61,7 @@ session_start();
 
 
                 <!-- Main Content Box -->
-                <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 ">
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 min-h-screen">
                     <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900">
                         <div class="flex items-center space-x-4">
                             <!-- Dropdown Button -->
@@ -169,7 +178,14 @@ session_start();
                         </ul>
                     </nav>
 
-
+                    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+                        <div class="relative">
+                            <!-- Close button -->
+                            <button id="closeModal" class="absolute top-2 right-2 text-white text-2xl font-bold">&times;</button>
+                            <!-- Image preview -->
+                            <img id="modalImage" src="" alt="Image Preview" class="max-w-full max-h-screen rounded-lg shadow-lg">
+                        </div>
+                    </div>
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
                             const button = document.getElementById('dropdownActionButton');
@@ -181,6 +197,14 @@ session_start();
                             const searchInput = document.getElementById('table-search-users');
                             const checkboxOption = document.getElementById('checkboxOption');
 
+
+                            const imageModal = document.getElementById('imageModal');
+                            const modalImage = document.getElementById('modalImage');
+                            const closeModal = document.getElementById('closeModal');
+
+
+
+
                             let allRecords = []; // To store all fetched records
                             let filteredRecords = []; // To store filtered records
                             let currentPage = 1; // To track the current page
@@ -190,8 +214,8 @@ session_start();
                                 fetch(`fetch_table_data.php?table=${encodeURIComponent(tableName)}`)
                                     .then(response => response.json())
                                     .then(data => {
-                                        allRecords = data.data; // Store the fetched records
-                                        filteredRecords = allRecords; // Initialize filtered records
+                                        allRecords = data.data;
+                                        filteredRecords = allRecords;
                                         displayRecords(filteredRecords);
                                         setupPagination(filteredRecords.length);
                                     });
@@ -199,49 +223,76 @@ session_start();
 
                             function displayRecords(records) {
                                 const startIndex = (currentPage - 1) * recordsPerPage;
-                                const endIndex = startIndex + recordsPerPage;
-                                const paginatedRecords = records.slice(startIndex, endIndex);
+                                const paginatedRecords = records.slice(startIndex, startIndex + recordsPerPage);
 
                                 tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
-            <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
-                <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
-                    <div class="flex-none w-12">
-                        <div class="text-lg font-semibold text-gray-800">${startIndex + index + 1}</div>
-                    </div>
-                    <div class="flex-1 border-l-2 border-black p-4">
-                        <h2 class="text-lg font-semibold mb-2">${record.title}</h2>
-                        <span class="block text-base mb-2">by ${record.author}</span>
-                        <div class="flex items-center space-x-2 mb-2">
-                            <div class="text-sm text-gray-600">Published</div>
-                            <div class="text-sm text-gray-600">${record.publicationDate}</div>
-                            <div class="text-sm text-gray-600">copies ${record.copies}</div>
+                <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
+                    <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
+                        <div class="flex-none w-12">
+                            <div class="text-lg font-semibold text-gray-800">${startIndex + index + 1}</div>
                         </div>
-                         <div class="flex items-center space-x-2 mb-2">
-                        
-                        <div class="text-sm text-gray-600">Book Status: ${record.status}</div> <!-- Add status here -->
-                    </div>
-                        <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
-                            ${record.table}
+                        <div class="flex-1 border-l-2 border-black p-4">
+                            <h2 class="text-lg font-semibold mb-2">${record.title}</h2>
+                            <span class="block text-base mb-2">by ${record.author}</span>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="text-sm text-gray-600">Published</div>
+                                <div class="text-sm text-gray-600">${record.publicationDate}</div>
+                                <div class="text-sm text-gray-600">copies ${record.copies}</div>
+                            </div>
+                            <div class="text-sm text-gray-600 mb-2">Book Status: ${record.status}</div>
                         </div>
-                    </div>
-                   <div class="flex-shrink-0">
-    ${record.copies <= 1
-        ? `<span class="text-red-600">Not Available</span>`
-        : `<a href="#" class="text-green-600 hover:underline">
-                <span class="fa fa-plus"></span> Available
-            </a>`
-    }
-</div>
-
-                    <div class="flex-shrink-0">
-                        <a href="#">
-                            <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">
-                        </a>
-                    </div>
-                </div>
-            </li>
-        `).join('');
+                        <div class="flex-shrink-0">
+                            ${record.copies <= 1
+                                ? `<span class="text-red-600">Not Available</span>`
+                                : `<a href="#" class="text-green-600 hover:underline">Available</a>`
                             }
+                        </div>
+                        <div class="flex-shrink-0">
+                            <a href="#" class="preview-image">
+                                <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            `).join('');
+
+                                // Attach click event to each image with the preview-image class
+                                document.querySelectorAll('.preview-image img').forEach(image => {
+                                    image.addEventListener('click', function(event) {
+                                        event.preventDefault();
+                                        modalImage.src = this.src; // Set the clicked image as the modal image
+                                        imageModal.classList.remove('hidden'); // Show the modal
+                                    });
+                                });
+                            }
+
+                            // Close modal when the close button is clicked
+                            closeModal.addEventListener('click', () => {
+                                imageModal.classList.add('hidden');
+                                modalImage.src = "";
+                            });
+
+                            // Close modal when clicking outside the image area
+                            imageModal.addEventListener('click', (event) => {
+                                if (event.target === imageModal) {
+                                    imageModal.classList.add('hidden');
+                                    modalImage.src = "";
+                                }
+                            });
+
+                            function setupPagination(totalRecords) {
+                                const totalPages = Math.ceil(totalRecords / recordsPerPage);
+                                const paginationContainer = document.querySelector('nav ul');
+                                paginationContainer.innerHTML = '';
+
+                                // Add pagination logic here, similar to your original code...
+                            }
+
+                            // Load initial data
+
+
+
+
 
                             function setupPagination(totalRecords) {
                                 const totalPages = Math.ceil(totalRecords / recordsPerPage);
