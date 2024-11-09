@@ -32,6 +32,7 @@ $damageDescription = $data['damage_description']; // Add damage description
 $walkinId = $data['walkin_id']; // Changed to walkin_id
 $bookId = $data['book_id'];
 $category = $data['category'];
+$accessionNo = $data['accession_no']; // Add accession_no to data
 
 // Bind parameters to the first update query
 $stmt->bind_param('ddsssss', $fines, $bookFines, $damageDescription, $returnedDate, $walkinId, $bookId, $category); // 'ddsssss' for two doubles and five strings
@@ -54,8 +55,32 @@ if ($stmt->execute()) {
 
     // Execute the second query (for updating No_Of_Copies)
     if ($bookStmt->execute()) {
-        // If both queries were successful
-        echo json_encode(['success' => true]);
+
+        // Prepare the third query to update the accession_records table
+        $updateAccessionQuery = "UPDATE accession_records SET status = 'available', available = 'yes' WHERE accession_no = ? AND walk_in_id = ? AND status = 'lost'";
+        $stmtAccession = $conn->prepare($updateAccessionQuery);
+
+        // Check if the third statement preparation was successful
+        if (!$stmtAccession) {
+            echo json_encode(['success' => false, 'message' => 'Statement preparation failed: ' . $conn->error]);
+            exit();
+        }
+
+        // Bind the accession_no and walk_in_id to the third query
+        $stmtAccession->bind_param('si', $accessionNo, $walkinId);
+
+        // Execute the third query
+        if ($stmtAccession->execute()) {
+            // If all updates were successful
+            echo json_encode(['success' => true]);
+        } else {
+            // If the third query fails
+            echo json_encode(['success' => false, 'message' => 'Failed to update accession records: ' . $stmtAccession->error]);
+        }
+
+        // Close the third statement
+        $stmtAccession->close();
+
     } else {
         // If the second query fails
         echo json_encode(['success' => false, 'message' => 'Failed to update book copies: ' . $bookStmt->error]);

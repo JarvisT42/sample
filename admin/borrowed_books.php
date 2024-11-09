@@ -8,7 +8,6 @@ session_start();
 
 <head>
     <?php include 'admin_header.php'; ?>
-
     <style>
         .active-borrowed-books {
             background-color: #f0f0f0;
@@ -20,6 +19,7 @@ session_start();
             color: #000;
         }
     </style>
+
     <style>
         /* Force underline when the peer is checked */
         input:checked+label {
@@ -197,44 +197,44 @@ session_start();
 
 
                                     $sql = "SELECT 
-                                b.student_id,  
-                                b.faculty_id,  
+                                    b.student_id,  
+                                    b.faculty_id,  
+                                    b.Way_Of_Borrow,
+                                    b.walk_in_id,
+                                    b.role,
+                                    s.course_id,  -- Course ID from the student table
+                                    c.course,     -- Course name from the course table
+                                    CASE 
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN CONCAT(s.First_Name, ' ', s.Last_Name)
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN CONCAT(f.First_Name, ' ', f.Last_Name)
+                                        WHEN b.Way_Of_Borrow = 'walk-in' THEN w.full_name
+                                        ELSE '' 
+                                    END AS First_Name,
+                                    CASE 
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN c.course
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN 'n/a'
+                                        WHEN b.Way_Of_Borrow = 'walk-in' THEN 'n/a'
+                                        ELSE '' 
+                                    END AS Course,
+                                    b.Due_Date,
+                                    b.Issued_Date,
+                                    
+                                    -- Calculate total borrow count by summing individual counts
+                                    (COUNT(b.student_id) + COUNT(b.faculty_id) + COUNT(b.walk_in_id)) AS borrow_count,
+                        
+                                    MIN(CASE 
+                                        WHEN b.Due_Date = '' THEN DATE_ADD(b.Issued_Date, INTERVAL 3 DAY)
+                                        ELSE b.Due_Date
+                                    END) AS nearest_date,
+                                    MIN(b.Time) AS Time  
+                                FROM borrow b
+                                LEFT JOIN students s ON b.student_id = s.Student_Id
+                                LEFT JOIN faculty f ON b.faculty_id = f.Faculty_Id
+                                LEFT JOIN walk_in_borrowers w ON b.walk_in_id = w.walk_in_id
+                                LEFT JOIN course c ON s.course_id = c.course_id
+                                WHERE b.status = 'borrowed'
+                                GROUP BY b.Way_Of_Borrow, b.student_id, b.faculty_id, b.role, s.course_id";
 
-                                b.Way_Of_Borrow,
-                                 b.walk_in_id,
-                                 b.role,
-                                CASE 
-                                 WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN CONCAT(s.First_Name, ' ', s.Last_Name)
-    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN CONCAT(f.First_Name, ' ', f.Last_Name)
-
- 
-                                    WHEN b.Way_Of_Borrow = 'walk-in' THEN b.Full_Name 
-                                    ELSE '' 
-                                END AS First_Name,
-                                CASE 
-                                    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN s.S_Course
-                                    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN 'n/a' 
-
-                                    WHEN b.Way_Of_Borrow = 'walk-in' THEN 'n/a' 
-
-                                    ELSE '' 
-                                END AS Course,
-                                b.Due_Date,
-                                b.Issued_Date,
-                                COUNT(b.student_id) AS borrow_count,
-                                COUNT(b.faculty_id) AS borrow_count,
-
-                                MIN(CASE 
-                                    WHEN b.Due_Date = '' THEN DATE_ADD(b.Issued_Date, INTERVAL 3 DAY)
-                                    ELSE b.Due_Date
-                                END) AS nearest_date,
-                                MIN(b.Time) AS Time  
-                            FROM borrow b
-                            LEFT JOIN students s ON b.student_id = s.Student_Id
-                            LEFT JOIN faculty f ON b.faculty_id = f.Faculty_Id
-
-                            WHERE b.status = 'borrowed'
-                            GROUP BY b.Way_Of_Borrow, b.student_id, b.faculty_id, b.Full_Name, b.Return_Date";
 
 
 
@@ -258,7 +258,7 @@ session_start();
 
 
                                                 <td class="px-6 py-4 break-words" style="max-width: 300px;">
-                                                    <?php echo htmlspecialchars($row['Course']); ?> </td>
+                                                    <?php echo htmlspecialchars($row['course']); ?> </td>
                                                 <td class="px-6 py-4"><?php echo htmlspecialchars($row['borrow_count']); ?></td>
                                                 <td class="px-6 py-4">
                                                     <?php
@@ -509,6 +509,7 @@ session_start();
         });
     </script>
 
+
     <script>
         // Function to automatically show the dropdown if on book_request.php
         document.addEventListener('DOMContentLoaded', function() {
@@ -520,6 +521,7 @@ session_start();
 
         });
     </script>
+
 </body>
 
 </html>

@@ -1,5 +1,9 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 include '../connection.php';  // Assuming you have a connection script
 include '../connection2.php';  // Assuming you have a connection script for book update
 
@@ -8,6 +12,7 @@ $id = $_SESSION["Faculty_Id"];
 $email = $_SESSION["email"];
 $selectedDate = $_SESSION["selected_date"];
 $selectedTime = $_SESSION["selected_time"];
+$appointment_id = $_SESSION["appointment_id"];
 
 // Save book IDs (assuming you have book IDs in your session for each book)
 $bookBag = $_SESSION['book_bag']; // Books in session
@@ -20,7 +25,6 @@ if (!empty($bookBag)) {
         $role = 'Faculty';
         $status = 'pending';
         $way_of_borrow = 'online';
-        $studentid = '0';  // Assuming 'id' exists in the book session data
 
         // Query to check the number of copies
         $checkCopiesSql = "SELECT No_Of_Copies FROM `$table` WHERE id = ?";
@@ -44,11 +48,11 @@ if (!empty($bookBag)) {
         }
 
         // Proceed with the insert if copies are available
-        $sql = "INSERT INTO borrow (role, student_id, faculty_id, book_id, Category, Date_to_claim, time, Way_Of_Borrow, status) 
+        $sql = "INSERT INTO borrow (role, faculty_id, book_id, Category, appointment_id, Date_to_claim, time, Way_Of_Borrow, status) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         if ($stmt = $conn->prepare($sql)) {
-            $stmt->bind_param("siiisssss", $role, $studentid, $id, $book_id, $table, $selectedDate, $selectedTime, $way_of_borrow, $status);
+            $stmt->bind_param("siisissss", $role, $id, $book_id, $table, $appointment_id, $selectedDate, $selectedTime, $way_of_borrow, $status);
             
             // Execute the query
             if ($stmt->execute()) {

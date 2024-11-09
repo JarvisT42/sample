@@ -12,7 +12,7 @@ if (isset($_GET['walk_in_id'])) {
     // Fetch the student ID and full name based on walk_in_id
     $studentQuery = "
   SELECT walk_in_id, Full_Name, Over_Due_Fines
-  FROM GFI_Library_Database.borrow 
+  FROM borrow 
   WHERE walk_in_id = ? AND status = 'lost'";
 
     $stmtStudent = $conn->prepare($studentQuery);
@@ -27,8 +27,8 @@ if (isset($_GET['walk_in_id'])) {
 
         // Fetch the category, book_id, and issued date based on the student_id
         $categoryQuery = "
-      SELECT a.Category, a.book_id, a.Issued_Date, a.Due_Date, Over_Due_Fines
-      FROM GFI_Library_Database.borrow AS a
+      SELECT a.Category, a.book_id, a.Issued_Date, a.Due_Date, Over_Due_Fines, accession_no
+      FROM borrow AS a
       WHERE a.walk_in_id = ? AND a.status = 'lost'";
 
         $stmt = $conn->prepare($categoryQuery);
@@ -193,6 +193,9 @@ if (isset($_GET['walk_in_id'])) {
                                                         <div class="mb-4">
                                                             <h2 class="text-lg font-semibold text-gray-600 mb-1">Borrow Category:</h2>
                                                             <p class="text-sm text-gray-500"><?php echo htmlspecialchars($book['Category']); ?></p>
+                                                            <h3 class="text-lg font-semibold text-gray-600 mb-1">Accession no:</h3>
+                                                            <p id="accession_no-<?php echo $overall_index; ?>" class="text-sm text-gray-500"><?php echo htmlspecialchars($book['accession_no']); ?></p>
+
                                                         </div>
                                                     </div>
                                                     <div class="w-full md:w-32 h-40 bg-gray-200 border border-gray-300 flex items-center justify-center mb-4 md:mb-0">
@@ -223,20 +226,15 @@ if (isset($_GET['walk_in_id'])) {
                                                         </div>
                                                     </div>
                                                     <div class="flex justify-end space-x-2 mt-4">
-                                                <!-- <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm renew-button"
-                                                    data-student-id="<?php echo htmlspecialchars($walk_in_id); ?>"
-                                                    data-book-id="<?php echo htmlspecialchars($book_id); ?>"
-                                                    data-category="<?php echo htmlspecialchars($category); ?>"
-                                                    data-due-date="<?php echo htmlspecialchars($due_date); ?>">
-                                                    Renew
-                                                </button> -->
 
-                                                <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
-                                                    data-index="<?php echo $overall_index; ?>"
-                                                    onclick="openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($walk_in_id); ?>', '<?php echo htmlspecialchars($book_id); ?>')">
-                                                    Return
-                                                </button>
-                                            </div>
+
+                                                        <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
+                                                            data-index="<?php echo $overall_index; ?>"
+                                                            onclick="openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($walk_in_id); ?>', '<?php echo htmlspecialchars($book_id); ?>', '<?php echo htmlspecialchars($book['accession_no']); ?>')">
+                                                            Return
+                                                        </button>
+
+                                                    </div>
                                                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                                                         <div style="display: none;">
                                                             <p class="text-sm font-semibold">Renew</p>
@@ -278,7 +276,7 @@ if (isset($_GET['walk_in_id'])) {
                                                 </div>
                                             </div>
 
-                                       
+
                                         </li>
 
 
@@ -486,6 +484,7 @@ if (isset($_GET['walk_in_id'])) {
                 <p id="modalBookTitle" class="mb-2"></p>
                 <p id="modalBookAuthor" class="mb-2"></p>
                 <p id="modalBookCategory" class="mb-2"></p>
+                <p id="modalAccessionNo" class="mb-2 hidden"></p>
 
                 <!-- Original fines display (unchanged) -->
                 <p id="OverDueFines" class="mb-4 hidden"></p>
@@ -528,8 +527,7 @@ if (isset($_GET['walk_in_id'])) {
 
 
     <script>
-        function openReturnModal(title, author, category, fines, fineInputId, walkinId, bookId) {
-
+        function openReturnModal(title, author, category, fines, fineInputId, walkinId, bookId, accessionNo) {
             // Set the book details in the modal
             document.getElementById('modalBookTitle').innerText = 'Title: ' + title;
             document.getElementById('modalBookAuthor').innerText = 'Author: ' + author;
@@ -542,34 +540,32 @@ if (isset($_GET['walk_in_id'])) {
             let updatedFines = document.getElementById(fineInputId).value; // Get value from the specific fines input field
             document.getElementById('BookFines').innerText = 'Book Fines: ₱ ' + (updatedFines || '0'); // Display updated fines or 0 if none
 
-            // Display the student ID and book ID in the modal
-            document.getElementById('modalWalkinId').innerText = 'Walkin ID: ' + walkinId; // Correct ID usage
+            // Display the walkin ID, book ID, and accession number in the modal
+            document.getElementById('modalWalkinId').innerText = 'Walkin ID: ' + walkinId;
             document.getElementById('modalBookId').innerText = 'Book ID: ' + bookId;
+            document.getElementById('modalAccessionNo').innerText = 'Accession No: ' + accessionNo; // Display accession no
 
-            // Check if the button clicked was "Next" (which means the book is marked as "Lost")
-            const statusSelect = document.getElementById(`statusSelect-${fineInputId.split('-')[1]}`).value; // Get the status of the book
-
-            // Update the label of the "Confirm Return" button to "Pay" if the status is "Lost"
+            // Adjust the confirm button label and damage description based on book status
+            const statusSelect = document.getElementById(`statusSelect-${fineInputId.split('-')[1]}`).value;
             const confirmButton = document.getElementById('confirmReturn');
-            if (statusSelect === "Lost") {
-                confirmButton.innerText = 'Book Lost'; // Change the label to 'Pay'
-                document.getElementById('damageDescriptionLabel').style.display = 'none'; // Hide damage description label
-                document.getElementById('damageDescription').style.display = 'none'; // Hide damage description
-            } else if (statusSelect === "Damage") {
-                confirmButton.innerText = 'Confirm Return'; // Set to 'Return'
 
-                // Show and set the damage description if applicable
-                let damageDesc = document.getElementById(`damageDescription-${fineInputId.split('-')[1]}`).value; // Get the damage description
+            if (statusSelect === "Lost") {
+                confirmButton.innerText = 'Book Lost';
+                document.getElementById('damageDescriptionLabel').style.display = 'none';
+                document.getElementById('damageDescription').style.display = 'none';
+            } else if (statusSelect === "Damage") {
+                confirmButton.innerText = 'Confirm Return';
+                let damageDesc = document.getElementById(`damageDescription-${fineInputId.split('-')[1]}`).value;
                 document.getElementById('damageDescriptionLabel').style.display = 'block';
                 document.getElementById('damageDescription').style.display = 'block';
-                document.getElementById('damageDescription').innerText = damageDesc || 'No description provided'; // Set the damage description or fallback
+                document.getElementById('damageDescription').innerText = damageDesc || 'No description provided';
             } else {
-                confirmButton.innerText = 'Confirm Return'; // Reset to default
-                document.getElementById('damageDescriptionLabel').style.display = 'none'; // Hide damage description label
-                document.getElementById('damageDescription').style.display = 'none'; // Hide damage description
+                confirmButton.innerText = 'Confirm Return';
+                document.getElementById('damageDescriptionLabel').style.display = 'none';
+                document.getElementById('damageDescription').style.display = 'none';
             }
 
-            // Display the modal
+            // Show the modal
             document.getElementById('returnModal').classList.remove('hidden');
         }
 
@@ -583,22 +579,28 @@ if (isset($_GET['walk_in_id'])) {
         // Confirm return or pay logic
         document.getElementById('confirmReturn').onclick = function() {
             const overdueFines = document.getElementById('OverDueFines').innerText.replace('Over Due Fines: ₱ ', ''); // Extract overdue fines
-            const bookFines = document.getElementById('BookFines').innerText.replace('Book Fines: ₱ ', ''); // Correct extraction of book fines
-            const walkinId = document.getElementById('modalWalkinId').innerText.replace('Walkin ID: ', ''); // Use correct ID
+            const bookFines = document.getElementById('BookFines').innerText.replace('Book Fines: ₱ ', ''); // Extract book fines
+            const walkinId = document.getElementById('modalWalkinId').innerText.replace('Walkin ID: ', ''); // Get walk-in ID
+            const bookId = document.getElementById('modalBookId').innerText.replace('Book ID: ', ''); // Get book ID
+            const category = document.getElementById('modalBookCategory').innerText.replace('Category: ', ''); // Get category
+            const accessionNo = document.getElementById('modalAccessionNo').innerText.replace('Accession No: ', ''); // Get accession no
+            const damageDesc = document.getElementById('damageDescription').innerText; // Get damage description
 
-            const bookId = document.getElementById('modalBookId').innerText.replace('Book ID: ', '');
-            const category = document.getElementById('modalBookCategory').innerText.replace('Category: ', '');
-            const damageDesc = document.getElementById('damageDescription').innerText; // Extract damage description
-
+            // Prepare data to be sent
             const data = {
                 fines: parseFloat(overdueFines) || 0,
                 book_fines: parseFloat(bookFines) || 0,
                 walkin_id: walkinId,
                 book_id: bookId,
                 category: category,
+                accession_no: accessionNo, // Include accession no
                 damage_description: damageDesc // Include damage description
             };
 
+            // Show an alert with the data before sending it
+            alert(`Data to be sent:\n\n${JSON.stringify(data, null, 2)}`);
+
+            // Proceed with the AJAX request
             const confirmButton = document.getElementById('confirmReturn');
             if (confirmButton.innerText === 'Book Lost') {
                 fetch('borrowed_books_2walkIn_pay.php', {

@@ -12,6 +12,7 @@ $id = $_SESSION["Student_Id"];
 $email = $_SESSION["email"];
 $selectedDate = $_SESSION["selected_date"];
 $selectedTime = $_SESSION["selected_time"];
+$appointment_id = $_SESSION["appointment_id"];
 
 // Save book IDs (assuming you have book IDs in your session for each book)
 $bookBag = $_SESSION['book_bag']; // Books in session
@@ -47,11 +48,11 @@ if (!empty($bookBag)) {
         }
 
         // Proceed with the insert if copies are available
-        $sql = "INSERT INTO borrow (role, student_id, book_id, Category, Date_to_claim, time, Way_Of_Borrow, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO borrow (role, student_id, book_id, Category, appointment_id, Date_to_claim, time, Way_Of_Borrow, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         if ($stmt = $conn->prepare($sql)) {
-            $stmt->bind_param("siisssss", $role, $id, $book_id, $table, $selectedDate, $selectedTime, $way_of_borrow, $status);
+            $stmt->bind_param("siisissss", $role, $id, $book_id, $table, $appointment_id, $selectedDate, $selectedTime, $way_of_borrow, $status);
             
             // Execute the query
             if ($stmt->execute()) {

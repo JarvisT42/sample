@@ -58,7 +58,7 @@ session_start();
                     <select id="role" name="role" class="col-span-2 border rounded px-3 py-2">
                         <option value="">Select Role</option>
                         <option value="Student">Student</option>
-                        <option value="Teacher">Teacher</option>
+                        <option value="Faculty">Faculty</option>
                     </select>
                     <label for="full_name" class="text-left">FULL NAME:&nbsp;&nbsp;&nbsp;</label>
                     <input id="full_name" name="full_name" placeholder="Full Name" class="col-span-2 border rounded px-3 py-2" />

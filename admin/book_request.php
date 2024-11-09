@@ -87,111 +87,113 @@ include '../connection.php';  // Ensure you have your database connection
 
                             </thead>
                             <tbody>
-<?php
-include '../connection.php';  // Ensure you have your database connection
+                                <?php
+                                include '../connection.php';  // Ensure you have your database connection
 
-// Get today's date
-$today = date('Y-m-d');
+                                // Get today's date
+                                $today = date('Y-m-d');
 
-// Fetch book_id and category for entries that exceed 3 days
-$fetchSql = "SELECT book_id, Category FROM borrow 
+                                // Fetch book_id and category for entries that exceed 3 days
+                                $fetchSql = "SELECT book_id, Category FROM borrow 
              WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
-$fetchResult = $conn->query($fetchSql);
+                                $fetchResult = $conn->query($fetchSql);
 
-if ($fetchResult->num_rows > 0) {
-    while ($row = $fetchResult->fetch_assoc()) {
-        $book_id = $row['book_id'];
-        $category = $row['Category'];
+                                if ($fetchResult->num_rows > 0) {
+                                    while ($row = $fetchResult->fetch_assoc()) {
+                                        $book_id = $row['book_id'];
+                                        $category = $row['Category'];
 
-        // Update the book record in the corresponding category table
-        $updateBookSql = "UPDATE gfi_library_database_books_records.$category
+                                        // Update the book record in the corresponding category table
+                                        $updateBookSql = "UPDATE gfi_library_database_books_records.$category
                           SET No_Of_Copies = No_Of_Copies + 1
                           WHERE id = $book_id";
-        $conn->query($updateBookSql);
-    }
-}
+                                        $conn->query($updateBookSql);
+                                    }
+                                }
 
-// Update the status to 'Failed' for borrow entries that exceed 3 days
-$updateSql = "UPDATE borrow
+                                // Update the status to 'Failed' for borrow entries that exceed 3 days
+                                $updateSql = "UPDATE borrow
               SET status = 'failed-to-claim'
               WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
-$conn->query($updateSql);
+                                $conn->query($updateSql);
 
-// Query to get student records
-$studentSql = "SELECT s.First_Name, b.role, s.Middle_Initial, s.Last_Name, s.S_Course, b.student_id, b.Time, COUNT(b.student_id) AS borrow_count, 
+                                // Query to get student records
+                                $studentSql = "SELECT s.First_Name, b.role, s.Middle_Initial, s.Last_Name, c.course, b.student_id, b.Time, COUNT(b.student_id) AS borrow_count, 
                      MIN(b.Date_To_Claim) AS nearest_date 
               FROM borrow b 
               JOIN students s ON b.student_id = s.Student_Id  
+              JOIN course c ON s.course_id = c.course_id  
+
               WHERE b.status = 'pending' 
               GROUP BY b.student_id";
-$studentResult = $conn->query($studentSql);
+                                $studentResult = $conn->query($studentSql);
 
-// Query to get faculty records
-$facultySql = "SELECT f.First_Name, b.role, f.Middle_Initial, f.Last_Name, b.faculty_id, b.Time, COUNT(b.faculty_id) AS borrow_count, 
+                                // Query to get faculty records
+                                $facultySql = "SELECT f.First_Name, b.role, f.Middle_Initial, f.Last_Name, b.faculty_id, b.Time, COUNT(b.faculty_id) AS borrow_count, 
                      MIN(b.Date_To_Claim) AS nearest_date 
               FROM borrow b 
               JOIN faculty f ON b.faculty_id = f.Faculty_Id  
               WHERE b.status = 'pending' 
               GROUP BY b.faculty_id";
-$facultyResult = $conn->query($facultySql);
+                                $facultyResult = $conn->query($facultySql);
 
-// Array to store combined records
-$records = [];
-if ($studentResult->num_rows > 0) {
-    while ($row = $studentResult->fetch_assoc()) {
-        $row['user_type'] = 'student'; // Mark as student
-        $records[] = $row;
-    }
-}
-if ($facultyResult->num_rows > 0) {
-    while ($row = $facultyResult->fetch_assoc()) {
-        $row['user_type'] = 'faculty'; // Mark as faculty
-        $records[] = $row;
-    }
-}
-?>
+                                // Array to store combined records
+                                $records = [];
+                                if ($studentResult->num_rows > 0) {
+                                    while ($row = $studentResult->fetch_assoc()) {
+                                        $row['user_type'] = 'student'; // Mark as student
+                                        $records[] = $row;
+                                    }
+                                }
+                                if ($facultyResult->num_rows > 0) {
+                                    while ($row = $facultyResult->fetch_assoc()) {
+                                        $row['user_type'] = 'faculty'; // Mark as faculty
+                                        $records[] = $row;
+                                    }
+                                }
+                                ?>
 
-<?php if (!empty($records)): ?>
-    <?php foreach ($records as $record): ?>
-        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-300">
-            <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white break-words" style="max-width: 300px;">
-                <?php echo htmlspecialchars($record['First_Name'] . ' ' . $record['Middle_Initial'] . ' ' . $record['Last_Name']); ?>
-            </th>
-            <td class="px-6 py-4"><?php echo htmlspecialchars($record['role']); ?></td>
+                                <?php if (!empty($records)): ?>
+                                    <?php foreach ($records as $record): ?>
+                                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-300">
+                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white break-words" style="max-width: 300px;">
+                                                <?php echo htmlspecialchars($record['First_Name'] . ' ' . $record['Middle_Initial'] . ' ' . $record['Last_Name']); ?>
+                                            </th>
+                                            <td class="px-6 py-4"><?php echo htmlspecialchars($record['role']); ?></td>
 
-            <td class="px-6 py-4 break-words" style="max-width: 300px;">
-                <?php 
-                // Display S_Course only if it exists (for students)
-                echo $record['user_type'] === 'student' ? htmlspecialchars($record['S_Course']) : 'N/A'; 
-                ?>
-            </td>
-            <td class="px-6 py-4"><?php echo htmlspecialchars($record['borrow_count']); ?></td>
-            <td class="px-6 py-4">
-                <?php
-                // Format the nearest date
-                $nearestDate = new DateTime($record['nearest_date']);
-                // Format the date as 'F j, Y' and get the day of the week
-                $formattedDate = $nearestDate->format('F j, Y') . ' - ' . $nearestDate->format('l');
+                                            <td class="px-6 py-4 break-words" style="max-width: 300px;">
+                                                <?php
+                                                // Display S_Course only if it exists (for students)
+                                                echo $record['user_type'] === 'student' ? htmlspecialchars($record['course']) : 'N/A';
+                                                ?>
+                                            </td>
+                                            <td class="px-6 py-4"><?php echo htmlspecialchars($record['borrow_count']); ?></td>
+                                            <td class="px-6 py-4">
+                                                <?php
+                                                // Format the nearest date
+                                                $nearestDate = new DateTime($record['nearest_date']);
+                                                // Format the date as 'F j, Y' and get the day of the week
+                                                $formattedDate = $nearestDate->format('F j, Y') . ' - ' . $nearestDate->format('l');
 
-                // Output the formatted date along with the Time value if available
-                echo htmlspecialchars($formattedDate) . ' ' . htmlspecialchars($record['Time']);
-                ?>
-            </td>
-            <td class="px-6 py-4">
-                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    onclick="redirectToBookRequest('<?php echo htmlspecialchars($record['user_type']); ?>', '<?php echo htmlspecialchars($record['user_type'] === 'student' ? $record['student_id'] : $record['faculty_id']); ?>')">
-                    Next
-                </button>
-            </td>
-        </tr>
-    <?php endforeach; ?>
-<?php else: ?>
-    <tr>
-        <td colspan="5" class="px-6 py-4 text-center">No records found.</td>
-    </tr>
-<?php endif; ?>
+                                                // Output the formatted date along with the Time value if available
+                                                echo htmlspecialchars($formattedDate) . ' ' . htmlspecialchars($record['Time']);
+                                                ?>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                                    onclick="redirectToBookRequest('<?php echo htmlspecialchars($record['user_type']); ?>', '<?php echo htmlspecialchars($record['user_type'] === 'student' ? $record['student_id'] : $record['faculty_id']); ?>')">
+                                                    Next
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-4 text-center">No records found.</td>
+                                    </tr>
+                                <?php endif; ?>
 
-</tbody>
+                            </tbody>
 
                         </table>
                     </div>
@@ -201,12 +203,12 @@ if ($facultyResult->num_rows > 0) {
     </main>
 
     <script>
-    function redirectToBookRequest(userType, userId) {
-        // Redirect to book_request_2.php with appropriate ID parameter based on user type
-        const param = userType === 'student' ? 'student_id' : 'faculty_id';
-        window.location.href = 'book_request_2.php?' + param + '=' + userId;
-    }
-</script>
+        function redirectToBookRequest(userType, userId) {
+            // Redirect to book_request_2.php with appropriate ID parameter based on user type
+            const param = userType === 'student' ? 'student_id' : 'faculty_id';
+            window.location.href = 'book_request_2.php?' + param + '=' + userId;
+        }
+    </script>
 
 
     <script>

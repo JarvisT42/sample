@@ -23,15 +23,18 @@ if ($_SESSION["loggedin"] !== TRUE) {
 
 </head>
 <style>
-            .preview-image img {
-    outline: none; /* Remove outline for images */
-}
+    .preview-image img {
+        outline: none;
+        /* Remove outline for images */
+    }
 
-.preview-image:focus,
-.preview-image img:focus {
-    outline: none; /* Remove outline when focused */
-}
+    .preview-image:focus,
+    .preview-image img:focus {
+        outline: none;
+        /* Remove outline when focused */
+    }
 </style>
+
 <body>
     <?php include './src/components/sidebar.php'; ?>
 
@@ -237,11 +240,11 @@ if ($_SESSION["loggedin"] !== TRUE) {
                             }
 
                             function displayRecords(records) {
-    const startIndex = (currentPage - 1) * recordsPerPage;
-    const endIndex = startIndex + recordsPerPage;
-    const paginatedRecords = records.slice(startIndex, endIndex);
+                                const startIndex = (currentPage - 1) * recordsPerPage;
+                                const endIndex = startIndex + recordsPerPage;
+                                const paginatedRecords = records.slice(startIndex, endIndex);
 
-    tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
+                                tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
         <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
             <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
                 <div class="flex-none w-12">
@@ -296,8 +299,8 @@ if ($_SESSION["loggedin"] !== TRUE) {
 
 
 
-    // Attach click event to each image with the preview-image class
-    document.querySelectorAll('.preview-image img').forEach(image => {
+                                // Attach click event to each image with the preview-image class
+                                document.querySelectorAll('.preview-image img').forEach(image => {
                                     image.addEventListener('click', function(event) {
                                         event.preventDefault();
                                         modalImage.src = this.src; // Set the clicked image as the modal image

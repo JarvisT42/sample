@@ -54,7 +54,7 @@ session_start();
                         <br>
                         <li><a class="px-4 py-2" href="damage.php">Damage Books</a></li>
 
-                        
+
                         <br>
 
                         <!-- <li><a class="px-4 py-2 " href="subject_for_replacement.php">Subject for Replacement</a></li> -->
@@ -140,7 +140,7 @@ session_start();
                     <div class="overflow-x-auto">
                         <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
                             <div class="container mx-auto px-4 py-6">
-                                <ul id="tableData" class="flex flex-col space-y-4">
+                                <ul id="tableData" class="flex flex-col space-y-4 ">
                                     <!-- Table data will be inserted here -->
                                 </ul>
                             </div>
@@ -216,8 +216,8 @@ session_start();
                                 const paginatedRecords = records.slice(startIndex, endIndex);
 
                                 tableDataContainer.innerHTML = paginatedRecords.map((record, index) => `
-            <li class="bg-gray-200 p-4 flex items-center border-b-2 border-black">
-                <div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
+<li class="bg-gray-200 p-4 flex items-center border-b-2 border-black "> 
+<div class="flex flex-row items-start w-full space-x-6 overflow-x-auto">
                     <div class="flex-none w-12">
                         <div class="text-lg font-semibold text-gray-800">${startIndex + index + 1}</div>
                     </div>

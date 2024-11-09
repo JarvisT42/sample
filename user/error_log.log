@@ -1,0 +1,13 @@
+[01-Nov-2024 11:06:03 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'gfi_library_database_books_records.aandysam' doesn't exist in C:\xampp\htdocs\tag\user\fetch_table_data.php:60
+Stack trace:
+#0 C:\xampp\htdocs\tag\user\fetch_table_data.php(60): mysqli->prepare('SELECT Title, A...')
+#1 {main}
+  thrown in C:\xampp\htdocs\tag\user\fetch_table_data.php on line 60
+[01-Nov-2024 11:06:26 Europe/Berlin] No table specified in the request.
+[01-Nov-2024 11:06:30 Europe/Berlin] No table specified in the request.
+[01-Nov-2024 11:07:08 Europe/Berlin] No table specified in the request.
+[01-Nov-2024 11:07:09 Europe/Berlin] No table specified in the request.
+[01-Nov-2024 11:07:49 Europe/Berlin] No table specified in the request.
+[01-Nov-2024 11:09:26 Europe/Berlin] No table specified in the request.
+[01-Nov-2024 11:09:53 Europe/Berlin] No table specified in the request.
+[01-Nov-2024 11:10:04 Europe/Berlin] No table specified in the request.

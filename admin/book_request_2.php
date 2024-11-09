@@ -94,9 +94,9 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                             ?>
 
                             <form id="book-request-form" class="space-y-6" method="POST" action="book_request_2_save.php" onsubmit="return validateDueDate()">
-                            <input type="hidden" name="<?php echo $user_type; ?>_id" value="<?php echo htmlspecialchars($user_id); ?>">
-            <!-- Hidden field to capture the due date -->
-            <input type="hidden" id="hidden_due_date" name="due_date" value="">
+                                <input type="hidden" name="<?php echo $user_type; ?>_id" value="<?php echo htmlspecialchars($user_id); ?>">
+                                <!-- Hidden field to capture the due date -->
+                                <input type="hidden" id="hidden_due_date" name="due_date" value="">
 
                                 <?php foreach ($grouped_books as $date => $books_group): ?>
                                     <div class="bg-blue-200 p-4 rounded-lg">
@@ -132,6 +132,7 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                             $stmt2->close();
                                             ?>
 
+
                                             <li class="p-4 bg-white flex flex-col md:flex-row items-start border-b-2 border-black">
                                                 <div class="flex flex-col md:flex-row items-start w-full space-y-4 md:space-y-0 md:space-x-6">
                                                     <div class="flex-1 w-full md:w-auto">
@@ -139,6 +140,35 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                                             <a href="#" class="text-blue-600 hover:underline max-w-xs break-words">
                                                                 <?php echo $title; ?>
                                                             </a>
+
+                                                            <div class="mt-2">
+                                                                <label for="accession-dropdown-<?php echo $book_id; ?>" class="text-sm font-medium text-gray-700">Select Accession No:</label>
+                                                                <select id="accession-dropdown-<?php echo $book_id; ?>" name="accession_no[<?php echo $book_id; ?>]" class="ml-2 border border-gray-300 rounded-md p-1" required>
+                                                                    <?php
+                                                                    // Prepare and execute query to fetch accession numbers for the given book_id and category
+                                                                    $accessionQuery = "SELECT accession_no FROM `accession_records` WHERE book_id = ? AND book_category = ? AND available = 'yes'";
+                                                                    $stmt3 = $conn->prepare($accessionQuery);
+
+                                                                    // Check if the statement was prepared successfully
+                                                                    if ($stmt3) {
+                                                                        $stmt3->bind_param("is", $book_id, $category);
+                                                                        $stmt3->execute();
+                                                                        $accessionResult = $stmt3->get_result();
+
+                                                                        // Populate the dropdown with accession numbers
+                                                                        while ($accessionRow = $accessionResult->fetch_assoc()) {
+                                                                            echo '<option value="' . htmlspecialchars($accessionRow['accession_no']) . '">' . htmlspecialchars($accessionRow['accession_no']) . '</option>';
+                                                                        }
+                                                                        $stmt3->close();
+                                                                    } else {
+                                                                        echo '<option value="">Error fetching accession numbers</option>';
+                                                                    }
+                                                                    ?>
+                                                                </select>
+                                                            </div>
+
+
+
                                                         </h2>
                                                         <div class="mt-4">
                                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 text-sm text-gray-600">
@@ -182,29 +212,29 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                 <?php endforeach; ?>
 
                                 <div class="flex items-center justify-end">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Done</button>
-            </div>
+                                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Done</button>
+                                </div>
                             </form>
 
                             <script>
-            function validateDueDate() {
-                const dueDate = document.getElementById("due_date").value;
-                if (!dueDate) {
-                    alert("Please select a due date before proceeding.");
-                    return false; // Prevent form submission
-                }
-                document.getElementById("hidden_due_date").value = dueDate; // Set the hidden input with the due date
-                return true; // Allow form submission if due date is set
-            }
+                                function validateDueDate() {
+                                    const dueDate = document.getElementById("due_date").value;
+                                    if (!dueDate) {
+                                        alert("Please select a due date before proceeding.");
+                                        return false; // Prevent form submission
+                                    }
+                                    document.getElementById("hidden_due_date").value = dueDate; // Set the hidden input with the due date
+                                    return true; // Allow form submission if due date is set
+                                }
 
-            function toggleSelectAll(date) {
-                const selectAllCheckbox = document.getElementById('select-all-' + date);
-                const bookCheckboxes = document.querySelectorAll('.book-checkbox-' + date);
-                bookCheckboxes.forEach(function(checkbox) {
-                    checkbox.checked = selectAllCheckbox.checked;
-                });
-            }
-        </script>
+                                function toggleSelectAll(date) {
+                                    const selectAllCheckbox = document.getElementById('select-all-' + date);
+                                    const bookCheckboxes = document.querySelectorAll('.book-checkbox-' + date);
+                                    bookCheckboxes.forEach(function(checkbox) {
+                                        checkbox.checked = selectAllCheckbox.checked;
+                                    });
+                                }
+                            </script>
                         <?php else: ?>
                             <div class="p-4 bg-white flex items-center border-b-2 border-black">
                                 <div class="text-gray-600">No books found for this <?php echo ucfirst($user_type); ?>.</div>

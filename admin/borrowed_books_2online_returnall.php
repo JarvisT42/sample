@@ -14,7 +14,10 @@ if (!empty($data['student_id']) && !empty($data['books'])) {
     $returnedDate = date('Y-m-d');
 
     // Prepare the update query
-    $updateQuery = "UPDATE borrow SET status = 'returned', Total_Fines = ?, Return_Date = ? WHERE student_id = ? AND book_id = ? AND category = ?";
+    $updateQuery = "UPDATE borrow 
+    SET status = 'returned', Total_Fines = ?, Return_Date = ? 
+    WHERE student_id = ? AND book_id = ? AND category = ? AND status = 'borrowed'";
+
     $stmt = $conn->prepare($updateQuery);
 
     foreach ($books as $book) {
@@ -39,4 +42,3 @@ if (!empty($data['student_id']) && !empty($data['books'])) {
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid request data.']);
 }
-?>
