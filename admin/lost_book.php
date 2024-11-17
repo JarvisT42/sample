@@ -3,6 +3,14 @@ session_start();
 include '../connection.php'; // Ensure you have your database connection
 include '../connection2.php'; // Ensure you have your database connection
 
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
+
+
+
 if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['walk_in_id'])) {
     $user_type = ''; // Initialize user type
 
@@ -20,7 +28,7 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
 
     // Fetch the category, book_id, issued date, and due date based on the user type
     $categoryQuery = "
-        SELECT a.Category, a.book_id, a.Issued_Date, a.Due_Date, a.role, a.Way_Of_Borrow, a.accession_no
+        SELECT a.Category, a.book_id, a.Issued_Date, a.Due_Date, a.role, a.Way_Of_Borrow, a.accession_no, a.expected_replacement_date
         FROM borrow AS a
         WHERE " . ($user_type === 'student' ? "a.student_id" : ($user_type === 'faculty' ? "a.faculty_id" : "a.walk_in_id")) . " = ? 
         AND status = 'lost'";
@@ -74,7 +82,7 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
         $stmtUser->close();
     } else {
         // For walk-in users, get the name from the borrow table
-        $fullNameQuery = "SELECT Full_Name, role FROM borrow WHERE walk_in_id = ?";
+        $fullNameQuery = "SELECT full_name, role FROM walk_in_borrowers WHERE walk_in_id = ?";
         $stmtWalkIn = $conn->prepare($fullNameQuery);
         $stmtWalkIn->bind_param('i', $user_id);
         $stmtWalkIn->execute();
@@ -82,7 +90,7 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
 
         if ($walkInResult->num_rows > 0) {
             $walkInRow = $walkInResult->fetch_assoc();
-            $fullName = $walkInRow['Full_Name'];
+            $fullName = $walkInRow['full_name'];
             $displayRole = $walkInRow['role'];
         } else {
             $fullName = 'Unknown Walk-In';
@@ -95,65 +103,9 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
     echo "No student, faculty, or walk-in ID provided.";
     exit;
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['returnall'])) {
-    if (isset($_POST['books']) && isset($_POST['user_id']) && isset($_POST['user_role'])) {
 
 
-        $books = json_decode($_POST['books'], true);
-        $userId = htmlspecialchars($_POST['user_id']);
-        $userRole = htmlspecialchars($_POST['user_role']);
-        $userColumn = ($userRole === 'student') ? 'student_id' : (($userRole === 'faculty') ? 'faculty_id' : 'walk_in_id');
-        $success = true;
-        $returnedDate = date('Y-m-d');
 
-        $updateQuery = "UPDATE borrow 
-                    SET status = 'returned', Return_Date = ? 
-                    WHERE $userColumn = ? AND book_id = ? AND category = ? AND status = 'lost'";
-        $stmt = $conn->prepare($updateQuery);
-
-        $updateAccessionQuery = "UPDATE accession_records 
-                             SET status = 'available', walk_in_id = NULL, user_id = NULL 
-                             WHERE accession_no = ? AND " . ($userRole === 'walk-in' ? "walk_in_id" : "user_id") . " = ? AND status = 'lost'";
-        $stmtAccession = $conn->prepare($updateAccessionQuery);
-
-        foreach ($books as $book) {
-            $book_id = $book['book_id'];
-            $category = $book['category'];
-            $accession_no = $book['accession_no'];
-
-            if (!$stmt->bind_param('sisi', $returnedDate, $userId, $book_id, $category) || !$stmt->execute()) {
-                $success = false;
-                break;
-            }
-
-            if (!$stmtAccession->bind_param('si', $accession_no, $userId) || !$stmtAccession->execute()) {
-                $success = false;
-                break;
-            }
-
-            $bookAdditionSql = "UPDATE `$category` SET No_Of_Copies = No_Of_Copies + 1 WHERE id = ?";
-            $stmtBookAddition = $conn2->prepare($bookAdditionSql);
-            if (!$stmtBookAddition->bind_param('i', $book_id) || !$stmtBookAddition->execute()) {
-                $success = false;
-                break;
-            }
-            $stmtBookAddition->close();
-        }
-
-        $stmt->close();
-        $stmtAccession->close();
-
-        if ($success) {
-            header("Location: " . $_SERVER['PHP_SELF'] . "?{$userColumn}={$userId}&success=1");
-        } else {
-            echo 'Failed to return all books and update accession records.';
-        }
-    } else {
-        echo 'Invalid request data.';
-    }
-} else {
-    echo 'No action performed.';
-}
 
 
 
@@ -254,47 +206,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['returnall'])) {
                                         }
 
                                         $stmt2->close();
-                                        include '../connection.php';
-
-                                        // Get the fines value from the database
-                                        $fines_value = 0;
-                                        $sql = "SELECT fines FROM library_fines LIMIT 1";
-                                        $result = $conn->query($sql);
-
-                                        if ($result && $result->num_rows > 0) {
-                                            $row = $result->fetch_assoc();
-                                            $fines_value = (int)$row['fines'];
-                                        }
 
 
-
-
-
-
-                                        // Get the issued date from the book array
-                                        $issued_date = $book['Issued_Date'];
-
-                                        if (empty($book['Due_Date'])) {
-                                            // Calculate the due date (3 days after the issued date)
-                                            $due_date = date('Y-m-d', strtotime($issued_date . ' + 3 days'));
-                                        } else {
-                                            // Use the existing due date from $book['Due_Date']
-                                            $due_date = $book['Due_Date'];
-                                        }
-
-                                        // Now $due_date has the correct value based on the conditions
-
-
-
-                                        // Calculate the fines based on the due date
-                                        $current_date = date('Y-m-d');
-                                        $fine_amount = 0;
-
-                                        if ($current_date > $due_date) {
-                                            // Calculate overdue days
-                                            $overdue_days = (strtotime($current_date) - strtotime($due_date)) / (60 * 60 * 24);
-                                            $fine_amount = $overdue_days * $fines_value;
-                                        }
                                         ?>
 
                                         <li class="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mb-2 flex flex-col">
@@ -310,8 +223,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['returnall'])) {
                                                             <p class="text-sm text-gray-500"><?php echo htmlspecialchars($book['Category']); ?></p>
                                                             <h3 class="text-lg font-semibold text-gray-600 mb-1">Accession no:</h3>
                                                             <p id="accession_no-<?php echo $overall_index; ?>" class="text-sm text-gray-500"><?php echo htmlspecialchars($book['accession_no']); ?></p>
-
-
                                                         </div>
                                                     </div>
                                                     <div class="w-full md:w-32 h-40 bg-gray-200 border border-gray-300 flex items-center justify-center mb-4 md:mb-0">
@@ -328,73 +239,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['returnall'])) {
                                                     </div>
                                                 </div>
                                                 <div class="bg-blue-100 p-4 rounded-lg">
-                                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4 hidden">
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Issued Date:</p>
-                                                            <p class="text-sm"><?php echo htmlspecialchars($book['Issued_Date']); ?></p>
+                                                    <div class="flex justify-between space-x-4 mt-4">
+                                                        <!-- Return Date label and value -->
+                                                        <div class="flex items-center">
+                                                            <label for="return_date" class="text-sm font-bold text-gray-600 mr-2">Return Date:</label>
+                                                            <p id="return_date" class="text-sm text-gray-500"><?php echo htmlspecialchars($book['expected_replacement_date']); ?></p> <!-- Replace with the actual return date variable -->
                                                         </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Due Date:</p>
-                                                            <p class="text-sm due-date" data-index="<?php echo $overall_index; ?>"><?php echo htmlspecialchars($due_date); ?></p>
-                                                        </div>
-                                                        <div>
-                                                        </div>
-                                                    </div>
 
-                                                    <div class="flex justify-end space-x-2 mt-4">
-
-
+                                                        <!-- Replace Button -->
                                                         <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
                                                             data-index="<?php echo $overall_index; ?>"
-                                                            onclick="console.log('Replace clicked'); openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo $fine_amount; ?>', 'fineInput-<?php echo $overall_index; ?>', '<?php echo htmlspecialchars($student_id); ?>', '<?php echo htmlspecialchars($book_id); ?>', '<?php echo htmlspecialchars($book['accession_no']); ?>')">
+                                                            onclick="console.log('Replace clicked'); openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo htmlspecialchars($book_id); ?>', '<?php echo htmlspecialchars($book['accession_no']); ?>', '<?php echo $user_type; ?>', '<?php echo $user_id; ?>')">
                                                             Replace
                                                         </button>
 
 
                                                     </div>
-                                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                                        <div style="display: none;">
-                                                            <p class="text-sm font-semibold">Renew</p>
-                                                            <select class="renew-dropdown border border-gray-300 rounded p-1 mr-16" data-index="<?php echo $overall_index; ?>" data-due-date="<?php echo htmlspecialchars($due_date); ?>">
-                                                                <option value="0">0 Days</option>
-                                                                <option value="3">3 Days</option>
-                                                                <option value="6">6 Days</option>
-                                                                <option value="9">9 Days</option>
-                                                                <option value="12">12 Days</option>
-                                                                <option value="15">15 Days</option>
-                                                            </select>
-                                                        </div>
-                                                        <div style="display: none;">
-                                                            <p class="text-sm font-semibold">Book Status:</p>
-                                                            <select id="statusSelect-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-1 mr-16" onchange="toggleFinesInput(<?php echo $overall_index; ?>)">
-                                                                <option value="<?php echo $status; ?>"><?php echo $status; ?></option>
-                                                                <option value="Damage">Damage</option>
-                                                                <option value="Lost">Lost</option>
-                                                            </select>
-                                                        </div>
-                                                        <div style="display: none;">
-                                                            <p class="text-sm font-semibold">Fines:</p>
-                                                            <div class="flex items-center">
-                                                                P:<input id="fineInput-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-1 w-32 finesInput" type="number" disabled placeholder="Disabled">
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                    <div id="damageTextArea-<?php echo $overall_index; ?>" style="display: none;" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                                        <div class="col-span-3">
-                                                            <p class="text-sm font-semibold">Describe the Damage:</p>
-                                                            <textarea id="damageDescription-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-2 w-full" rows="4" placeholder="Provide a description of the damage"></textarea>
-                                                        </div>
-                                                    </div>
-
-
-                                                    <!-- Text area for damage description -->
-
                                                 </div>
                                             </div>
-
-
                                         </li>
+
 
 
 
@@ -407,9 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['returnall'])) {
                                     <?php endforeach; ?>
                                 </div>
                             <?php endforeach; ?>
-                            <div class="flex items-center justify-end">
-                                <button type="button" onclick="openReturnModal()" class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Return All</button>
-                            </div>
+
                         </div>
 
                     <?php else: ?>
@@ -429,79 +291,95 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['returnall'])) {
 
 
 
-        <div id="returnModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white rounded-lg p-6 w-11/12 md:w-1/3">
-                <h2 class="text-lg font-semibold mb-4">Return Book(s)</h2>
 
-                <!-- Form starts here -->
-                <form id="returnForm" action="" method="post">
-                    <!-- Display user ID and role in the modal -->
-                    <p><strong>User ID:</strong> <span id="userIdDisplay"></span></p>
-                    <input type="hidden" name="user_id" id="userIdInput">
+        <!-- Modal Structure -->
+        <!-- Modal Structure -->
+        <!-- Modal Structure -->
+        <div id="replaceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                <h2 class="text-2xl font-bold mb-4">Replace Book</h2>
+                <p><strong>Title:</strong> <span id="replacementModalTitle"></span></p>
+                <p><strong>Author:</strong> <span id="replacementModalAuthor"></span></p>
+                <p><strong>Category:</strong> <span id="replacementModalCategory"></span></p>
+                <p><strong>Accession No:</strong> <span id="replacementModalAccessionNo"></span></p>
 
-                    <p><strong>User Role:</strong> <span id="userRoleDisplay"></span></p>
-                    <input type="hidden" name="user_role" id="userRoleInput">
+                <p><strong>Book ID:</strong> <span id="replacementModalBookId"></span></p>
+                <p><strong>User Type:</strong> <span id="replacementModalUserType"></span></p>
+                <p><strong>User ID:</strong> <span id="replacementModalUserId"></span></p>
 
-                    <p><strong>Number of Books to Replace:</strong> <span id="bookCount"></span></p>
-                    <input type="hidden" name="book_count" id="bookCountInput">
-
-                    <!-- Container for list of books -->
-                    <div id="modalBookList" class="mt-4 mb-4"></div>
-                    <input type="hidden" name="books" id="booksInput">
-
-                    <!-- Form buttons -->
-                    <div class="flex justify-end space-x-2">
-                        <button type="button" onclick="closeReturnModal()" class="bg-red-500 text-white py-2 px-4 rounded">Close</button>
-                        <button type="submit" name="returnall" class="bg-blue-500 text-white py-2 px-4 rounded">Confirm Return</button>
-                    </div>
-                </form>
+                <div class="flex justify-end space-x-2">
+                    <button onclick="closeModal()" class="bg-gray-300 text-gray-700 rounded px-4 py-2">Cancel</button>
+                    <button onclick="confirmReplacement()" class="bg-blue-600 text-white rounded px-4 py-2">Confirm</button>
+                </div>
             </div>
         </div>
 
+
+
+
+
         <script>
-            function openReturnModal() {
-                const userId = "<?php echo $user_id; ?>";
-                const userRole = "<?php echo $user_type; ?>";
-                const books = <?php echo json_encode($books); ?>;
+    // Function to open the modal with dynamic content
+    function openReturnModal(title, author, category, bookId, accessionNo, userType, userId) {
+        // Set the modal content dynamically
+        document.getElementById('replacementModalTitle').textContent = title;
+        document.getElementById('replacementModalAuthor').textContent = author;
+        document.getElementById('replacementModalCategory').textContent = category;
+        document.getElementById('replacementModalAccessionNo').textContent = accessionNo;
 
-                document.getElementById("returnModal").classList.remove("hidden");
+        document.getElementById('replacementModalBookId').textContent = bookId; // Set the book ID
+        document.getElementById('replacementModalUserType').textContent = userType; // Set the user type
+        document.getElementById('replacementModalUserId').textContent = userId; // Set the user ID
 
-                // Populate User ID and Role
-                document.getElementById("userIdDisplay").textContent = userId || "Not Available";
-                document.getElementById("userIdInput").value = userId;
+        // Show the modal
+        document.getElementById('replaceModal').classList.remove('hidden');
+    }
 
-                document.getElementById("userRoleDisplay").textContent = userRole.charAt(0).toUpperCase() + userRole.slice(1); // Capitalize first letter
-                document.getElementById("userRoleInput").value = userRole;
+    // Function to close the modal
+    function closeModal() {
+        document.getElementById('replaceModal').classList.add('hidden'); // Hide the modal
+    }
 
-                // Display the count of books
-                document.getElementById("bookCount").textContent = books.length;
-                document.getElementById("bookCountInput").value = books.length;
+    // Function to handle replacement confirmation and send data to lost_book_save.php
+    function confirmReplacement() {
+    console.log('Confirm Replacement function called'); // Debugging log
 
-                // Populate the book details
-                const modalBookList = document.getElementById("modalBookList");
-                modalBookList.innerHTML = ''; // Clear previous entries
-                books.forEach(book => {
-                    const bookItem = document.createElement('p');
-                    bookItem.innerHTML = `<strong>Title:</strong> ${book.Category} - <strong>Accession No:</strong> ${book.accession_no}`;
-                    modalBookList.appendChild(bookItem);
-                });
+    const category = document.getElementById('replacementModalCategory').textContent;
+    const bookId = document.getElementById('replacementModalBookId').textContent;
+    const accessionNo = document.getElementById('replacementModalAccessionNo').textContent;
+    const userType = document.getElementById('replacementModalUserType').textContent;
+    const userId = document.getElementById('replacementModalUserId').textContent;
 
-                // Serialize books data, including the book_id for each book
-                document.getElementById("booksInput").value = JSON.stringify(books.map(book => ({
-                    book_id: book.book_id,
-                    category: book.Category,
-                    accession_no: book.accession_no
-                })));
-            }
+    // Prepare the data to send
+    fetch('lost_book_save.php', { // Adjust to the correct PHP file
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        book_id: bookId,
+        category: category,
+        user_type: userType,
+        user_id: userId,
+        accession_no: accessionNo
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload(); // Reload the page to update the status of the damaged book
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
 
-            function closeReturnModal() {
-                document.getElementById("returnModal").classList.add("hidden");
-            }
-        </script>
 
 
 
-
+</script>
 
 
 
@@ -514,16 +392,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['returnall'])) {
 
 
     <script>
-    // Set a timeout to hide the alert after 3 seconds (3000 ms)
-    setTimeout(function() {
-        var alertElement = document.getElementById('alert');
-        if (alertElement) {
-        alertElement.style.display = 'none';
-        }
-    }, 4000);
+        // Set a timeout to hide the alert after 3 seconds (3000 ms)
+        setTimeout(function() {
+            var alertElement = document.getElementById('alert');
+            if (alertElement) {
+                alertElement.style.display = 'none';
+            }
+        }, 4000);
     </script>
     <script src="./src/components/header.js"></script>
+    <script>
+        // Function to automatically show the dropdown if on book_request.php
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownRequest = document.getElementById('dropdown-request');
 
+            // Open the dropdown menu for 'Request'
+            dropdownRequest.classList.remove('hidden');
+            dropdownRequest.classList.add('block'); // Make the dropdown visible
+
+        });
+    </script>
 </body>
 
 </html>

@@ -1,6 +1,13 @@
 <?php
 # Initialize the session
 session_start();
+include("../connection.php");
+include("../connection2.php");
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
 
 ?>
 <!DOCTYPE html>
@@ -172,17 +179,16 @@ session_start();
                         <div class="scrollable-table-container relative overflow-x-auto shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
                             <?php
 
-                            include("../connection.php");
-                            include("../connection2.php");
+
 
                             // Sanitize the student ID to prevent SQL injection
                             $id = intval($_SESSION["Faculty_Id"]);
 
                             // Fetch the category and book_id based on the student_id
-                            $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status 
+                            $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, due_date, status 
                             FROM borrow 
                             WHERE faculty_id = ? 
-                            AND status IN ('borrowed', 'pending', 'lost', 'failed-to-claim')";
+                            AND status IN ('failed-to-claim', 'borrowed', 'pending', 'lost')";
                             $stmt = $conn->prepare($categoryQuery);
                             $stmt->bind_param('i', $id); // Assuming student_id is an integer
                             $stmt->execute();
@@ -192,11 +198,14 @@ session_start();
                             $books = [];
 
                             // Fetch all rows (there may be multiple books borrowed by the same student)
+                            // Fetch all rows (there may be multiple books borrowed by the same student)
+                            // Fetch all rows (there may be multiple books borrowed by the same student)
                             while ($row = $result->fetch_assoc()) {
                                 $category = $row['Category'];
                                 $bookId = $row['book_id'];
                                 $dateToClaim = $row['Date_To_Claim'];
                                 $issuedDate = $row['Issued_Date'];
+                                $dueDate = $row['due_date']; // Retrieve due_date from database
                                 $status = $row['status'];
 
                                 // Prepare the SQL to fetch book details from the category-specific table
@@ -212,14 +221,18 @@ session_start();
                                     $books[] = [
                                         'Title' => $bookRow['Title'],
                                         'Author' => $bookRow['Author'],
+                                        'Category' => $category,
                                         'Date_To_Claim' => $dateToClaim,
                                         'Issued_Date' => $issuedDate,
+                                        'Due_Date' => $dueDate, // Store the due date in the array
                                         'status' => $status
                                     ];
                                 }
 
                                 $bookStmt->close();
                             }
+
+
 
                             $stmt->close();
                             ?>
@@ -232,6 +245,8 @@ session_start();
                                         <th scope="col" class="px-6 py-3">Date To Claim</th>
                                         <th scope="col" class="px-6 py-3">Issued Date</th>
                                         <th scope="col" class="px-6 py-3">Status</th>
+                                        <th scope="col" class="px-6 py-3">Action</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -261,16 +276,26 @@ session_start();
                                                     echo 'Borrowed';
                                                 } elseif (!empty($row['status']) && $row['status'] === 'pending') {
                                                     echo 'Pending';
-                                                }
-                                                elseif (!empty($row['status']) && $row['status'] === 'failed-to-claim') {
-                                                    echo 'Failed To Claim';
-                                                }
-                                                else{
-                                                                                                       echo 'Lost';
- 
+                                                } else {
+                                                    echo 'Lost';
                                                 }
                                                 ?>
                                             </td>
+                                            <td class="px-6 py-4">
+                                                <button
+                                                    type="button"
+                                                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                                                    onclick="openModal('<?php echo htmlspecialchars($row['Title']); ?>', '<?php echo htmlspecialchars($row['Category']); ?>', '<?php echo htmlspecialchars($row['status']); ?>', '<?php echo htmlspecialchars($row['Date_To_Claim']); ?>', '<?php echo htmlspecialchars($row['Issued_Date']); ?>', '<?php echo htmlspecialchars($row['Due_Date']); ?>')">
+                                                    View
+                                                </button>
+
+
+                                            </td>
+
+
+
+
+
                                         </tr>
                                     <?php
                                     }
@@ -286,13 +311,79 @@ session_start();
 
                     </div>
 
+
+                    <div id="bookModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm" onclick="closeOnOutsideClick(event)">
+                        <div class="bg-white rounded-lg shadow-lg dark:bg-gray-800 w-1/3" onclick="event.stopPropagation()">
+                            <div class="flex justify-between items-center border-b p-4">
+                                <h5 class="text-lg font-bold text-gray-800 dark:text-white">Book Details</h5>
+                                <button type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" onclick="closeModal()">
+                                    <span class="text-xl">&times;</span>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <p><strong>Title:</strong> <span id="modalTitle"></span></p>
+                                <p><strong>Category:</strong> <span id="modalCategory"></span></p>
+                                <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                                <p><strong>Date To Claim:</strong> <span id="modalDateToClaim">N/A</span></p>
+                                <span id="dueDateContainer" style="display: none;">
+                                    <p><strong>Due Date:</strong> <span id="modalDueDate"></span></p>
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+
+
+                    <script>
+                        function closeOnOutsideClick(event) {
+                            // Check if the click is outside the modal content
+                            const modalContent = document.querySelector("#bookModal > div");
+                            if (!modalContent.contains(event.target)) {
+                                closeModal();
+                            }
+                        }
+
+                        function closeModal() {
+                            document.getElementById('bookModal').classList.add('hidden');
+                        }
+
+                        // Optional: Function to open the modal
+                        function openModal(title, category, status, dateToClaim, issuedDate, dueDate) {
+                            document.getElementById('modalTitle').textContent = title;
+                            document.getElementById('modalCategory').textContent = category;
+                            document.getElementById('modalStatus').textContent = status;
+
+                            // Conditionally display Date To Claim and Due Date based on status
+                            const dateToClaimElement = document.getElementById('modalDateToClaim');
+                            const dueDateContainer = document.getElementById('dueDateContainer');
+                            const dueDateElement = document.getElementById('modalDueDate');
+
+                            dateToClaimElement.textContent = dateToClaim;
+
+                            if (status === 'borrowed') {
+                                dueDateElement.textContent = dueDate; // Show actual Due Date
+                                dueDateContainer.style.display = 'block'; // Show Due Date section
+                            } else {
+                                dueDateContainer.style.display = 'none'; // Hide Due Date section
+                            }
+
+                            document.getElementById('bookModal').classList.remove('hidden');
+                        }
+                    </script>
+
+
+
                     <!-- Table 2 and Dropdown (hidden initially) -->
                     <div id="table2-container" class="hidden">
                         <div id="table2" class="overflow-x-auto">
                             <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
                                 <?php
                                 // Query for books with status 'returned'
-                                $categoryQueryReturned = "SELECT Category, book_id, Date_To_Claim, Issued_Date, status FROM borrow WHERE student_id = ? AND status = 'returned'";
+                                
+
+                                $categoryQueryReturned = "SELECT Category, book_id, Issued_Date, total_fines, status FROM borrow WHERE faculty_id = ? AND (status = 'returned' OR status = 'replaced')";
                                 $stmtReturned = $conn->prepare($categoryQueryReturned);
                                 $stmtReturned->bind_param('i', $id); // Assuming student_id is an integer
                                 $stmtReturned->execute();
@@ -305,8 +396,8 @@ session_start();
                                 while ($rowReturned = $resultReturned->fetch_assoc()) {
                                     $category = $rowReturned['Category'];
                                     $bookId = $rowReturned['book_id'];
-                                    $dateToClaim = $rowReturned['Date_To_Claim'];
                                     $issuedDate = $rowReturned['Issued_Date'];
+                                    $totalFines = number_format((float)$rowReturned['total_fines'], 2); // Ensure proper formatting
                                     $status = $rowReturned['status'];
 
                                     // Prepare the SQL to fetch book details from the category-specific table
@@ -321,8 +412,8 @@ session_start();
                                         $returnedBooks[] = [
                                             'Title' => $bookRowReturned['Title'],
                                             'Author' => $bookRowReturned['Author'],
-                                            'Date_To_Claim' => $dateToClaim,
                                             'Issued_Date' => $issuedDate,
+                                            'Total_Fines' => $totalFines,
                                             'status' => $status
                                         ];
                                     }
@@ -338,9 +429,10 @@ session_start();
                                         <tr>
                                             <th scope="col" class="px-6 py-3">Book Title</th>
                                             <th scope="col" class="px-6 py-3">Author</th>
-                                            <th scope="col" class="px-6 py-3">Date To Claim</th>
                                             <th scope="col" class="px-6 py-3">Returned Date</th>
+                                            <th scope="col" class="px-6 py-3">Total Fines</th>
                                             <th scope="col" class="px-6 py-3">Status</th>
+                                            <th scope="col" class="px-6 py-3">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -356,13 +448,21 @@ session_start();
                                                     <?php echo htmlspecialchars($rowReturned['Author']); ?>
                                                 </td>
                                                 <td class="px-6 py-4">
-                                                    <?php echo htmlspecialchars($rowReturned['Date_To_Claim']); ?>
-                                                </td>
-                                                <td class="px-6 py-4">
                                                     <?php echo htmlspecialchars($rowReturned['Issued_Date']); ?>
                                                 </td>
                                                 <td class="px-6 py-4">
+                                                    <?php echo htmlspecialchars($rowReturned['Total_Fines']); ?>
+                                                </td>
+                                                <td class="px-6 py-4">
                                                     <?php echo htmlspecialchars($rowReturned['status']); ?>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <button
+                                                        type="button"
+                                                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                                                        onclick="openModalReturned('<?php echo htmlspecialchars($rowReturned['Title']); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo htmlspecialchars($rowReturned['status']); ?>', '<?php echo htmlspecialchars($rowReturned['Total_Fines']); ?>')">
+                                                        View
+                                                    </button>
                                                 </td>
                                             </tr>
                                         <?php
@@ -374,6 +474,66 @@ session_start();
                             </div>
                         </div>
                     </div>
+
+                    <div id="bookModalReturned" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" onclick="closeOnOutsideClickReturned(event)">
+                        <div class="bg-yellow-50 rounded-lg shadow-lg w-full max-w-md mx-4 md:mx-0" onclick="event.stopPropagation()">
+                            <!-- Header Section -->
+                            <div class="flex items-center justify-between p-4 rounded-t-lg bg-red-700 text-yellow-100">
+                                <h5 class="text-lg font-bold">Returned Book Details</h5>
+                                <button type="button" class="text-yellow-200 hover:text-yellow-100" onclick="closeModalReturned()">
+                                    <span class="text-2xl font-bold">&times;</span>
+                                </button>
+                            </div>
+
+                            <!-- Content Section -->
+                            <div class="p-6 text-gray-800">
+                                <div class="mb-4">
+                                    <p class="font-semibold text-red-800">Title:</p>
+                                    <p id="modalReturnedTitle" class="pl-2 text-red-900">N/A</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="font-semibold text-red-800">Category:</p>
+                                    <p id="modalReturnedCategory" class="pl-2 text-red-900">N/A</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="font-semibold text-red-800">Status:</p>
+                                    <p id="modalReturnedStatus" class="pl-2 text-red-900">N/A</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="font-semibold text-red-800">Total Fines:</p>
+                                    <p id="modalReturnedTotalFines" class="pl-2 text-red-900">N/A</p>
+                                </div>
+                            </div>
+
+                            <!-- Footer Section -->
+                            <div class="flex justify-end p-4 rounded-b-lg bg-red-700">
+                                <button type="button" class="bg-yellow-600 text-red-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500" onclick="closeModalReturned()">Close</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function closeOnOutsideClickReturned(event) {
+                            const modalContent = document.querySelector("#bookModalReturned > div");
+                            if (!modalContent.contains(event.target)) {
+                                closeModalReturned();
+                            }
+                        }
+
+                        function closeModalReturned() {
+                            document.getElementById('bookModalReturned').classList.add('hidden');
+                        }
+
+                        function openModalReturned(title, category, status, totalFines) {
+                            document.getElementById('modalReturnedTitle').textContent = title;
+                            document.getElementById('modalReturnedCategory').textContent = category;
+                            document.getElementById('modalReturnedStatus').textContent = status;
+                            document.getElementById('modalReturnedTotalFines').textContent = totalFines;
+
+                            document.getElementById('bookModalReturned').classList.remove('hidden');
+                        }
+                    </script>
+
 
 
 
@@ -421,3 +581,81 @@ session_start();
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+<div id="modalOverlay" class="fixed inset-0 hidden z-40 bg-black bg-opacity-50" onclick="closeOnOutsideClickReturned(event)"></div>
+
+<!-- Modal -->
+<div id="editModal" class="fixed inset-0 hidden z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 text-center">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto">
+
+            <!-- Modal Header -->
+            <div class="bg-red-800 text-white rounded-t-lg">
+                <h2 class="text-lg font-semibold p-4">Please Enter Details Below</h2>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 bg-white rounded-b-lg shadow-md">
+                <form id="studentForm" class="space-y-4" method="POST">
+                    <div class="grid grid-cols-3 items-center gap-4 mt-3">
+                        <label for="name" class="text-left">Name:</label>
+                        <input id="name" name="name" class="col-span-2 border rounded px-3 py-2" readonly />
+                    </div>
+
+                    <div class="grid grid-cols-3 items-center gap-4">
+                        <label for="gender" class="text-left">Gender:</label>
+                        <input id="gender" name="gender" class="col-span-2 border rounded px-3 py-2" readonly />
+                    </div>
+
+                    <div class="grid grid-cols-3 items-center gap-4">
+                        <label for="email" class="text-left">Email:</label>
+                        <input id="email" name="email" class="col-span-2 border rounded px-3 py-2" readonly />
+                    </div>
+
+                    <div class="grid grid-cols-3 items-center gap-4">
+                        <label for="contact" class="text-left">Contact:</label>
+                        <input id="contact" name="contact" class="col-span-2 border rounded px-3 py-2" readonly />
+                    </div>
+
+                    <div class="grid grid-cols-3 items-center gap-4">
+                        <label for="year_level" class="text-left">Year Level:</label>
+                        <input id="year_level" name="year_level" class="col-span-2 border rounded px-3 py-2" readonly />
+                    </div>
+
+                    <div class="grid grid-cols-3 items-center gap-4">
+                        <label for="status" class="text-left">Status:</label>
+                        <select id="status" name="status" class="col-span-2 border rounded px-3 py-2">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="banned">Banned</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-3 items-center gap-4">
+                        <label for="course" class="text-left">Course:</label>
+                        <input id="course" name="course" class="col-span-2 border rounded px-3 py-2" readonly />
+                    </div>
+
+                    <!-- Hidden field for student ID -->
+                    <input type="hidden" id="student_id" name="student_id" />
+
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="closeModal(event)" class="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700">
+                            Close
+                        </button>
+                        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

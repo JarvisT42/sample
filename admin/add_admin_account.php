@@ -1,9 +1,9 @@
 <?php
 # Initialize the session
 session_start();
-if ($_SESSION["logged_Admin"] !== TRUE) {
-    //echo "<script type='text/javascript'> alert ('Iasdasdasd.')</script>";
-    echo "<script>" . "window.location.href='../index.php';" . "</script>";
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
     exit;
 }
 ?>
@@ -11,21 +11,7 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="path/to/your/styles.css">
-    <!-- Include Tailwind CSS -->
-    <!-- Latest Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
-
-    <!-- Latest Flowbite CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.css" rel="stylesheet" />
-
-    <!-- Latest Flowbite JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@latest/dist/flowbite.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <?php include 'admin_header.php'; ?>
 
     <style>
         /* If you prefer inline styles, you can include them directly */
@@ -66,7 +52,7 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                 <div class="grid grid-cols-2 gap-4 mb-4">
 
 
-                    <div class="flex items-center justify-center rounded   dark:bg-gray-800">
+                    <div class="flex items-start justify-center rounded   dark:bg-gray-800">
 
 
 
@@ -76,70 +62,71 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                                 <form id="createAccountForm" class="space-y-4">
                                     <!-- Full Name Field -->
                                     <div class="space-y-2">
-                                        <label for="fullname" class="font-semibold text-gray-700">Full Name</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
+                                        <label for="fullname" class="font-medium text-sm text-gray-700">Full Name</label>
+                                        <div class="flex items-center border border-gray-300 rounded-md">
+                                            <span class="px-2 text-gray-500 text-xs">
                                                 <i class="fas fa-user"></i>
                                             </span>
                                             <input type="text" id="fullname" name="fullname" required
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
+                                                class="w-full px-2 py-1 text-xs focus:outline-none focus:ring focus:border-blue-400 rounded-r-md">
                                         </div>
                                     </div>
 
                                     <!-- Username Field -->
                                     <div class="space-y-2">
-                                        <label for="username" class="font-semibold text-gray-700">Username</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
+                                        <label for="username" class="font-medium text-sm text-gray-700">Username</label>
+                                        <div class="flex items-center border border-gray-300 rounded-md">
+                                            <span class="px-2 text-gray-500 text-xs">
                                                 <i class="fas fa-user-circle"></i>
                                             </span>
                                             <input type="text" id="username" name="username" required
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
+                                                class="w-full px-2 py-1 text-xs focus:outline-none focus:ring focus:border-blue-400 rounded-r-md">
                                         </div>
                                     </div>
 
                                     <!-- Email Field -->
                                     <div class="space-y-2">
-                                        <label for="email" class="font-semibold text-gray-700">Email</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
+                                        <label for="email" class="font-medium text-sm text-gray-700">Email</label>
+                                        <div class="flex items-center border border-gray-300 rounded-md">
+                                            <span class="px-2 text-gray-500 text-xs">
                                                 <i class="fas fa-envelope"></i>
                                             </span>
                                             <input type="email" id="email" name="email" required
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
+                                                class="w-full px-2 py-1 text-xs focus:outline-none focus:ring focus:border-blue-400 rounded-r-md">
                                         </div>
                                     </div>
 
                                     <!-- Password Field -->
                                     <div class="space-y-2">
-                                        <label for="password" class="font-semibold text-gray-700">Password</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
+                                        <label for="password" class="font-medium text-sm text-gray-700">Password</label>
+                                        <div class="flex items-center border border-gray-300 rounded-md">
+                                            <span class="px-2 text-gray-500 text-xs">
                                                 <i class="fas fa-lock"></i>
                                             </span>
                                             <input type="password" id="password" name="password" required
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
+                                                class="w-full px-2 py-1 text-xs focus:outline-none focus:ring focus:border-blue-400 rounded-r-md">
                                         </div>
                                     </div>
 
                                     <!-- Confirm Password Field -->
                                     <div class="space-y-2">
-                                        <label for="confirm-password" class="font-semibold text-gray-700">Confirm Password</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
+                                        <label for="confirm-password" class="font-medium text-sm text-gray-700">Confirm Password</label>
+                                        <div class="flex items-center border border-gray-300 rounded-md">
+                                            <span class="px-2 text-gray-500 text-xs">
                                                 <i class="fas fa-lock"></i>
                                             </span>
                                             <input type="password" id="confirm-password" name="confirm-password" required
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
+                                                class="w-full px-2 py-1 text-xs focus:outline-none focus:ring focus:border-blue-400 rounded-r-md">
                                         </div>
                                     </div>
 
                                     <!-- Submit Button -->
                                     <button type="submit"
-                                        class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:bg-blue-800">
+                                        class="w-full px-3 py-1 text-xs text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:bg-blue-800">
                                         <i class="fas fa-user-plus"></i> Create Account
                                     </button>
                                 </form>
+
 
                                 <script>
                                     document.getElementById('createAccountForm').addEventListener('submit', function(e) {
@@ -221,7 +208,7 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                         <div class="w-full md:w-1/2 border border-gray-300 rounded-lg h-full shadow-md">
                             <div class="p-4">
                                 <div class="overflow-x-auto">
-                                    <table class="w-full border-collapse">
+                                    <table id="userTable" class="w-full border-collapse">
                                         <thead>
                                             <tr class="border-b">
                                                 <th class="text-left p-2">ID</th>
@@ -269,7 +256,29 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                         </div>
                     </div>
 
+
+                    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+
+                    <!-- DataTables Core JS -->
+                    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+
+                    <!-- DataTables TailwindCSS Integration -->
+                    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.tailwindcss.js"></script>
                     <script>
+                        $(document).ready(function() {
+                            $('#userTable').DataTable({
+                                paging: true, // Enables pagination
+                                searching: true, // Enables search functionality
+                                info: true, // Displays table info
+                                order: [], // Default no ordering
+                                columnDefs: [{
+                                    orderable: false,
+                                    targets: 3 // Make the "Delete" column not sortable
+                                }]
+                            });
+                        });
+
+
                         // JavaScript function to handle user deletion
                         function deleteUser(userId) {
                             if (confirm("Are you sure you want to delete this user?")) {
@@ -335,6 +344,9 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
         });
     </script>
+    <!-- jQuery -->
+
+
 
 </body>
 

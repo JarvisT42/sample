@@ -2,6 +2,13 @@
 session_start();
 include '../connection.php';  // Ensure you have your database connection
 
+
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -87,71 +94,56 @@ include '../connection.php';  // Ensure you have your database connection
 
                             </thead>
                             <tbody>
-                                <?php
-                                include '../connection.php';  // Ensure you have your database connection
+                            <?php
+include '../connection.php';  // Database connection for main DB
+include '../connection2.php';  // Additional connection if needed
 
-                                // Get today's date
-                                $today = date('Y-m-d');
+// Get today's date
+$today = date('Y-m-d');
 
-                                // Fetch book_id and category for entries that exceed 3 days
-                                $fetchSql = "SELECT book_id, Category FROM borrow 
-             WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
-                                $fetchResult = $conn->query($fetchSql);
+// Update the status to 'failed-to-claim' for borrow entries that exceed 3 days
+$updateSql = "UPDATE borrow
+    SET status = 'failed-to-claim'
+    WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
+$conn->query($updateSql);
 
-                                if ($fetchResult->num_rows > 0) {
-                                    while ($row = $fetchResult->fetch_assoc()) {
-                                        $book_id = $row['book_id'];
-                                        $category = $row['Category'];
+// Query to get student records
+$studentSql = "SELECT s.First_Name, b.role, s.Middle_Initial, s.Last_Name, c.course, b.student_id, b.Time, 
+    COUNT(b.student_id) AS borrow_count, MIN(b.Date_To_Claim) AS nearest_date 
+    FROM borrow b 
+    JOIN students s ON b.student_id = s.Student_Id  
+    JOIN course c ON s.course_id = c.course_id  
+    WHERE b.status = 'pending' 
+    GROUP BY b.student_id";
+$studentResult = $conn->query($studentSql);
 
-                                        // Update the book record in the corresponding category table
-                                        $updateBookSql = "UPDATE gfi_library_database_books_records.$category
-                          SET No_Of_Copies = No_Of_Copies + 1
-                          WHERE id = $book_id";
-                                        $conn->query($updateBookSql);
-                                    }
-                                }
+// Query to get faculty records
+$facultySql = "SELECT f.First_Name, b.role, f.Middle_Initial, f.Last_Name, b.faculty_id, b.Time, 
+    COUNT(b.faculty_id) AS borrow_count, MIN(b.Date_To_Claim) AS nearest_date 
+    FROM borrow b 
+    JOIN faculty f ON b.faculty_id = f.Faculty_Id  
+    WHERE b.status = 'pending' 
+    GROUP BY b.faculty_id";
+$facultyResult = $conn->query($facultySql);
 
-                                // Update the status to 'Failed' for borrow entries that exceed 3 days
-                                $updateSql = "UPDATE borrow
-              SET status = 'failed-to-claim'
-              WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
-                                $conn->query($updateSql);
+// Array to store combined records
+$records = [];
+if ($studentResult->num_rows > 0) {
+    while ($row = $studentResult->fetch_assoc()) {
+        $row['user_type'] = 'student'; // Mark as student
+        $records[] = $row;
+    }
+}
+if ($facultyResult->num_rows > 0) {
+    while ($row = $facultyResult->fetch_assoc()) {
+        $row['user_type'] = 'faculty'; // Mark as faculty
+        $records[] = $row;
+    }
+}
 
-                                // Query to get student records
-                                $studentSql = "SELECT s.First_Name, b.role, s.Middle_Initial, s.Last_Name, c.course, b.student_id, b.Time, COUNT(b.student_id) AS borrow_count, 
-                     MIN(b.Date_To_Claim) AS nearest_date 
-              FROM borrow b 
-              JOIN students s ON b.student_id = s.Student_Id  
-              JOIN course c ON s.course_id = c.course_id  
+// You can now use $records for further processing, display, or other logic
+?>
 
-              WHERE b.status = 'pending' 
-              GROUP BY b.student_id";
-                                $studentResult = $conn->query($studentSql);
-
-                                // Query to get faculty records
-                                $facultySql = "SELECT f.First_Name, b.role, f.Middle_Initial, f.Last_Name, b.faculty_id, b.Time, COUNT(b.faculty_id) AS borrow_count, 
-                     MIN(b.Date_To_Claim) AS nearest_date 
-              FROM borrow b 
-              JOIN faculty f ON b.faculty_id = f.Faculty_Id  
-              WHERE b.status = 'pending' 
-              GROUP BY b.faculty_id";
-                                $facultyResult = $conn->query($facultySql);
-
-                                // Array to store combined records
-                                $records = [];
-                                if ($studentResult->num_rows > 0) {
-                                    while ($row = $studentResult->fetch_assoc()) {
-                                        $row['user_type'] = 'student'; // Mark as student
-                                        $records[] = $row;
-                                    }
-                                }
-                                if ($facultyResult->num_rows > 0) {
-                                    while ($row = $facultyResult->fetch_assoc()) {
-                                        $row['user_type'] = 'faculty'; // Mark as faculty
-                                        $records[] = $row;
-                                    }
-                                }
-                                ?>
 
                                 <?php if (!empty($records)): ?>
                                     <?php foreach ($records as $record): ?>

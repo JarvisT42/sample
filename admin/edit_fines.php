@@ -1,8 +1,9 @@
 <?php
 # Initialize the session
 session_start();
-if ($_SESSION["logged_Admin"] !== TRUE) {
-    echo "<script>" . "window.location.href='../index.php';" . "</script>";
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
     exit;
 }
 
@@ -28,11 +29,20 @@ if ($result->num_rows > 0) {
 <head>
     <?php include 'admin_header.php'; ?>
     <style>
-        .active-dashboard {
+        /* If you prefer inline styles, you can include them directly */
+        .active-edit-fines {
+            background-color: #f0f0f0;
+            color: #000;
+        }
+
+        .active-setting {
             background-color: #f0f0f0;
             color: #000;
         }
     </style>
+
+
+    
 </head>
 
 <body>
@@ -124,7 +134,17 @@ if ($result->num_rows > 0) {
                 });
         }
     </script>
+  <script>
+        // Function to automatically show the dropdown if on book_request.php
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownRequest = document.getElementById('dropdown-setting');
 
+            // Open the dropdown menu for 'Request'
+            dropdownRequest.classList.remove('hidden');
+            dropdownRequest.classList.add('block'); // Make the dropdown visible
+
+        });
+    </script>
 </body>
 
 </html>

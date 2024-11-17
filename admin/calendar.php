@@ -2,7 +2,11 @@
 session_start();
 
 
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
 
+    exit;
+}
 
 
 // include("../connection.php");

@@ -1,6 +1,11 @@
 <?php
 # Initialize the session
 session_start();
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
 
 ?>
 <!DOCTYPE html>
@@ -241,7 +246,6 @@ session_start();
 
 
                                     $borrowData = $conn->query($sql);
-                                    $conn->close(); // Close the database connection
                                     ?>
                                     <?php if ($borrowData && $borrowData->num_rows > 0): ?>
                                         <?php while ($row = $borrowData->fetch_assoc()): ?>
@@ -316,7 +320,7 @@ session_start();
                                     let url = 'borrowed_books_2.php?';
 
                                     // Check if it's a walk-in borrow
-                                    if (wayOfBorrow === 'walk-in') {
+                                    if (wayOfBorrow === 'Walk-in') {
                                         if (role === 'Faculty' && walkInId) {
                                             // For faculty walk-ins, use faculty_id
                                             url += 'walk_in_id=' + walkInId;
@@ -367,34 +371,71 @@ session_start();
                                     <tbody id="returned-table-body">
                                         <!-- Returned books data will be displayed here -->
                                         <?php
-                                        include '../connection.php';
+                                        include '../connection.php';  // Ensure you have your database connection
 
-                                        // Query to fetch returned books
+                                        // Get today's date
+                                        $today = date('Y-m-d');
+
+                                        // Fetch book_id and category for entries that exceed 3 days
+
+
+
+
+
                                         $sqlReturned = "SELECT 
-                                        b.student_id, 
-                                        b.Way_Of_Borrow,
-                                        CASE 
-                                            WHEN b.Way_Of_Borrow = 'online' THEN CONCAT(s.First_Name, ' ', s.Last_Name) 
-                                            WHEN b.Way_Of_Borrow = 'walk-in' THEN b.Full_Name 
-                                            ELSE '' 
-                                        END AS First_Name,
-                                        CASE 
-                                            WHEN b.Way_Of_Borrow = 'online' THEN s.S_Course
-                                            WHEN b.Way_Of_Borrow = 'walk-in' THEN '' 
-                                            ELSE '' 
-                                        END AS Course,
-                                        b.Due_Date,
-                                        b.Issued_Date,
-                                        b.Return_Date,
-                                        COUNT(b.student_id) AS borrow_count
-                                        FROM borrow b
-                                        LEFT JOIN students s ON b.student_id = s.student_id
-                                        WHERE b.status = 'returned'
-                                        GROUP BY b.Way_Of_Borrow, b.student_id, b.Full_Name";
+                                    b.student_id,  
+                                    b.faculty_id,  
+                                    b.Way_Of_Borrow,
+                                    b.walk_in_id,
+                                    b.role,
+                                    s.course_id,  -- Course ID from the student table
+                                    c.course,     -- Course name from the course table
+                                    CASE 
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN CONCAT(s.First_Name, ' ', s.Last_Name)
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN CONCAT(f.First_Name, ' ', f.Last_Name)
+                                        WHEN b.Way_Of_Borrow = 'walk-in' THEN w.full_name
+                                        ELSE '' 
+                                    END AS First_Name,
+                                    CASE 
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN c.course
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN 'n/a'
+                                        WHEN b.Way_Of_Borrow = 'walk-in' THEN 'n/a'
+                                        ELSE '' 
+                                    END AS Course,
+                                    b.Due_Date,
+                                    b.Issued_Date,
+                                                                            b.Return_Date,
+
+                                    -- Calculate total borrow count by summing individual counts
+                                    (COUNT(b.student_id) + COUNT(b.faculty_id) + COUNT(b.walk_in_id)) AS borrow_count,
+                        
+                                    MIN(CASE 
+                                        WHEN b.Due_Date = '' THEN DATE_ADD(b.Issued_Date, INTERVAL 3 DAY)
+                                        ELSE b.Due_Date
+                                    END) AS nearest_date,
+                                    MIN(b.Time) AS Time  
+                                FROM borrow b
+                                LEFT JOIN students s ON b.student_id = s.Student_Id
+                                LEFT JOIN faculty f ON b.faculty_id = f.Faculty_Id
+                                LEFT JOIN walk_in_borrowers w ON b.walk_in_id = w.walk_in_id
+                                LEFT JOIN course c ON s.course_id = c.course_id
+                                WHERE b.status = 'returned'
+                                GROUP BY b.Way_Of_Borrow, b.student_id, b.faculty_id, b.role, s.course_id";
+
+
+
+
+
 
                                         $returnedData = $conn->query($sqlReturned);
                                         $conn->close();
+
+
+
                                         ?>
+
+
+
 
                                         <?php if ($returnedData && $returnedData->num_rows > 0): ?>
                                             <?php while ($rowReturned = $returnedData->fetch_assoc()): ?>

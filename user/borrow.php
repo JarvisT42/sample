@@ -1,7 +1,8 @@
 <?php
 session_start();
-if ($_SESSION["loggedin"] !== TRUE) {
-    echo "<script>window.location.href='../index.php';</script>";
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header('Location: ../index.php');
+
     exit;
 }
 
@@ -87,20 +88,26 @@ if ($_SESSION["loggedin"] !== TRUE) {
 
                                 <!-- Dropdown menu -->
                                 <div id="dropdownAction" class="z-10 hidden absolute mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600">
-                                    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
-                                        <!-- Default "All fields" option -->
-                                        <li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a></li>
-                                        <?php
-                                        if ($result->num_rows > 0) {
-                                            while ($row = $result->fetch_array()) {
-                                                echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8') . '</a></li>';
-                                            }
-                                        } else {
-                                            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
-                                        }
-                                        ?>
-                                    </ul>
-                                </div>
+    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
+        <!-- Default "All fields" option -->
+        <li>
+            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a>
+        </li>
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_array()) {
+                $tableName = htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8');
+                // Exclude the 'e-books' table
+                if ($tableName !== 'e-books') {
+                    echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . $tableName . '">' . $tableName . '</a></li>';
+                }
+            }
+        } else {
+            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
+        }
+        ?>
+    </ul>
+</div>
                             </div>
 
                             <!-- Checkbox -->
@@ -269,24 +276,25 @@ if ($_SESSION["loggedin"] !== TRUE) {
                         ${record.table}
                     </div>
                 </div>
-                <div class="flex-shrink-0">
-                    ${record.copies <= 1 || record.availableToBorrow === 'No'
-                        ? `<span class="text-red-600">Not Available</span>`
-                        : record.currentlyBorrowed
-                            ? `<span class="text-yellow-600">Currently Borrowed</span>`
-                            : `<a href="#" class="${record.inBag ? 'text-red-600' : 'text-green-600'} hover:underline book-bag-toggle"
-                                data-id="${record.id}"  
-                                data-title="${record.title}" 
-                                data-author="${record.author}" 
-                                data-publication-date="${record.publicationDate}" 
-                                data-table="${record.table}" 
-                                data-cover-image="${record.coverImage}" 
-                                data-copies="${record.copies}"
-                                data-in-bag="${record.inBag}">
-                                ${record.inBag ? '<span class="fa fa-minus"></span> Remove from Book Bag' : '<span class="fa fa-plus"></span> Add to Book Bag'}
-                            </a>`
-                    }
-                </div>
+              <div class="flex-shrink-0">
+    ${record.availableToBorrow === 'No'
+        ? `<span class="text-red-600">Not Available</span>`
+        : record.currentlyBorrowed
+            ? `<span class="text-yellow-600">Currently Borrowed</span>`
+            : `<a href="#" class="${record.inBag ? 'text-red-600' : 'text-green-600'} hover:underline book-bag-toggle"
+                data-id="${record.id}"  
+                data-title="${record.title}" 
+                data-author="${record.author}" 
+                data-publication-date="${record.publicationDate}" 
+                data-table="${record.table}" 
+                data-cover-image="${record.coverImage}" 
+                data-copies="${record.copies}"
+                data-in-bag="${record.inBag}">
+                ${record.inBag ? '<span class="fa fa-minus"></span> Remove from Book Bag' : '<span class="fa fa-plus"></span> Add to Book Bag'}
+            </a>`
+    }
+</div>
+
                <div class="flex-shrink-0">
                             <a href="#" class="preview-image">
                                 <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">

@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($student_id)) {
         // Prepare and execute query to check the student_id and status in the students_id table
-        $stmt = $conn->prepare("SELECT status FROM students_id WHERE student_id = ?");
+        $stmt = $conn->prepare("SELECT status FROM students_ids WHERE student_id = ?");
         $stmt->bind_param("s", $student_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             // Prepare and execute query to check the student_id in the faculty_id table
-            $stmt = $conn->prepare("SELECT status FROM faculty_id WHERE faculty_id = ?");
+            $stmt = $conn->prepare("SELECT status FROM faculty_ids WHERE faculty_id = ?");
             $stmt->bind_param("s", $student_id);
             $stmt->execute();
             $result = $stmt->get_result();

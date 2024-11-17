@@ -2,6 +2,11 @@
 # Initialize the session
 session_start();
 include("../connection.php");
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+  header('Location: ../index.php');
+
+  exit;
+}
 
 $sql = "SELECT appointment_id, calendar, morning, afternoon FROM calendar_appointment";
 $result = $conn->query($sql);

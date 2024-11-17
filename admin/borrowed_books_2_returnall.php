@@ -24,14 +24,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $damageDescription = htmlspecialchars($data['damage_description'] ?? '');
     $accessionNo = htmlspecialchars($data['accession_no']);
 
-    // Determine the user column based on user type
+    // Determine the user column and bind type based on user type
     $userColumn = '';
+    $bindType = ''; // Determines if userId is bound as an integer or a string
+
     if ($userType === 'student') {
         $userColumn = 'student_id';
+        $bindType = 'i'; // integer
     } elseif ($userType === 'faculty') {
         $userColumn = 'faculty_id';
+        $bindType = 'i'; // integer
     } elseif ($userType === 'walk_in') {
         $userColumn = 'walk_in_id';
+        $bindType = 's'; // string
     } else {
         echo json_encode(['success' => false, 'message' => 'Invalid user type.']);
         exit;
@@ -49,8 +54,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Bind parameters and execute the borrow table update
-    $stmtBorrow->bind_param('dsisi', $fineAmount, $damageDescription, $userId, $bookId, $category);
+    // Bind parameters and execute the borrow table update based on the bind type
+    if ($bindType === 'i') {
+        $stmtBorrow->bind_param('dsisi', $fineAmount, $damageDescription, $userId, $bookId, $category);
+    } else {
+        $stmtBorrow->bind_param('dsssi', $fineAmount, $damageDescription, $userId, $bookId, $category);
+    }
+
     if (!$stmtBorrow->execute()) {
         echo json_encode(['success' => false, 'message' => 'Error updating book return: ' . $stmtBorrow->error]);
         $stmtBorrow->close();
@@ -63,8 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         UPDATE accession_records 
         SET status = 'returned', available = 'yes' 
         WHERE accession_no = ? AND borrower_id = ? AND book_id = ? AND status = 'borrowed'";
+    
     $stmtAccession = $conn->prepare($updateAccessionQuery);
-
     if ($stmtAccession === false) {
         echo json_encode(['success' => false, 'message' => 'Error preparing the accession update statement.']);
         $stmtBorrow->close();
@@ -73,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Bind parameters and execute the accession records update
-    $stmtAccession->bind_param('sii', $accessionNo, $userId,  $bookId);
+    $stmtAccession->bind_param('sii', $accessionNo, $userId, $bookId);
     if ($stmtAccession->execute()) {
         echo json_encode(['success' => true, 'message' => 'Book returned successfully.']);
     } else {

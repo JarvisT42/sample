@@ -17,6 +17,8 @@ $appointment_id = $_SESSION["appointment_id"];
 // Save book IDs (assuming you have book IDs in your session for each book)
 $bookBag = $_SESSION['book_bag']; // Books in session
 
+$calendarUpdated = false; // Flag to track if calendar update has already occurred
+
 if (!empty($bookBag)) {
     // Iterate through the books and check the number of copies before borrowing
     foreach ($bookBag as $book) {
@@ -28,7 +30,7 @@ if (!empty($bookBag)) {
 
         // Query to check the number of copies
         $checkCopiesSql = "SELECT No_Of_Copies FROM `$table` WHERE id = ?";
-        
+
         if ($stmtCheck = $conn2->prepare($checkCopiesSql)) {
             $stmtCheck->bind_param("i", $book_id);
             $stmtCheck->execute();
@@ -50,43 +52,50 @@ if (!empty($bookBag)) {
         // Proceed with the insert if copies are available
         $sql = "INSERT INTO borrow (role, student_id, book_id, Category, appointment_id, Date_to_claim, time, Way_Of_Borrow, status) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
+
         if ($stmt = $conn->prepare($sql)) {
             $stmt->bind_param("siisissss", $role, $id, $book_id, $table, $appointment_id, $selectedDate, $selectedTime, $way_of_borrow, $status);
-            
+
             // Execute the query
             if ($stmt->execute()) {
-                // Deduct the number of calendar slots based on the selected time
-                $columnToUpdate = ($selectedTime === 'morning') ? 'morning' : 'afternoon';
-                $calendarUpdateSql = "UPDATE calendar_appointment SET $columnToUpdate = $columnToUpdate - 1 WHERE calendar = ?";
+                // Now set the available status to reserved in the accession_records table for one entry
+                $accessionUpdateSql = "UPDATE accession_records SET available = 'reserved', borrower_id = ? 
+                WHERE book_id = ? AND book_category = ? AND available = 'yes' 
+                LIMIT 1";
 
-                if ($stmt2 = $conn->prepare($calendarUpdateSql)) {
-                    $stmt2->bind_param("s", $selectedDate);
-                    if (!$stmt2->execute()) {
-                        $_SESSION['error_message'] = 'Error updating calendar slots: ' . $stmt2->error;
+                if ($stmt4 = $conn->prepare($accessionUpdateSql)) {
+                    $stmt4->bind_param("iis", $id, $book_id, $table);
+                    if (!$stmt4->execute()) {
+                        $_SESSION['error_message'] = 'Error updating accession record: ' . $stmt4->error;
                     }
-                    $stmt2->close();
+                    $stmt4->close();
                 } else {
-                    $_SESSION['error_message'] = 'Error preparing calendar update query: ' . $conn->error;
+                    $_SESSION['error_message'] = 'Error preparing accession update query: ' . $conn->error;
                 }
-
-                // Now deduct the number of book copies
-                $bookDeductionSql = "UPDATE `$table` SET No_Of_Copies = No_Of_Copies - 1 WHERE id = ?";
-                if ($stmt3 = $conn2->prepare($bookDeductionSql)) {
-                    $stmt3->bind_param("i", $book_id);
-                    if (!$stmt3->execute()) {
-                        $_SESSION['error_message'] = 'Error updating number of book copies: ' . $stmt3->error;
-                    }
-                    $stmt3->close();
-                } else {
-                    $_SESSION['error_message'] = 'Error preparing book deduction query: ' . $conn2->error;
-                }
-
             } else {
                 $_SESSION['error_message'] = 'Error saving borrow record: ' . $stmt->error;
             }
 
             $stmt->close();
+        }
+    }
+
+    // If calendar slot hasn't been updated yet, update it now
+    if (!$calendarUpdated) {
+        $columnToUpdate = ($selectedTime === 'morning') ? 'morning' : 'afternoon';
+        $calendarUpdateSql = "UPDATE calendar_appointment SET $columnToUpdate = $columnToUpdate - 1 WHERE calendar = ?";
+
+        if ($stmt2 = $conn->prepare($calendarUpdateSql)) {
+            $stmt2->bind_param("s", $selectedDate);
+            if (!$stmt2->execute()) {
+                $_SESSION['error_message'] = 'Error updating calendar slots: ' . $stmt2->error;
+            }
+            $stmt2->close();
+
+            // Mark the calendar update as done
+            $calendarUpdated = true;
+        } else {
+            $_SESSION['error_message'] = 'Error preparing calendar update query: ' . $conn->error;
         }
     }
 } else {
@@ -114,4 +123,3 @@ unset($_SESSION['selected_time']);
 // Redirect to the success page, passing data via URL parameters
 header("Location: success_booked.php?firstName=$firstName&lastName=$lastName&email=$email&phoneNo=$phoneNo&date=$selectedDate&time=$selectedTime&books=$bookBagTitlesStr");
 exit();
-?>

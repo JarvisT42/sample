@@ -3,6 +3,13 @@ session_start();
 include '../connection.php'; // Ensure you have your database connection
 include '../connection2.php'; // Ensure you have your database connection
 
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
+
+
 // Check if any of the IDs (student_id, faculty_id, walk_in_id) are set in the query parameters
 if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['walk_in_id'])) {
     $user_type = ''; // Initialize user type
@@ -75,7 +82,11 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
         $stmtUser->close();
     } else {
         // For walk-in users, get the name from the borrow table
-        $fullNameQuery = "SELECT Full_Name, role FROM borrow WHERE walk_in_id = ?";
+
+
+
+
+        $fullNameQuery = "SELECT full_name, role FROM walk_in_borrowers WHERE walk_in_id = ?";
         $stmtWalkIn = $conn->prepare($fullNameQuery);
         $stmtWalkIn->bind_param('i', $user_id);
         $stmtWalkIn->execute();
@@ -83,7 +94,7 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
 
         if ($walkInResult->num_rows > 0) {
             $walkInRow = $walkInResult->fetch_assoc();
-            $fullName = $walkInRow['Full_Name'];
+            $fullName = $walkInRow['full_name'];
             $displayRole = $walkInRow['role'];
         } else {
             $fullName = 'Unknown Walk-In';
@@ -265,7 +276,7 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
                                                             <p class="text-sm due-date" data-index="<?php echo $overall_index; ?>"><?php echo htmlspecialchars($due_date); ?></p>
                                                         </div>
                                                         <div>
-                                                            <p class="text-sm font-semibold">Fines: ₱ <span id="fine-amount-<?php echo $overall_index; ?>"><?php echo $fine_amount; ?></span></p>
+                                                            <p class="text-sm font-semibold">Due Date Fines: ₱ <span id="fine-amount-<?php echo $overall_index; ?>"><?php echo $fine_amount; ?></span></p>
                                                         </div>
                                                     </div>
                                                     <!-- Status and Fine Information -->
@@ -289,12 +300,14 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
                                                                 <option value="Lost">Lost</option>
                                                             </select>
                                                         </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold">Fines:</p>
+                                                        <div id="finehidden-<?php echo $overall_index; ?>"  style="display: none;">
+                                                            <p id="fineLabel-<?php echo $overall_index; ?>" class="text-sm font-semibold">Fines:</p>
                                                             <div class="flex items-center">
                                                                 P:<input id="fineInput-<?php echo $overall_index; ?>" class="border border-gray-300 rounded p-1 w-32 finesInput" type="number" disabled placeholder="Disabled">
                                                             </div>
                                                         </div>
+
+
                                                     </div>
                                                     <div id="damageTextArea-<?php echo $overall_index; ?>" style="display: none;" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                                                         <div class="col-span-3">
@@ -412,6 +425,10 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
                                             function toggleStatusActions(index) {
                                                 const statusSelect = document.getElementById(`statusSelect-${index}`);
                                                 const damageTextArea = document.getElementById(`damageTextArea-${index}`);
+                                                const fineHidden = document.getElementById(`finehidden-${index}`);
+
+
+                                                
                                                 const renewButton = document.getElementById(`renewButton-${index}`);
                                                 const returnButton = document.getElementById(`returnButton-${index}`);
                                                 const fineInput = document.getElementById(`fineInput-${index}`);
@@ -426,21 +443,23 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
                                                 const category = "<?php echo htmlspecialchars($category); ?>";
                                                 const dueDate = document.querySelector(`.due-date[data-index="${index}"]`).innerText;
                                                 const accessionNo = document.getElementById(`accession_no-${index}`).innerText;
+                                                const fineLabel = document.querySelector(`#fineLabel-${index}`); // Add ID to target the specific <p> tag
 
                                                 if (statusSelect.value === "Damage") {
                                                     fineInput.disabled = false;
                                                     fineInput.placeholder = "Enter fine amount";
                                                     fineInput.value = "";
+                                                    fineHidden.style.display = 'block';
                                                     damageTextArea.style.display = 'block';
                                                     renewButton.style.display = 'none';
                                                     returnButton.innerText = "Pay";
+                                                    fineLabel.innerText = "Damage fines"; // Update to "Replacement Fee"
 
-                                                    // Update fine and description dynamically
+                                                    // Update fine and description dynamically for "Damage" status
                                                     fineInput.addEventListener('input', () => {
                                                         const additionalFine = parseFloat(fineInput.value) || 0;
                                                         const totalFine = initialFineAmount + additionalFine;
 
-                                                        // Pass the current description from damageDescriptionInput
                                                         returnButton.onclick = () => openDamageBookModal(bookId, userType, userId, category, dueDate, totalFine, accessionNo, damageDescriptionInput.value);
                                                     });
 
@@ -448,16 +467,33 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
                                                     returnButton.onclick = () => openDamageBookModal(bookId, userType, userId, category, dueDate, initialFineAmount, accessionNo, damageDescriptionInput.value);
 
                                                 } else if (statusSelect.value === "Lost") {
-                                                    fineInput.disabled = true;
+                                                    fineInput.disabled = false;
+                                                    fineInput.placeholder = "Enter fine amount";
                                                     fineInput.value = "";
-                                                    fineInput.placeholder = "Disabled";
+                                                    fineHidden.style.display = 'block';
+
                                                     damageTextArea.style.display = 'none';
                                                     renewButton.style.display = 'none';
                                                     returnButton.innerText = "Replacement";
+                                                    fineLabel.innerText = "Replacement Fee:"; // Update to "Replacement Fee"
+
+                                                    // Update fine dynamically for "Lost" status
+                                                    fineInput.addEventListener('input', () => {
+                                                        const additionalFine = parseFloat(fineInput.value) || 0;
+                                                        const totalFine = initialFineAmount + additionalFine;
+
+                                                        returnButton.onclick = () => openReplacementModal(bookId, userType, userId, category, dueDate, totalFine, accessionNo);
+                                                    });
+
+                                                    // Initial setup for the button with the calculated fine amount
                                                     returnButton.onclick = () => openReplacementModal(bookId, userType, userId, category, dueDate, initialFineAmount, accessionNo);
+
                                                 } else {
+
                                                     fineInput.disabled = true;
                                                     fineInput.value = "";
+                                                    fineHidden.style.display = 'none';
+
                                                     fineInput.placeholder = "Disabled";
                                                     damageTextArea.style.display = 'none';
                                                     renewButton.style.display = 'inline';
@@ -469,6 +505,7 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
                                                 }
                                             }
                                         </script>
+
 
 
 
@@ -538,11 +575,60 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
                             <div class="flex items-center justify-end pr-36">
                                 <button type="button" onclick="openPrintModal()" class="bg-blue-500 text-white font-bold py-2 px-4 rounded mr-8">Print Preview</button>
 
-                                <button type="button" id="returnButton-<?php echo $overall_index; ?>"
-                                    class="bg-blue-500 text-white font-bold py-2 px-4 rounded mr-8 return-button"
-                                    onclick="openReturnBookModal('<?php echo htmlspecialchars($book_id); ?>', '<?php echo htmlspecialchars($user_id); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($displayRole); ?>', '<?php echo htmlspecialchars($fine_amount); ?>', '<?php echo $user_type === 'student' ? 'student_id' : ($user_type === 'faculty' ? 'faculty_id' : 'walk_in_id'); ?>')">
+                                <button type="button" id="returnAllButton"
+                                    class="bg-blue-500 text-white font-bold py-2 px-4 rounded mr-8"
+                                    onclick="processReturnAll()">
                                     Return All
                                 </button>
+
+
+
+                                <script>
+                                    function processReturnAll() {
+                                        // Loop through each book and send individual requests for each
+                                        document.querySelectorAll('li[data-book-id]').forEach((bookElement) => {
+                                            const bookId = bookElement.getAttribute('data-book-id');
+                                            const category = bookElement.getAttribute('data-category');
+                                            const fineAmount = parseFloat(bookElement.getAttribute('data-fine-amount')) || 0;
+
+                                            // Get the index to target the correct accession_no element
+                                            const index = bookElement.getAttribute('data-index');
+                                            const accessionNo = document.getElementById(`accession_no-${index}`).innerText;
+
+                                            // Retrieve userType and userId from PHP
+                                            const userType = "<?php echo $user_type; ?>";
+                                            const userId = "<?php echo $user_id; ?>";
+
+                                            // Send each book's data as an individual request to the server
+                                            fetch('borrowed_books_2_returnall.php', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                        book_id: bookId,
+                                                        category: category,
+                                                        fine_amount: fineAmount,
+                                                        accession_no: accessionNo,
+                                                        user_type: userType,
+                                                        user_id: userId
+                                                    }),
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    if (!data.success) {
+                                                        alert(`Error for Book ID ${bookId}: ` + data.message);
+                                                    }
+                                                })
+                                                .catch(error => console.error(`Error for Book ID ${bookId}:`, error));
+                                        });
+
+                                        // Alert the user after the loop completes
+                                        alert('All book return requests have been sent.');
+                                        location.reload(); // Reload to reflect changes after all requests
+                                    }
+                                </script>
+
 
 
                             </div>
@@ -722,7 +808,7 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
                 alert("Please select an expected replacement date.");
                 return;
             }
-           
+
             fetch('borrowed_books_2_replace.php', {
                     method: 'POST',
                     headers: {
@@ -1069,8 +1155,50 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Select the "Return All" button element
+            const returnAllButton = document.getElementById('returnAllButton');
 
+            // Select all status dropdowns
+            const statusDropdowns = document.querySelectorAll('select[id^="statusSelect-"]');
 
+            // Function to check if any dropdown has selected "Damage" or "Lost"
+            function checkStatusDropdowns() {
+                let shouldHideReturnAll = false;
+
+                // Loop through each dropdown to check the selected value
+                statusDropdowns.forEach((dropdown) => {
+                    if (dropdown.value === "Damage" || dropdown.value === "Lost") {
+                        shouldHideReturnAll = true;
+                    }
+                });
+
+                // Hide or show the "Return All" button based on the condition
+                returnAllButton.style.display = shouldHideReturnAll ? 'none' : 'inline-block';
+            }
+
+            // Attach event listener to each dropdown to monitor changes
+            statusDropdowns.forEach((dropdown) => {
+                dropdown.addEventListener('change', checkStatusDropdowns);
+            });
+
+            // Initial check in case any dropdown is already set to "Damage" or "Lost"
+            checkStatusDropdowns();
+        });
+    </script>
+
+    <script>
+        // Function to automatically show the dropdown if on book_request.php
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownRequest = document.getElementById('dropdown-request');
+
+            // Open the dropdown menu for 'Request'
+            dropdownRequest.classList.remove('hidden');
+            dropdownRequest.classList.add('block'); // Make the dropdown visible
+
+        });
+    </script>
 
 </body>
 

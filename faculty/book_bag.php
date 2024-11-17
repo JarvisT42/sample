@@ -2,6 +2,13 @@
 // Start session
 session_start();
 
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
+
+
 // If book_bag session is not set, initialize it as an empty array
 if (!isset($_SESSION['book_bag'])) {
     $_SESSION['book_bag'] = [];

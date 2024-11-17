@@ -1,14 +1,61 @@
 <?php
-# Initialize the session
-require '../connection.php';
+include '../connection.php'; // Include your database connection file
 
 session_start();
-if ($_SESSION["logged_Admin"] !== TRUE) {
-    //echo "<script type='text/javascript'> alert ('Iasdasdasd.')</script>";
-    echo "<script>" . "window.location.href='../index.php';" . "</script>";
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
+
+// Check if the request is a POST request and contains the 'add' parameter
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
+    // Prepare an array to store valid student IDs
+    $studentIds = [];
+
+    // Loop through all 10 potential fields
+    for ($i = 1; $i <= 10; $i++) {
+        $key = "student-id-{$i}";
+        if (!empty($_POST[$key])) {
+            $studentIds[] = $_POST[$key];
+        }
+    }
+
+    // Check if there are valid student IDs to insert
+    if (count($studentIds) > 0) {
+        // Prepare the SQL query dynamically
+        $placeholders = array_fill(0, count($studentIds), '(?)');
+        $sql = "INSERT INTO students_ids (student_id) VALUES " . implode(', ', $placeholders);
+
+        if ($stmt = $conn->prepare($sql)) {
+            // Bind parameters dynamically
+            $types = str_repeat('s', count($studentIds)); // 's' for each student_id (string)
+            $stmt->bind_param($types, ...$studentIds);
+
+            // Execute the query
+            if ($stmt->execute()) {
+                header("Location: " . $_SERVER['PHP_SELF'] . "?added_success=1");
+
+                $_SESSION['success_message'] = 'Student IDs added successfully!';
+            } else {
+                $_SESSION['error_message'] = 'Database insertion failed: ' . $stmt->error;
+            }
+
+            $stmt->close();
+        } else {
+            $_SESSION['error_message'] = 'Failed to prepare SQL statement: ' . $conn->error;
+        }
+    } else {
+        $_SESSION['error_message'] = 'No valid student IDs provided.';
+    }
+
+    $conn->close();
+
+    // Redirect back to the same page
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,13 +64,17 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
     <style>
         /* If you prefer inline styles, you can include them directly */
-        .active-dashboard {
+        .active-student_id {
             background-color: #f0f0f0;
-            /* Example for light mode */
             color: #000;
-            /* Example for light mode */
+        }
+
+        .active-setting {
+            background-color: #f0f0f0;
+            color: #000;
         }
     </style>
+
     <style>
         .container {
             background-color: white;
@@ -66,13 +117,42 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                     <!-- Button beside the title -->
                 </div>
 
+
+                <?php if (isset($_GET['added_success']) && $_GET['added_success'] == 1): ?>
+                    <div id="alert" class="alert alert-success" role="alert" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                        Added successful!
+                    </div>
+                <?php endif; ?>
+                <?php if (isset($_GET['delete_success']) && $_GET['delete_success'] == 1): ?>
+                    <div id="alert" class="alert alert-danger" role="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                        Deleted successfully!
+                    </div>
+                <?php endif; ?>
+
+
+
+
+
                 <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
                     The Students page allows administrators to add student IDs. Administrators can easily input and assign student IDs to ensure all students are properly documented for efficient tracking and management.
                 </div>
 
 
 
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-between">
+                    <ul class="flex flex-wrap gap-2 p-5 border border-dashed rounded-md w-full">
 
+
+                        <li><a class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" href="#">Student Id's</a></li>
+                        <br>
+                        <li><a class="px-4 py-2 " href="add_faculty_id.php">Faculty Id's</a></li>
+
+
+                        <!-- <li><a class="px-4 py-2 " href="subject_for_replacement.php">Subject for Replacement</a></li> -->
+                    </ul> <!-- Button beside the title -->
+
+
+                </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-4">
 
@@ -83,80 +163,38 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
 
 
-                    <div class="flex items-center justify-center rounded   dark:bg-gray-800">
+                    <div class="flex items-start justify-center rounded   dark:bg-gray-800">
 
 
 
                         <div class="w-full md:w-1/2 border border-gray-300 rounded-lg shadow-md ">
 
                             <div class="p-4 bg-gray-50 rounded-lg">
-                                <form id="createAccountForm" class="space-y-4">
-                                    <!-- Student ID 1 -->
-                                    <div class="space-y-2">
-                                        <label for="student-id-1" class="font-semibold text-gray-700">Student ID 1</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
-                                                <i class="fas fa-id-card"></i>
-                                            </span>
-                                            <input type="text" id="student-id-1" name="student-id-1" required
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
-                                        </div>
-                                    </div>
 
-                                    <!-- Student ID 2 -->
-                                    <div class="space-y-2">
-                                        <label for="student-id-2" class="font-semibold text-gray-700">Student ID 2</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
-                                                <i class="fas fa-id-card"></i>
-                                            </span>
-                                            <input type="text" id="student-id-2" name="student-id-2"
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
-                                        </div>
-                                    </div>
 
-                                    <!-- Student ID 3 -->
-                                    <div class="space-y-2">
-                                        <label for="student-id-3" class="font-semibold text-gray-700">Student ID 3</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
-                                                <i class="fas fa-id-card"></i>
-                                            </span>
-                                            <input type="text" id="student-id-3" name="student-id-3"
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
+                                <form method="POST" id="createAccountForm" enctype="multipart/form-data">
+                                    <?php for ($i = 1; $i <= 10; $i++): ?>
+                                        <div class="space-y-1">
+                                            <label for="student-id-<?= $i ?>" class="font-medium text-sm text-gray-700">Student ID <?= $i ?></label>
+                                            <div class="flex items-center border border-gray-300 rounded-md">
+                                                <span class="px-2 text-gray-500 text-xs">
+                                                    <i class="fas fa-id-card"></i>
+                                                </span>
+                                                <input type="number" id="student-id-<?= $i ?>" name="student-id-<?= $i ?>"
+                                                    class="w-full px-2 py-1 text-sm focus:outline-none focus:ring focus:border-blue-400 rounded-r-md"
+                                                    min="0">
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <!-- Student ID 4 -->
-                                    <div class="space-y-2">
-                                        <label for="student-id-4" class="font-semibold text-gray-700">Student ID 4</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
-                                                <i class="fas fa-id-card"></i>
-                                            </span>
-                                            <input type="text" id="student-id-4" name="student-id-4"
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
-                                        </div>
-                                    </div>
-
-                                    <!-- Student ID 5 -->
-                                    <div class="space-y-2">
-                                        <label for="student-id-5" class="font-semibold text-gray-700">Student ID 5</label>
-                                        <div class="flex items-center border border-gray-300 rounded-lg">
-                                            <span class="px-3 text-gray-500">
-                                                <i class="fas fa-id-card"></i>
-                                            </span>
-                                            <input type="text" id="student-id-5" name="student-id-5"
-                                                class="w-full px-4 py-2 focus:outline-none focus:ring focus:border-blue-400 rounded-r-lg">
-                                        </div>
-                                    </div>
-
-                                    <!-- Submit Button -->
+                                    <?php endfor; ?>
+                                    <input type="hidden" name="add" value="1">
                                     <button type="submit"
-                                        class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:bg-blue-800">
+                                        class="w-full px-3 py-2 text-xs text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:bg-blue-800">
                                         <i class="fas fa-user-plus"></i> Add Student IDs
                                     </button>
                                 </form>
+
+
+
 
 
 
@@ -169,55 +207,6 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
 
 
-
-                        <script>
-                            document.getElementById('createAccountForm').addEventListener('submit', function(event) {
-                                event.preventDefault(); // Prevent the form from submitting the default way
-
-                                // Gather all student IDs but only keep those that are not empty
-                                const studentIds = {};
-
-                                const student1 = document.getElementById('student-id-1').value;
-                                const student2 = document.getElementById('student-id-2').value;
-                                const student3 = document.getElementById('student-id-3').value;
-                                const student4 = document.getElementById('student-id-4').value;
-                                const student5 = document.getElementById('student-id-5').value;
-
-                                if (student1) studentIds.student1 = student1;
-                                if (student2) studentIds.student2 = student2;
-                                if (student3) studentIds.student3 = student3;
-                                if (student4) studentIds.student4 = student4;
-                                if (student5) studentIds.student5 = student5;
-
-                                // Check if there's any non-empty student ID to send
-                                if (Object.keys(studentIds).length > 0) {
-                                    // Send the data via POST to the backend
-                                    fetch('add_student_id_save.php', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                            },
-                                            body: JSON.stringify(studentIds), // Send only non-empty student IDs as JSON
-                                        })
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            if (data.success) {
-                                                alert('Student IDs saved successfully!');
-                                                // Optionally clear the form or reload the page
-                                                document.getElementById('createAccountForm').reset();
-                                            } else {
-                                                alert('Failed to save Student IDs: ' + data.error);
-                                            }
-                                        })
-                                        .catch(error => {
-                                            console.error('Error:', error);
-                                            alert('An error occurred while saving the student IDs.');
-                                        });
-                                } else {
-                                    alert('Please fill in at least one Student ID.');
-                                }
-                            });
-                        </script>
 
 
 
@@ -234,8 +223,8 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                         // Include database connection
                         include '../connection.php';
 
-                        // Fetch users from the database
-                        $sql = "SELECT id, student_id, status FROM students_id";
+                        // Fetch users from the database, ordered by `created_at` in descending order
+                        $sql = "SELECT student_id, status, created_at FROM students_ids ORDER BY created_at DESC";
                         $result = $conn->query($sql);
 
                         // Initialize an empty array to hold users
@@ -257,27 +246,24 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                         <div class="w-full md:w-1/2 border border-gray-300 rounded-lg h-full shadow-md">
                             <div class="p-4">
                                 <div class="overflow-x-auto">
-                                    <table class="w-full border-collapse">
+                                    <table id="userTable" class="w-full border-collapse stripe hover">
                                         <thead>
                                             <tr class="border-b">
                                                 <th class="text-left p-2">No.</th>
-
                                                 <th class="text-left p-2">Student Id</th>
                                                 <th class="text-left p-2">Status</th>
                                                 <th class="text-left p-2">Action</th>
-
                                             </tr>
                                         </thead>
                                         <tbody id="userTableBody">
                                             <?php
                                             if (!empty($users)) {
-                                                // Loop through each user and display their data in the table
+                                                $no = 1; // Add a counter for the "No." column
                                                 foreach ($users as $user) {
                                             ?>
-                                                    <tr class="border-b" data-user-id="<?php echo htmlspecialchars($user['id']); ?>">
-
+                                                    <tr class="border-b" data-user-id="<?php echo htmlspecialchars($user['student_id']); ?>" data-status="<?php echo htmlspecialchars($user['status']); ?>">
                                                         <td class="px-6 py-4 break-words" style="max-width: 300px;">
-                                                            <?php echo htmlspecialchars($user['id']); ?>
+                                                            <?php echo $no++; ?>
                                                         </td>
                                                         <td class="px-6 py-4 break-words" style="max-width: 300px;">
                                                             <?php echo htmlspecialchars($user['student_id']); ?>
@@ -285,13 +271,13 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                                                         <td class="px-6 py-4 break-words" style="max-width: 300px;">
                                                             <?php echo htmlspecialchars($user['status']); ?>
                                                         </td>
-
                                                         <td class="px-6 py-4">
-                                                            <button class="text-red-600 hover:text-red-800 focus:outline-none" onclick="deleteUser(<?php echo $user['id']; ?>)">
+                                                            <button class="text-red-600 hover:text-red-800 focus:outline-none" onclick="deleteUser(<?php echo htmlspecialchars($user['student_id']); ?>)">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
                                                         </td>
                                                     </tr>
+
                                                 <?php
                                                 }
                                             } else {
@@ -309,34 +295,78 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
                         </div>
 
 
+                        <!-- jQuery -->
+                        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+
+                        <!-- DataTables Core JS -->
+                        <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+
+                        <!-- DataTables TailwindCSS Integration -->
+                        <script src="https://cdn.datatables.net/2.1.8/js/dataTables.tailwindcss.js"></script>
+
                         <script>
-    // Function to delete a user by ID
-    function deleteUser(userId) {
-        if (confirm('Are you sure you want to delete this user?')) {
-            // Send the DELETE request via fetch to the backend
-            fetch('add_student_id_delete.php', {
-                method: 'POST', // Use POST method
-                headers: {
-                    'Content-Type': 'application/json', // Specify that we're sending JSON data
-                },
-                body: JSON.stringify({ id: userId }), // Send the user ID as JSON
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('User deleted successfully!');
-                    location.reload(); // Reload the page to update the table
-                } else {
-                    alert('Failed to delete user: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while deleting the user.');
-            });
-        }
+                          $(document).ready(function() {
+    // Initialize DataTables
+    $('#userTable').DataTable({
+        paging: true, // Enables pagination
+        searching: true, // Enables search functionality
+        info: true, // Displays table info
+        order: [], // Default no ordering
+        columnDefs: [{
+            orderable: false,
+            targets: 3 // Make the "Action" column not sortable
+        }]
+    });
+});
+
+// Function to delete a user by ID
+function deleteUser(userId) {
+    // Find the row that contains the user ID
+    var row = document.querySelector(`tr[data-user-id="${userId}"]`);
+    
+    // Get the status from the data-status attribute of the row
+    var status = row.getAttribute('data-status');
+    
+    // Check if the status is 'taken' and prevent deletion
+    if (status === 'Taken') {
+        alert('This user cannot be deleted because their status is "taken".');
+        return; // Exit the function if the status is "taken"
     }
-</script>
+
+    // Confirm before deletion
+    if (confirm('Are you sure you want to delete this user?')) {
+        // Send a request to delete the user from the backend
+        fetch('add_student_id_delete.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: userId, // Send the student ID
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // If the deletion was successful, remove the row from the table
+                row.remove();
+                // Optionally show a success message
+                window.location.href = window.location.pathname + '?delete_success=1';
+                // Optionally redirect or update UI
+                // window.location.href = window.location.pathname + '?delete_success=1';
+            } else {
+                alert('Failed to delete user: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the user.');
+        });
+    }
+}
+
+                        </script>
+
 
 
 
@@ -376,6 +406,15 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
     </main>
 
+    <script>
+        // Set a timeout to hide the alert after 3 seconds (3000 ms)s
+        setTimeout(function() {
+            var alertElement = document.getElementById('alert');
+            if (alertElement) {
+                alertElement.style.display = 'none';
+            }
+        }, 4000);
+    </script>
 
 
     <script src="./src/components/header.js"></script>
@@ -390,6 +429,8 @@ if ($_SESSION["logged_Admin"] !== TRUE) {
 
         });
     </script>
+    <!-- jQuery -->
+
 
 </body>
 

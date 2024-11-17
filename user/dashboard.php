@@ -4,11 +4,16 @@ session_start();
 require '../connection.php';
 
 
-if ($_SESSION["loggedin"] !== TRUE) {
-    //echo "<script type='text/javascript'> alert ('Iasdasdasd.')</script>";
-    echo "<script>" . "window.location.href='../index.php';" . "</script>";
+
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header('Location: ../index.php');
+
     exit;
 }
+
+
+
+
 $Student_Id = $_SESSION["Student_Id"];
 
 ?>

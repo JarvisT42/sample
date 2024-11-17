@@ -1,9 +1,10 @@
 <?php
 session_start();
-// if ($_SESSION["loggedin"] !== TRUE) {
-//     echo "<script>window.location.href='../index.php';</script>";
-//     exit;
-// }
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
 
 
 
@@ -77,20 +78,26 @@ session_start();
 
                                 <!-- Dropdown menu -->
                                 <div id="dropdownAction" class="z-10 hidden absolute mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600">
-                                    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
-                                        <!-- Default "All fields" option -->
-                                        <li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a></li>
-                                        <?php
-                                        if ($result->num_rows > 0) {
-                                            while ($row = $result->fetch_array()) {
-                                                echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8') . '</a></li>';
-                                            }
-                                        } else {
-                                            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
-                                        }
-                                        ?>
-                                    </ul>
-                                </div>
+    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
+        <!-- Default "All fields" option -->
+        <li>
+            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a>
+        </li>
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_array()) {
+                $tableName = htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8');
+                // Exclude the 'e-books' table
+                if ($tableName !== 'e-books') {
+                    echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . $tableName . '">' . $tableName . '</a></li>';
+                }
+            }
+        } else {
+            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
+        }
+        ?>
+    </ul>
+</div>
                             </div>
 
                             <!-- Checkbox -->

@@ -3,6 +3,15 @@
 session_start();
 
 // If book_bag session is not set, initialize it as an empty array
+
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
+
+
+
 if (!isset($_SESSION['book_bag'])) {
     $_SESSION['book_bag'] = [];
 }
@@ -83,16 +92,16 @@ $role = isset($_GET['role']) ? htmlspecialchars($_GET['role']) : '';
                                             <h2 class="text-lg font-semibold mb-2">
                                                 <a href="#" class="text-blue-600 hover:underline max-w-xs break-words">
                                                     <?php echo htmlspecialchars($book['title']); ?>
-                                                   
+
                                                 </a>
-                                               
+
                                                 <div class="mt-2">
                                                     <label for="accession-dropdown-<?php echo htmlspecialchars($book['id']); ?>" class="text-sm font-medium text-gray-700">Select Accession No:</label>
                                                     <select id="accession-dropdown-<?php echo htmlspecialchars($book['id']); ?>" name="accession_no[<?php echo htmlspecialchars($book['id']); ?>]" class="ml-2 border border-gray-300 rounded-md p-1" required>
                                                         <?php
                                                         include '../connection.php'; // Ensure you have your database connection
 
-                                                        $accessionQuery = "SELECT accession_no FROM `accession_records` WHERE book_id = ? AND book_category = ? AND status != 'borrowed'";
+                                                        $accessionQuery = "SELECT accession_no FROM `accession_records` WHERE book_id = ? AND book_category = ? AND available NOT IN ('no', 'reserved')";
                                                         $stmt3 = $conn->prepare($accessionQuery);
                                                         $stmt3->bind_param("is", htmlspecialchars($book['id']), htmlspecialchars($book['table']));
                                                         $stmt3->execute();
@@ -107,7 +116,7 @@ $role = isset($_GET['role']) ? htmlspecialchars($_GET['role']) : '';
                                                 </div>
                                             </h2>
 
-                                            
+
                                             <div class="mt-4">
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 text-sm text-gray-600">
                                                     <div class="font-medium bg-gray-200 p-2">Main Author:</div>
@@ -116,6 +125,7 @@ $role = isset($_GET['role']) ? htmlspecialchars($_GET['role']) : '';
                                                     <div class="bg-gray-200 p-2"><?php echo htmlspecialchars($book['publicationDate']); ?></div>
                                                     <div class="font-medium bg-gray-200 p-2">Table:</div>
                                                     <div class="bg-gray-100 p-2"><?php echo htmlspecialchars($book['table']); ?></div>
+                                                    
                                                     <div class="font-medium bg-gray-100 p-2">Copies:</div>
                                                     <div class="bg-gray-200 p-2"><?php echo htmlspecialchars($book['copies']); ?></div>
                                                 </div>
@@ -129,9 +139,12 @@ $role = isset($_GET['role']) ? htmlspecialchars($_GET['role']) : '';
                                         <div class="flex-shrink-0">
                                             <img src="<?php echo htmlspecialchars($book['coverImage']); ?>" alt="Book Cover" class="w-36 h-56 border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
                                         </div>
+                                        <input type="hidden" name="table[<?php echo htmlspecialchars($book['id']); ?>]" value="<?php echo htmlspecialchars($book['table']); ?>">
+
                                     </div>
                                 </li>
                             <?php endforeach; ?>
+
                         </ul>
 
                         <div class="mt-8 bg-white border border-gray-300 w-full p-4 rounded-lg shadow-md flex justify-end">
@@ -145,42 +158,46 @@ $role = isset($_GET['role']) ? htmlspecialchars($_GET['role']) : '';
 
             <script>
                 document.getElementById('borrowForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent the default form submission
+                    event.preventDefault(); // Prevent the default form submission
 
-    const formData = new FormData(this); // Create a FormData object
+                    const formData = new FormData(this); // Create a FormData object
 
-    // Log selected accession numbers for debugging
-    document.querySelectorAll("select[name^='accession_no']").forEach(select => {
-        console.log(`Book ID: ${select.name}, Selected Accession No: ${select.value}`);
-    });
+                    // Collect data to display in an alert
+                    let dataToSend = 'Data to be sent:\n';
+                    formData.forEach((value, key) => {
+                        dataToSend += `${key}: ${value}\n`; // Append each key-value pair to the dataToSend string
+                    });
 
-    // Send the form data using fetch
-    fetch('book_bag_save.php', {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json(); // Parse JSON response
-            } else {
-                throw new Error('Network response was not ok.');
-            }
-        })
-        .then(data => {
-            // Show alerts based on the response from PHP
-            if (data.status === 'success') {
-                alert(data.message); // Show success alert
-                window.location.href = 'borrow.php'; // Redirect to borrow.php
-            } else {
-                alert(data.message); // Show error alert
-            }
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-});
+                    // Show alert with all the data
+                    // alert(dataToSend);
 
+                    // Send the form data using fetch
+                    fetch('book_bag_save.php', {
+                            method: 'POST',
+                            body: formData,
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json(); // Parse JSON response
+                            } else {
+                                throw new Error('Network response was not ok.');
+                            }
+                        })
+                        .then(data => {
+                            // Show alerts based on the response from PHP
+                            if (data.status === 'success') {
+                                alert(data.message); // Show success alert
+                                window.location.href = 'borrow.php'; // Redirect to borrow.php
+                            } else {
+                                alert(data.message); // Show error alert
+                            }
+                        })
+                        .catch(error => {
+                            console.error('There was a problem with the fetch operation:', error);
+                        });
+                });
             </script>
+
 
 
         </div>

@@ -11,6 +11,16 @@ $selectedDate = htmlspecialchars($_GET['date']);
 $selectedTime = htmlspecialchars($_GET['time']);
 $bookBagTitlesStr = urldecode($_GET['books']);
 $bookBagTitles = unserialize($bookBagTitlesStr);
+
+
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+  header('Location: ../index.php');
+
+  exit;
+}
+
+
+
 ?>
 
 <!DOCTYPE html>

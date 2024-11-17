@@ -15,6 +15,8 @@ if (ini_get("session.use_cookies")) {
 }
 
 // Finally, destroy the session
+session_start();
+session_unset();
 session_destroy();
 
 // Redirect to index.php

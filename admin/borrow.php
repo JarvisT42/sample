@@ -2,6 +2,12 @@
 session_start();
 
 
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
+
 
 
 ?>
@@ -106,20 +112,26 @@ session_start();
 
                                 <!-- Dropdown menu -->
                                 <div id="dropdownAction" class="z-10 hidden absolute mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600">
-                                    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
-                                        <!-- Default "All fields" option -->
-                                        <li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a></li>
-                                        <?php
-                                        if ($result->num_rows > 0) {
-                                            while ($row = $result->fetch_array()) {
-                                                echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8') . '</a></li>';
-                                            }
-                                        } else {
-                                            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
-                                        }
-                                        ?>
-                                    </ul>
-                                </div>
+    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
+        <!-- Default "All fields" option -->
+        <li>
+            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a>
+        </li>
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_array()) {
+                $tableName = htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8');
+                // Exclude the 'e-books' table
+                if ($tableName !== 'e-books') {
+                    echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . $tableName . '">' . $tableName . '</a></li>';
+                }
+            }
+        } else {
+            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
+        }
+        ?>
+    </ul>
+</div>
                             </div>
 
                             <!-- Checkbox -->
@@ -292,22 +304,19 @@ session_start();
                     <div class="flex items-center space-x-2 mb-2">
                         <div class="text-sm text-gray-600">Published</div>
                         <div class="text-sm text-gray-600">${record.publicationDate}</div>
-                        <div class="text-sm text-gray-600">copies ${record.copies}</div>
-                    
+                        <div class="text-sm text-gray-600">Copies: ${record.copies}</div>
                     </div>
 
-                      <div class="flex items-center space-x-2 mb-2">
-                        
+                    <div class="flex items-center space-x-2 mb-2">
                         <div class="text-sm text-gray-600">Book Status: ${record.status}</div> <!-- Add status here -->
                     </div>
-
 
                     <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
                         ${record.table}
                     </div>
                 </div>
                 <div class="flex-shrink-0">
-                    ${record.copies <= 1
+                    ${record.availableToBorrow === 'No'
                         ? `<span class="text-red-600">Not Available</span>`
                         : record.currentlyBorrowed
                             ? `<span class="text-yellow-600">Currently Borrowed</span>`
@@ -333,6 +342,7 @@ session_start();
         </li>
     `).join('');
                             }
+
 
 
                             function setupPagination(totalRecords) {

@@ -3,6 +3,15 @@ session_start();
 include '../connection.php'; // Ensure you have your database connection
 include '../connection2.php'; // Ensure you have your database connection
 
+
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
+
+
+
 // Check if student_id or faculty_id is set in the query parameters
 if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
     $isStudent = isset($_GET['student_id']);
@@ -95,12 +104,11 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
 
                             <form id="book-request-form" class="space-y-6" method="POST" action="book_request_2_save.php" onsubmit="return validateDueDate()">
                                 <input type="hidden" name="<?php echo $user_type; ?>_id" value="<?php echo htmlspecialchars($user_id); ?>">
-                                <!-- Hidden field to capture the due date -->
                                 <input type="hidden" id="hidden_due_date" name="due_date" value="">
 
                                 <?php foreach ($grouped_books as $date => $books_group): ?>
                                     <div class="bg-blue-200 p-4 rounded-lg">
-                                        <div class="bg-blue-200 rounded-lg flex items-center justify-between ">
+                                        <div class="bg-blue-200 rounded-lg flex items-center justify-between">
                                             <h3 class="text-lg font-semibold text-white">Date to Claim: <?php echo $date; ?></h3>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="select-all-<?php echo $date; ?>" class="select-all-checkbox ml-2" onclick="toggleSelectAll('<?php echo $date; ?>')">
@@ -132,7 +140,6 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                             $stmt2->close();
                                             ?>
 
-
                                             <li class="p-4 bg-white flex flex-col md:flex-row items-start border-b-2 border-black">
                                                 <div class="flex flex-col md:flex-row items-start w-full space-y-4 md:space-y-0 md:space-x-6">
                                                     <div class="flex-1 w-full md:w-auto">
@@ -140,36 +147,39 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                                             <a href="#" class="text-blue-600 hover:underline max-w-xs break-words">
                                                                 <?php echo $title; ?>
                                                             </a>
-
                                                             <div class="mt-2">
-                                                                <label for="accession-dropdown-<?php echo $book_id; ?>" class="text-sm font-medium text-gray-700">Select Accession No:</label>
-                                                                <select id="accession-dropdown-<?php echo $book_id; ?>" name="accession_no[<?php echo $book_id; ?>]" class="ml-2 border border-gray-300 rounded-md p-1" required>
+                                                                <label class="text-sm font-medium text-gray-700">Accession Numbers:</label>
+                                                                <div class="ml-2 border border-gray-300 rounded-md p-1 inline-block max-w-xs text-sm">
                                                                     <?php
-                                                                    // Prepare and execute query to fetch accession numbers for the given book_id and category
-                                                                    $accessionQuery = "SELECT accession_no FROM `accession_records` WHERE book_id = ? AND book_category = ? AND available = 'yes'";
+                                                                    // Query to fetch accession numbers for the given book_id, category, and borrower_id with available set to 'reserved'
+                                                                    $accessionQuery = "SELECT accession_no FROM `accession_records` WHERE book_id = ? AND book_category = ? AND borrower_id = ? AND available = 'reserved'";
                                                                     $stmt3 = $conn->prepare($accessionQuery);
 
-                                                                    // Check if the statement was prepared successfully
                                                                     if ($stmt3) {
-                                                                        $stmt3->bind_param("is", $book_id, $category);
+                                                                        $stmt3->bind_param("isi", $book_id, $category, $user_id);
                                                                         $stmt3->execute();
                                                                         $accessionResult = $stmt3->get_result();
 
-                                                                        // Populate the dropdown with accession numbers
-                                                                        while ($accessionRow = $accessionResult->fetch_assoc()) {
-                                                                            echo '<option value="' . htmlspecialchars($accessionRow['accession_no']) . '">' . htmlspecialchars($accessionRow['accession_no']) . '</option>';
+                                                                        if ($accessionResult->num_rows > 0) {
+                                                                            while ($accessionRow = $accessionResult->fetch_assoc()) {
+                                                                                $accession_no = $accessionRow['accession_no'];
+                                                                                echo '<div class="">' . htmlspecialchars($accession_no) . '</div>';
+                                                                                // Hidden input to send accession_no to the server
+                                                                                echo '<input type="hidden" name="accession_no[' . $book_id . '][]" value="' . htmlspecialchars($accession_no) . '">';
+                                                                            }
+                                                                        } else {
+                                                                            echo '<p class="text-gray-500">No reserved accession numbers found.</p>';
                                                                         }
                                                                         $stmt3->close();
                                                                     } else {
-                                                                        echo '<option value="">Error fetching accession numbers</option>';
+                                                                        echo '<p class="text-red-500">Error fetching accession numbers</p>';
                                                                     }
                                                                     ?>
-                                                                </select>
+                                                                </div>
                                                             </div>
-
-
-
                                                         </h2>
+
+                                                        <!-- Display other book information -->
                                                         <div class="mt-4">
                                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 text-sm text-gray-600">
                                                                 <div class="font-medium bg-gray-200 p-2">Main Author:</div>
@@ -184,14 +194,10 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                                         </div>
                                                     </div>
 
+                                                    <!-- Book cover image and selection checkbox -->
                                                     <div class="flex-shrink-0">
                                                         <?php
-                                                        if (!empty($record_cover)) {
-                                                            $imageData = base64_encode($record_cover);
-                                                            $imageSrc = 'data:image/jpeg;base64,' . $imageData;
-                                                        } else {
-                                                            $imageSrc = 'path/to/default/image.jpg';
-                                                        }
+                                                        $imageSrc = $record_cover ? 'data:image/jpeg;base64,' . base64_encode($record_cover) : 'path/to/default/image.jpg';
                                                         ?>
                                                         <img src="<?php echo $imageSrc; ?>" alt="Book Cover" class="w-36 h-56 border-2 border-gray-400 rounded-lg object-cover transition-transform duration-200 transform hover:scale-105">
                                                     </div>
@@ -204,7 +210,6 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                                             class="book-checkbox-<?php echo $date; ?> mr-1">
                                                         <label for="book-checkbox-<?php echo $date . '-' . $index; ?>" class="text-sm text-gray-600">Select</label>
                                                     </div>
-
                                                 </div>
                                             </li>
                                         <?php endforeach; ?>
@@ -215,6 +220,7 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                     <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Done</button>
                                 </div>
                             </form>
+
 
                             <script>
                                 function validateDueDate() {

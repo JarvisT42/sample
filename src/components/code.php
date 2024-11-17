@@ -1,209 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        /* Tab Header */
-        .tab_header {
-            border: 2px solid #014420;
-            border-bottom: none;
-            border-radius: 10px 10px 0 0;
-            background-color: #014420;
-            color: #ffffff;
-            padding: 0.1em 0;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
 
-        .tab_header .title {
-            flex: 1;
-            text-align: center;
-            padding: 0.125rem;
-        }
-
-        .tab_header .search-icon {
-            padding-left: 0.125rem;
-        }
-
-        /* Tabs Container */
-        .tab {
-            overflow: hidden;
-            border: 1px solid #014420;
-            border-bottom: none;
-            background-color: #014420;
-            text-align: center;
-        }
-
-        /* Tab Buttons */
-        .tab button {
-            background-color: inherit;
-            border: none;
-            cursor: pointer;
-            transition: 0.3s;
-            border-radius: 10px 10px 0 0;
-            font-size: 16px;
-            color: #fff;
-            padding: 0.9em 0.29em;
-        }
-
-        /* Hover Effect */
-        .tab button:hover {
-            background-color: #ddd;
-            color: #014420;
-        }
-
-        /* Active Tab */
-        .tab button.active {
-            background-color: #fff;
-            color: #014420;
-        }
-
-        /* Tab Content */
-        .tabcontent {
-            display: none;
-            padding: 12px;
-            border: 1px solid #014420;
-            border-top: none;
-            background-color: #fff;
-            animation: fadeEffect 1s;
-        }
-
-        /* Fade Effect */
-        @keyframes fadeEffect {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Centered List */
-        .centered_list {
-            font-size: 0.75rem;
-            text-align: center;
-        }
-
-        .centered_link {
-            display: inline-block;
-            padding: 0 0.5em;
-        }
-
-        /* Input Field */
-        input[type="text"] {
-            border-radius: 10px;
-            padding: 0.5em;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .tab_header {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .tab button {
-                font-size: 14px;
-                padding: 0.6em 0.2em;
-            }
-
-            input[type="text"] {
-                width: 100%;
-            }
-
-            .tabcontent {
-                padding: 8px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .tab button {
-                font-size: 12px;
-                padding: 0.4em 0.1em;
-            }
-
-            input[type="text"] {
-                padding: 0.4em;
-            }
-
-            .tabcontent {
-                padding: 6px;
-            }
-
-            .tab_header {
-                font-size: 0.9em;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="tab_header">
-        <div class="title">Saliktroniko</div>
-        <span class="fas fa-search search-icon"></span>
+<div id="gallery" class="relative w-full border border-blue-500 mt-2 bg-red-600 " data-carousel="slide">
+    <!-- Carousel wrapper -->
+    <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
+        <!-- Item 1 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <img src="./src/assets/images/background.jpg" class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="Background Image 1">
+        </div>
+        <!-- Item 2 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item="active">
+            <img src="./src/assets/images/Screenshot 2024-08-30 203504.png" class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="Background Image 2">
+        </div>
+        <!-- Item 3 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <img src="./src/assets/images/mainlib.upd.png"class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="Background Image 3">
+        </div>
+        <!-- Item 4 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <img src="./src/assets/images/mainlib2.upd.png" class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="Background Image 4">
+        </div>
+        <!-- Item 5 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <img src="./src/assets/images/mainlib3.upd.png" class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="Background Image 5">
+        </div>
     </div>
+    <!-- Slider controls -->
+    <button type="button" class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-500/30 group-hover:bg-gray-500/50 group-focus:ring-4 group-focus:ring-gray-500/70 group-focus:outline-none">
+            <svg class="w-4 h-4 text-gray-500 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4" />
+            </svg>
+            <span class="sr-only">Previous</span>
+        </span>
+    </button>
+    <button type="button" class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-500/30 group-hover:bg-gray-500/50 group-focus:ring-4 group-focus:ring-gray-500/70 group-focus:outline-none">
+            <svg class="w-4 h-4 text-gray-500 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
+            </svg>
+            <span class="sr-only">Next</span>
+        </span>
+    </button>
+    <div class="text-center  text-white font-bold text-lg">
+    Guidelines for the Onsite Service of the Main Library
+</div>
+</div>
 
-    <!-- Tab links -->
-    <div class="tab">
-        <button class="tablinks" onclick="openCity(event, 'local')" id="defaultOpen">Tuklas</button>
-        <button class="tablinks" onclick="openCity(event, 'subs')">Databases</button>
-        <button class="tablinks" onclick="openCity(event, 'journals')">Journals</button>
-    </div>
-
-    <!-- Tab content -->
-    <div id="local" class="tabcontent">
-        <p style="text-align: center; margin-top: 0;">Search UPD Library Collection</p>
-        <form id="searchFormLocal" method="get" action="https://tuklas.up.edu.ph/Search/Results" name="searchForm" target="_blank" style="justify-content: center; display: flex;">
-            <input id="searchForm_lookfor" placeholder="Books, serials, theses, and multimedia" type="text" name="lookfor" style="width: 80%;">
-            <button type="submit" style="font-size: 28px; padding: 0 0.4em;"><i class="fas fa-search"></i></button>
-        </form>
-        <p style="text-align: center; margin-top: 0; font-size: 14px;">Browse Local Collections</p>
-    </div>
-
-    <div id="subs" class="tabcontent">
-        <p style="text-align: center; margin-top: 0;">Search Subscribed e-Resources</p>
-        <form id="searchFormSubs" action="https://searchbox.ebsco.com/search/" target="_blank" class="ebsco-single-search" style="justify-content: center; display: flex;">
-            <input id="searchForm_lookfor" placeholder="Books, serials, theses, and multimedia" type="text" name="lookfor" style="width: 80%;">
-
-            <button type="submit" style="font-size: 28px; padding: 0 0.4em;"><i class="fas fa-search"></i></button>
-        </form>
-        <p style="text-align: center; margin-top: 0; font-size: 14px;">Browse Subscribed e-Resources</p>
-    </div>
-
-    <div id="journals" class="tabcontent">
-        <p style="text-align: center; margin-top: 0;">Search Subscribed Online Journals</p>
-        <script src="https://widgets.ebscohost.com/eit/scripts/ebscohostsearch2.js" type="text/javascript"></script>
-        <form id="searchFormJournals" class="ebscohostCustomSearchBox75251" action="" onsubmit="return ebscoHostSearchGo(this,75251);" method="post" style="justify-content: center; display: flex;">
-            <input id="searchForm_lookfor" placeholder="Books, serials, theses, and multimedia" type="text" name="lookfor" style="width: 80%;">
-
-            <button type="submit" style="font-size: 28px; padding: 0 0.4em;"><i class="fas fa-search"></i></button>
-        </form>
-        <p style="text-align: center; margin-top: 0; font-size: 14px;">Browse Subscribed e-Resources</p>
-    </div>
-
-    <script>
-        function openCity(evt, cityName) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-            tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-            document.getElementById(cityName).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
-
-        // Prevent form submission on Enter key press
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-            }
-        });
-
-        document.getElementById("defaultOpen").click();
-    </script>
-
-</body>
-</html>
+<!-- Caption below the carousel -->

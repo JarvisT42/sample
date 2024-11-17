@@ -10,14 +10,14 @@ if (isset($data['id'])) {
     $userId = $data['id'];
 
     // Prepare the DELETE query
-    $stmt = $conn->prepare("DELETE FROM students_id WHERE id = ?");
-    $stmt->bind_param("i", $userId);
+    $stmt = $conn->prepare("DELETE FROM students_ids WHERE student_id = ?");
+    $stmt->bind_param("s", $userId); // Use "s" if student_id is a string
 
     if ($stmt->execute()) {
-        // If the deletion was successful, return success response
+        // If the deletion was successful, return a success response
         echo json_encode(['success' => true]);
     } else {
-        // If there was an error, return failure response
+        // If there was an error, return a failure response
         echo json_encode(['success' => false, 'error' => 'Database deletion failed']);
     }
 

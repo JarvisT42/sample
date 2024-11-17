@@ -2,7 +2,7 @@
 session_start(); // Start the session
 
 if (!isset($_SESSION['Faculty_Id'])) {
-    die("Student ID not set in session.");
+    die("faculty ID not set in session.");
 }
 
 $facultyId = $_SESSION['Faculty_Id']; // Assuming student_id is stored in session
@@ -18,6 +18,7 @@ $bookBagTitles = array_map(function($book) {
 
 // Count of items in the book bag
 $bookBagCount = count($bookBag);
+require '../connection.php'; // Update with your actual path
 
 require '../connection2.php'; // Update with your actual path
 
@@ -89,23 +90,42 @@ if ($table === 'All fields') {
         while ($row = $result->fetch_array()) {
             $tableName = $row[0];
             $tableName = $conn2->real_escape_string($tableName);
-            $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status, Available_To_Borrow  FROM `$tableName`";
 
+            $excludedTable = "e-books";
+
+
+            if ($tableName === $excludedTable) {
+         continue; // Skip this iteration
+     }
+     
+            $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status, Available_To_Borrow FROM `$tableName`";
+    
             $tableResult = $conn2->query($sql);
-
+    
             if (!$tableResult) {
                 die("Error fetching data from table $tableName: " . $conn2->error);
             }
-
+    
             if ($tableResult->num_rows > 0) {
                 while ($tableRow = $tableResult->fetch_assoc()) {
                     $coverImage = $tableRow['record_cover'];
                     $coverImageBase64 = base64_encode($coverImage);
                     $coverImageDataUrl = 'data:image/jpeg;base64,' . $coverImageBase64;
-
+    
                     $isInBag = in_array($tableRow['title'] . '|' . $tableRow['author'] . '|' . $tableRow['Date_Of_Publication_Copyright'] . '|' . $tableName, $bookBagTitles);
                     $isCurrentlyBorrowed = in_array($tableRow['title'] . '|' . $tableRow['author'] . '|' . $tableName, $borrowedBooks);
-
+    
+                    // Check if the book is available in accession_records table
+                    $bookId = $tableRow['id']; // Assume this is the book_id in accession_records
+                    $bookCategory = $row[0]; // Modify as necessary based on your table structure
+    
+                    $accessionQuery = "SELECT COUNT(*) as available_count FROM accession_records WHERE book_id = '$bookId' AND book_category = '$bookCategory' AND available = 'yes'";
+                    $accessionResult = $conn->query($accessionQuery);
+                    $accessionRow = $accessionResult->fetch_assoc();
+                    
+                    // Set availability based on count
+                    $availableToBorrow = ($accessionRow['available_count'] <= 1) ? 'No' : $tableRow['Available_To_Borrow'];
+    
                     $allData[] = [
                         'id' => $tableRow['id'],
                         'title' => $tableRow['title'],
@@ -117,8 +137,7 @@ if ($table === 'All fields') {
                         'inBag' => $isInBag,
                         'currentlyBorrowed' => $isCurrentlyBorrowed,
                         'status' => $tableRow['status'],
-                        'availableToBorrow' => $tableRow['Available_To_Borrow']
-
+                        'availableToBorrow' => $availableToBorrow
                     ];
                 }
             }
@@ -126,7 +145,7 @@ if ($table === 'All fields') {
     }
 
     echo json_encode(['data' => $allData, 'bookBagCount' => $bookBagCount]);
-} else {
+}else {
     $table = $conn2->real_escape_string($table);
     $sql = "SELECT id, title, author, Date_Of_Publication_Copyright, record_cover, No_Of_Copies, status, Available_To_Borrow FROM `$table`";
 
@@ -146,6 +165,17 @@ if ($table === 'All fields') {
             $isInBag = in_array($row['title'] . '|' . $row['author'] . '|' . $row['Date_Of_Publication_Copyright'] . '|' . $table, $bookBagTitles);
             $isCurrentlyBorrowed = in_array($row['title'] . '|' . $row['author'] . '|' . $table, $borrowedBooks);
 
+            // Check if the book is available in accession_records table
+            $bookId = $row['id']; // Assuming this is the book_id in accession_records
+            $bookCategory = $table; // Modify if necessary based on your structure
+
+            $accessionQuery = "SELECT COUNT(*) as available_count FROM accession_records WHERE book_id = '$bookId' AND book_category = '$bookCategory' AND available = 'yes'";
+            $accessionResult = $conn->query($accessionQuery);
+            $accessionRow = $accessionResult->fetch_assoc();
+            
+            // Set availability based on count
+            $availableToBorrow = ($accessionRow['available_count'] <= 1) ? 'No' : $row['Available_To_Borrow'];
+
             $data[] = [
                 'id' => $row['id'],
                 'title' => $row['title'],
@@ -157,12 +187,12 @@ if ($table === 'All fields') {
                 'inBag' => $isInBag,
                 'currentlyBorrowed' => $isCurrentlyBorrowed,
                 'status' => $row['status'],
-                'availableToBorrow' => $row['Available_To_Borrow']
-
+                'availableToBorrow' => $availableToBorrow
             ];
         }
     }
 
     echo json_encode(['data' => $data, 'bookBagCount' => $bookBagCount]);
 }
+
 ?>

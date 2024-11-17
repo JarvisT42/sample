@@ -1,6 +1,11 @@
 <?php
 # Initialize the session
 session_start();
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
+    exit;
+}
 
 ?>
 <!DOCTYPE html>
@@ -86,13 +91,7 @@ session_start();
                                     </label>
                                 </div>
 
-                                <!-- Second Radio Option -->
-                                <div class="flex items-center">
-                                    <input id="inline-radio" type="radio" name="inline-radio-group" class="hidden peer">
-                                    <label for="inline-radio" class="ms-2 cursor-pointer text-sm font-semibold px-6 py-3 rounded-lg bg-gray-100 text-gray-900 dark:text-gray-300 hover:text-blue-600 hover:bg-blue-50 peer-checked:underline peer-checked:bg-blue-500 peer-checked:text-white shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
-                                        History
-                                    </label>
-                                </div>
+                                
                             </div>
 
 
@@ -196,51 +195,50 @@ session_start();
 
 
                                     $sql = "SELECT 
-                                b.student_id,  
-                                b.faculty_id,  
+                                    b.student_id,  
+                                    b.faculty_id,  
+                                    b.Way_Of_Borrow,
+                                    b.walk_in_id,
+                                    b.role,
+                                    s.course_id,  -- Course ID from the student table
+                                    c.course,     -- Course name from the course table
+                                    CASE 
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN CONCAT(s.First_Name, ' ', s.Last_Name)
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN CONCAT(f.First_Name, ' ', f.Last_Name)
+                                        WHEN b.Way_Of_Borrow = 'walk-in' THEN w.full_name
+                                        ELSE '' 
+                                    END AS First_Name,
+                                    CASE 
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN c.course
+                                        WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN 'n/a'
+                                        WHEN b.Way_Of_Borrow = 'walk-in' THEN 'n/a'
+                                        ELSE '' 
+                                    END AS Course,
+                                    b.Due_Date,
+                                    b.Issued_Date,
+                                    
+                                    -- Calculate total borrow count by summing individual counts
+                                    (COUNT(b.student_id) + COUNT(b.faculty_id) + COUNT(b.walk_in_id)) AS borrow_count,
+                        
+                                    MIN(CASE 
+                                        WHEN b.Due_Date = '' THEN DATE_ADD(b.Issued_Date, INTERVAL 3 DAY)
+                                        ELSE b.Due_Date
+                                    END) AS nearest_date,
+                                    MIN(b.Time) AS Time  
+                                FROM borrow b
+                                LEFT JOIN students s ON b.student_id = s.Student_Id
+                                LEFT JOIN faculty f ON b.faculty_id = f.Faculty_Id
+                                LEFT JOIN walk_in_borrowers w ON b.walk_in_id = w.walk_in_id
+                                LEFT JOIN course c ON s.course_id = c.course_id
+                                WHERE b.status = 'lost'
+                                GROUP BY b.Way_Of_Borrow, b.student_id, b.faculty_id, b.role, s.course_id";
 
-                                b.Way_Of_Borrow,
-                                 b.walk_in_id,
-                                 b.role,
-                                CASE 
-                                    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN CONCAT(s.First_Name, ' ', s.Last_Name)
-                                    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN CONCAT(f.First_Name, ' ', f.Last_Name)
-
- 
-                                    WHEN b.Way_Of_Borrow = 'walk-in' THEN b.Full_Name 
-                                    ELSE '' 
-                                END AS First_Name,
-                                CASE 
-                                    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Student' THEN s.S_Course
-                                    WHEN b.Way_Of_Borrow = 'online' AND b.role = 'Faculty' THEN 'n/a' 
-
-                                    WHEN b.Way_Of_Borrow = 'walk-in' THEN 'n/a' 
-
-                                    ELSE '' 
-                                END AS Course,
-                                b.Due_Date,
-                                b.Issued_Date,
-                                COUNT(b.student_id) AS borrow_count,
-                                COUNT(b.faculty_id) AS borrow_count,
-
-                                MIN(CASE 
-                                    WHEN b.Due_Date = '' THEN DATE_ADD(b.Issued_Date, INTERVAL 3 DAY)
-                                    ELSE b.Due_Date
-                                END) AS nearest_date,
-                                MIN(b.Time) AS Time  
-                            FROM borrow b
-                            LEFT JOIN students s ON b.student_id = s.Student_Id
-                            LEFT JOIN faculty f ON b.faculty_id = f.Faculty_Id
-
-                            WHERE b.status = 'lost'
-                            GROUP BY b.Way_Of_Borrow, b.student_id, b.faculty_id, b.Full_Name, b.Return_Date";
 
 
 
 
 
                                     $borrowData = $conn->query($sql);
-                                    $conn->close(); // Close the database connection
                                     ?>
                                     <?php if ($borrowData && $borrowData->num_rows > 0): ?>
                                         <?php while ($row = $borrowData->fetch_assoc()): ?>
@@ -315,7 +313,7 @@ session_start();
                                     let url = 'lost_book.php?';
 
                                     // Check if it's a walk-in borrow
-                                    if (wayOfBorrow === 'walk-in') {
+                                    if (wayOfBorrow === 'Walk-in') {
                                         if (role === 'Faculty' && walkInId) {
                                             // For faculty walk-ins, use faculty_id
                                             url += 'walk_in_id=' + walkInId;
@@ -347,94 +345,7 @@ session_start();
                         </div>
                     </div>
 
-                    <!-- Returned (History) Table -->
-                    <div id="table2-container" class="hidden">
-                        <div id="table2" class="overflow-x-auto">
-                            <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
-                                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Student Name</th>
-                                            <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/4">Way of Borrow</th>
-                                            <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/3">Course</th>
-                                            <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/12">Number of Books Borrowed</th>
-                                            <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/5">Issued Date</th>
-                                            <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Return Date</th>
-                                            <!-- <th scope="col" class="px-6 py-3 border-b border-gray-300 w-1/6">Action</th> -->
-                                        </tr>
-                                    </thead>
-                                    <tbody id="returned-table-body">
-                                        <!-- Returned books data will be displayed here -->
-                                        <?php
-                                        include '../connection.php';
-
-                                        // Query to fetch returned books
-                                        $sqlReturned = "SELECT 
-                                        b.student_id, 
-                                        b.Way_Of_Borrow,
-                                        CASE 
-                                            WHEN b.Way_Of_Borrow = 'online' THEN CONCAT(s.First_Name, ' ', s.Last_Name) 
-                                            WHEN b.Way_Of_Borrow = 'walk-in' THEN b.Full_Name 
-                                            ELSE '' 
-                                        END AS First_Name,
-                                        CASE 
-                                            WHEN b.Way_Of_Borrow = 'online' THEN s.S_Course
-                                            WHEN b.Way_Of_Borrow = 'walk-in' THEN '' 
-                                            ELSE '' 
-                                        END AS Course,
-                                        b.Due_Date,
-                                        b.Issued_Date,
-                                        b.Return_Date,
-                                        COUNT(b.student_id) AS borrow_count
-                                        FROM borrow b
-                                        LEFT JOIN students s ON b.student_id = s.student_id
-                                        WHERE b.status = 'returned'
-                                        GROUP BY b.Way_Of_Borrow, b.student_id, b.Full_Name";
-
-                                        $returnedData = $conn->query($sqlReturned);
-                                        $conn->close();
-                                        ?>
-
-                                        <?php if ($returnedData && $returnedData->num_rows > 0): ?>
-                                            <?php while ($rowReturned = $returnedData->fetch_assoc()): ?>
-                                                <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-300">
-                                                    <!-- <td class="px-6 py-4 student-name"><?php echo htmlspecialchars($rowReturned['First_Name']); ?></td> -->
-                                                    <td class="px-6 py-4"><?php echo htmlspecialchars($rowReturned['Way_Of_Borrow']); ?></td>
-                                                    <td class="px-6 py-4"><?php echo htmlspecialchars($rowReturned['Course']); ?></td>
-                                                    <td class="px-6 py-4"><?php echo htmlspecialchars($rowReturned['borrow_count']); ?></td>
-
-                                                    <td class="px-6 py-4">
-                                                        <?php
-                                                        // Convert Issued_Date to a DateTime object
-                                                        $issuedDate = new DateTime($rowReturned['Issued_Date']);
-                                                        // Format the date as 'October 23, 2024 - Wednesday'
-                                                        echo $issuedDate->format('F j, Y - l');
-                                                        ?>
-                                                    </td>
-                                                    <td class="px-6 py-4">
-                                                        <?php
-                                                        // Convert Issued_Date to a DateTime object
-                                                        $issuedDate = new DateTime($rowReturned['Return_Date']);
-                                                        // Format the date as 'October 23, 2024 - Wednesday'
-                                                        echo $issuedDate->format('F j, Y - l');
-                                                        ?>
-                                                    </td>
-
-                                                    <!-- <td class="px-6 py-4">
-                                                        <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">View</button>
-                                                    </td> -->
-                                                </tr>
-                                            <?php endwhile; ?>
-                                        <?php else: ?>
-                                            <tr>
-                                                <td colspan="7" class="text-center px-6 py-4">No returned records found.</td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                    
 
 
 

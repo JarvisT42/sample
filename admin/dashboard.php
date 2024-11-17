@@ -3,11 +3,14 @@
 require '../connection.php';
 
 session_start();
-if ($_SESSION["logged_Admin"] !== TRUE) {
-    //echo "<script type='text/javascript'> alert ('Iasdasdasd.')</script>";
-    echo "<script>" . "window.location.href='../index.php';" . "</script>";
+
+
+if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
+    header('Location: ../index.php');
+
     exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -1,0 +1,485 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+
+
+/* <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+
+@media only screen and (max-width: 600px) {
+  .navgfi h2 {
+      display: none;
+}
+.navgfi #item{
+  display: none;
+
+}
+.navgfi .icon{
+  display: none;
+
+}
+
+} */
+
+
+
+
+
+* {
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  text-decoration: none;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: rgb(219, 219, 219);
+
+}
+
+.navgfi {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 1rem 6.5rem;
+  background: #5f5e5e;
+  z-index: 100000;
+
+}
+
+.navgfi h2 {
+  color: #fff;
+  font-size: 1.7rem;
+}
+
+#item {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+}
+
+#item li {
+  list-style: none;
+  padding-right: 50px;
+
+}
+
+#item li a {
+  text-decoration: none;
+  font-size: 1rem;
+  text-transform: uppercase;
+  color: #fff;
+
+}
+
+.icon {
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+  margin-right: 30px;
+}
+
+#item .icon i {
+  color: #fff;
+  padding-right: 30px;
+  font-weight: bolder;
+}
+
+#login {
+
+  width: 50px;
+  cursor: pointer;
+  margin-right: -90px;
+}
+
+
+.left-side {
+  display: flex;
+  align-items: center;
+  margin-left: -83px;
+
+}
+
+.left-side img {
+  width: 55px;
+
+  margin-right: 20px;
+}
+
+.right-side {
+  display: flex;
+  align-items: center;
+
+}
+
+.container1 {
+  background-image: url(image/background\ -\ Copy.jpg);
+  width: 100%;
+  height: 100vh;
+
+}
+
+.container1 .overlay {
+  background: #171819;
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+}
+
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.search_box {
+  display: flex;
+  align-items: center;
+}
+
+.search_box input {
+  padding: 9px;
+  width: 250px;
+  background: rgb(228, 228, 228);
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.search_box i {
+  padding: 0.66rem;
+  cursor: pointer;
+  color: #fff;
+  background: #000;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+}
+
+.header-icons i {
+  margin-right: 2rem;
+  cursor: pointer;
+}
+
+.header-icons .account {
+  width: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-icons .account img {
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.container2 {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+
+}
+
+
+
+
+
+
+
+.container {
+  display: flex;
+}
+
+
+nav {
+  width: 200px;
+  height: 100vh;
+  background-color: rgb(255, 255, 255);
+  /* background-image: url('../image/AI/cool-gradient-for-header--website-sampledarkish-grey-.jpeg'); */
+
+  left: 0;
+  margin-top: 10px;
+  position: relative;
+  margin-right: 10px;
+}
+
+nav .highlight {
+  display: block;
+
+  color: red;
+  background-color: #5f5e5e;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+
+}
+
+nav .highlight:hover {
+  background-color: #ccc;
+  /* Change to your desired background color */
+  color: white;
+  /* Change to your desired text color */
+}
+
+nav .brand-container {
+  color: rgb(170, 26, 26);
+  padding: 10px;
+}
+
+
+nav .brand-container span {
+  display: block;
+  margin-bottom: 10px;
+  background-color: rgb(40, 40, 173);
+
+}
+
+nav .link-container {
+  padding: 10px;
+  color: rgb(45, 114, 194);
+
+}
+
+nav .Log-Out {
+  position: absolute;
+ bottom: 0;
+
+ 
+ /* color: red;
+ background-color: #5f5e5e;
+ width: 100%;
+ text-align: center;
+ padding: 10px; */ 
+ width: 100%;
+ color: rgb(170, 26, 26);
+ padding: 10px;
+ }
+
+
+
+
+
+nav .dropdown-content {
+    display: none;
+
+
+background-image: linear-gradient(to bottom right, #b4b4b4, #222222);
+
+padding-left: 40px;
+border-left: 2px solid rgb(100, 100, 100);
+
+max-height: 0;
+    overflow: hidden;
+    transition: max-height 1s ease;
+
+}
+
+
+
+nav {
+  width: 200px;
+  height: 100vh;
+  background-color: rgb(255, 255, 255);
+  left: 0;
+  margin-top: 10px;
+  position: relative;
+  margin-right: 10px;
+  }
+  
+  nav .highlight {
+    display: block;
+  
+    color: red;
+    background-color: #5f5e5e;
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+  
+  }
+  
+  nav .highlight:hover {
+  background-color: #ccc;
+  /* Change to your desired background color */
+  color: white;
+  /* Change to your desired text color */
+  }
+  
+ 
+  
+  nav .link-container {
+  padding: 10px;
+  color: rgb(45, 114, 194);
+  
+  }
+  
+  
+  
+  nav .dropdown-toggle:hover {
+  
+  /* White text color on hover */
+ 
+  /* Soft shadow effect */
+  transform: scale(1.05);
+  /* Slightly scale up on hover */
+ 
+  
+  background-color: rgba(255, 255, 255, 0.1);
+  /* Light transparent white */
+  border-radius: 5px;
+  /* Add rounded corners */
+  transform: scale(1.05);
+  /* Scale up slightly on hover */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  /* Add a subtle shadow */
+  transition: background-color 1s, transform 1s, box-shadow 1s;
+  /* Smooth transition */
+  background-color: lightgrey;
+  /* Set the background color to grey */
+  border-left: 2px solid rgb(100, 100, 100);
+  
+  }
+  
+  
+  
+  
+  nav .dropdown-content {
+    display: none;
+  
+  
+  background-image: linear-gradient(to bottom right, #b4b4b4, #c7c5c5);
+  
+  padding-left: 40px;
+  border-left: 2px solid rgb(100, 100, 100);
+  
+  max-height: 0;
+    overflow: hidden;
+    transition: max-height 1s ease;
+  
+  }
+  
+  /* Add this CSS to override the default behavior */
+  .dropdown-content.active {
+    display: block !important;
+    max-height: none !important;
+    transition: none; /* You may also want to remove the transition effect */
+  }
+  
+ 
+  
+  nav .link-container a {
+    
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+  
+  }
+ 
+  nav .link-container a:hover {
+    color: blue;
+    
+    
+    }
+ 
+  
+  nav .link-container span {
+  flex-grow: 1;
+  text-align: left;
+  margin-right: 10px;
+  margin-left: 10px;
+  }
+  
+  nav .link-container img {
+  margin-left: 10px;
+  }
+  
+  .left-side-container {
+  
+  width: 10px;
+  }
+  
+  nav .rotate {
+  transform: rotate(90deg);
+  /* Adjust the degree as per your need */
+  transition: transform 0.3s ease;
+  /* Add a transition for smooth rotation */
+  }
+  
+  #booksIcon,
+    #studentsIcon,
+    #facultyIcon {
+        transition: transform 0.3s ease; /* Apply transition directly to the icon */
+    }
+  .active {
+  border-left: 2px solid rgb(100, 100, 100);
+  background-color: lightgrey;
+
+  }
+  
+  
+  .main-content {
+  width: 100%;
+  
+  }
+  
+
+
+  
+        /* Add this CSS to style the buttons */
+td button {
+  padding: 5px 10px;
+  background-color: grey; /* Green background color */
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 5px; /* Add some margin between buttons */
+  border-radius: 5px; /* Rounded corners */
+}
+
+/* Style for the Reject button */
+td button.reject {
+  background-color: #f44336; /* Red background color */
+}
+
+/* Style for the Approve button */
+td button.approve {
+  background-color: #4CAF50; /* Green background color */
+}
+
+button {
+  padding: 5px 10px;
+  background-color: grey; /* Green background color */
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 5px; /* Add some margin between buttons */
+  border-radius: 5px; /* Rounded corners */
+}

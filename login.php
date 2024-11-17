@@ -34,6 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_login'])) {
             $_SESSION["Last_Name"] = $row['Last_Name'];
             $_SESSION['email'] = $row['Email_Address'];
             $_SESSION['phoneNo.'] = $row['Mobile_Number'];
+            $_SESSION['first_login'] = true;
 
 
 
@@ -88,11 +89,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_login'])) {
                 if (password_verify($password, $hashed_password)) {
                     // Successful admin login
                     $_SESSION["logged_Admin"] = TRUE;
-                    $_SESSION["Id"] = $row['Id'];
+                    $_SESSION["Id"] = $row['id'];
                     $_SESSION["Full_Name"] = $row['Full_Name'];
 
-                    header("Location: admin/dashboard.php");
-                    exit();
+                    // Check role_id in admin_account and retrieve role_name from roles table
+                    $role_id = $row['role_id'];
+                    $stmt->close();
+
+                    // Fetch role_name from roles table
+                    $stmt = $conn->prepare("SELECT role_name FROM roles WHERE role_id = ?");
+                    $stmt->bind_param("i", $role_id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+
+                    if ($result->num_rows > 0) {
+                        $role_row = $result->fetch_assoc();
+                        $role_name = $role_row['role_name'];
+
+                        // Redirect based on role_name
+                        if ($role_name === "super-admin" || $role_name === "admin") {
+                            header("Location: admin/dashboard.php");
+                        } elseif ($role_name === "assistant") {
+                            header("Location: admin inventory manager/dashboard.php");
+                        } else {
+                            // Default redirection or error handling if role_name doesn't match
+                            $loginError = true;
+                            $loginMessage = "Role not recognized.";
+                        }
+                        exit();
+                    } else {
+                        // Role not found in roles table
+                        $loginError = true;
+                        $loginMessage = "Role not found for admin account.";
+                    }
                 } else {
                     $loginError = true;
                     $loginMessage = "Incorrect password for admin account.";
@@ -163,7 +192,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
     // Close the statement and connection
     $stmt->close();
     $conn->close();
-}if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['faculty_register'])) {
+}
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['faculty_register'])) {
     include 'connection.php';
 
     // Capture form input and validated faculty ID
@@ -231,7 +261,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
-       
+
     </style>
 
     </style>
@@ -678,9 +708,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
 
     <script>
         $(document).ready(function() {
-            const lockoutDurations = [1, 3, 8, 60];
-let attempts = 0; // Number of attempts within a session
-let lockoutEndTime = 0; // Timestamp when the user can retry
+            const lockoutDurations = [1, 3, 8, 60]; // Lockout durations in minutes
+            let attempts = 0; // Number of failed attempts
+            let lockoutEndTime = 0; // Timestamp when the user can retry
 
             // Toggle between login and registration forms
             $("#toggleLogin").click(function() {
@@ -716,7 +746,7 @@ let lockoutEndTime = 0; // Timestamp when the user can retry
             // Show registration form after clicking Proceed
             $("#proceedToRegister").click(function() {
                 const student_id = $("#student_id").val();
-                const currentTime = new Date().getTime();
+                const currentTime = new Date().getTime(); // Current timestamp
 
                 // Check if user is in lockout period
                 if (currentTime < lockoutEndTime) {
@@ -725,44 +755,61 @@ let lockoutEndTime = 0; // Timestamp when the user can retry
                     return;
                 }
 
-                // AJAX request to check if student ID exists
+                // Reset lockout message
+                $("#accessDeniedAlert").hide();
+
+                // AJAX request to validate student ID
                 $.ajax({
-                url: 'validate_student.php',
-                type: 'POST',
-                data: { student_id: student_id },
-                success: function(response) {
-                    if (response === 'show_student_registration') {
-                        $("#validated_student_id").val(student_id);
-                        $(".validation-right").hide();
-                        $(".register-right").show();
-                    } else if (response === 'show_faculty_registration') {
-                        $("#validated_faculty_id").val(student_id);
-                        $(".validation-right").hide();
-                        $(".registerFaculty-right").show();
-                    } else if (response === 'already_registered') {
-                        $("#accessDeniedAlert").text("Student ID is already registered").show();
-                    } else {
-                        // Handle incorrect ID with attempts and lockout
-                        attempts++;
-
-                        if (attempts > lockoutDurations.length) {
-                            // Set lockout to max duration if attempts exceed the array length
-                            lockoutEndTime = currentTime + lockoutDurations[lockoutDurations.length - 1] * 60 * 1000;
-                            attempts = 0; // Reset attempts after the max lockout period
+                    url: 'validate_student.php',
+                    type: 'POST',
+                    data: {
+                        student_id: student_id
+                    },
+                    success: function(response) {
+                        if (response === 'show_student_registration') {
+                            // Show student registration form
+                            $("#validated_student_id").val(student_id);
+                            $(".validation-right").hide();
+                            $(".register-right").show();
+                            attempts = 0; // Reset attempts on successful validation
+                        } else if (response === 'show_faculty_registration') {
+                            // Show faculty registration form
+                            $("#validated_faculty_id").val(student_id);
+                            $(".validation-right").hide();
+                            $(".registerFaculty-right").show();
+                            attempts = 0; // Reset attempts on successful validation
+                        } else if (response === 'already_registered') {
+                            // Show already registered message
+                            $("#accessDeniedAlert").text("Student ID is already registered").show();
                         } else {
-                            // Set lockout time based on the current attempt's lockout duration
-                            lockoutEndTime = currentTime + lockoutDurations[attempts - 1] * 60 * 1000;
-                        }
+                            // Increment attempts on failure
+                            attempts++;
 
-                        // Show lockout message with time in minutes
-                        const lockoutMinutes = Math.ceil((lockoutEndTime - currentTime) / 1000 / 60);
-                        $("#accessDeniedAlert").text(`Max attempts reached. Please wait ${lockoutMinutes} minute(s) before retrying.`).show();
-                    }
-                },
-                error: function() {
-                    $("#accessDeniedAlert").text("An error occurred. Please try again.").show();
-                }
-            });
+                            if (attempts > lockoutDurations.length) {
+                                // Set lockout to max duration if attempts exceed the array length
+                                lockoutEndTime =
+                                    currentTime +
+                                    lockoutDurations[lockoutDurations.length - 1] * 60 * 1000;
+                                attempts = 0; // Reset attempts after the max lockout period
+                            } else {
+                                // Set lockout time based on the current attempt's lockout duration
+                                lockoutEndTime = currentTime + lockoutDurations[attempts - 1] * 60 * 1000;
+                            }
+
+                            // Show lockout message with time in minutes
+                            const lockoutMinutes = Math.ceil(
+                                (lockoutEndTime - currentTime) / 1000 / 60
+                            );
+                            $("#accessDeniedAlert")
+                                .text(`Max attempts reached. Please wait ${lockoutMinutes} minute(s) before retrying.`)
+                                .show();
+                        }
+                    },
+                    error: function() {
+                        // Show error message
+                        $("#accessDeniedAlert").text("An error occurred. Please try again.").show();
+                    },
+                });
             });
         });
     </script>

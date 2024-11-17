@@ -1,148 +1,96 @@
 <?php
-include '../connection.php';
-include '../connection2.php';
+include '../connection.php'; // Ensure this defines $conn
+include '../connection2.php'; // Ensure this defines $conn2 for the second database
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['returnall'])) {
-    if (isset($_POST['books']) && isset($_POST['user_id']) && isset($_POST['user_role'])) {
+file_put_contents('debug_log.txt', print_r(file_get_contents('php://input'), true), FILE_APPEND);
 
+// Only process POST requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Decode the JSON request body
+    $data = json_decode(file_get_contents('php://input'), true);
 
-        $books = json_decode($_POST['books'], true);
-        $userId = htmlspecialchars($_POST['user_id']);
-        $userRole = htmlspecialchars($_POST['user_role']);
-        $userColumn = ($userRole === 'student') ? 'student_id' : (($userRole === 'faculty') ? 'faculty_id' : 'walk_in_id');
-        $success = true;
-        $returnedDate = date('Y-m-d');
-
-        $updateQuery = "UPDATE borrow 
-                    SET status = 'returned', Return_Date = ? 
-                    WHERE $userColumn = ? AND book_id = ? AND category = ? AND status = 'lost'";
-        $stmt = $conn->prepare($updateQuery);
-
-        $updateAccessionQuery = "UPDATE accession_records 
-                             SET status = 'available', walk_in_id = NULL, user_id = NULL 
-                             WHERE accession_no = ? AND " . ($userRole === 'walk-in' ? "walk_in_id" : "user_id") . " = ? AND status = 'lost'";
-        $stmtAccession = $conn->prepare($updateAccessionQuery);
-
-        foreach ($books as $book) {
-            $book_id = $book['book_id'];
-            $category = $book['category'];
-            $accession_no = $book['accession_no'];
-
-            if (!$stmt->bind_param('sisi', $returnedDate, $userId, $book_id, $category) || !$stmt->execute()) {
-                $success = false;
-                break;
-            }
-
-            if (!$stmtAccession->bind_param('si', $accession_no, $userId) || !$stmtAccession->execute()) {
-                $success = false;
-                break;
-            }
-
-            $bookAdditionSql = "UPDATE `$category` SET No_Of_Copies = No_Of_Copies + 1 WHERE id = ?";
-            $stmtBookAddition = $conn2->prepare($bookAdditionSql);
-            if (!$stmtBookAddition->bind_param('i', $book_id) || !$stmtBookAddition->execute()) {
-                $success = false;
-                break;
-            }
-            $stmtBookAddition->close();
-        }
-
-        $stmt->close();
-        $stmtAccession->close();
-
-        if ($success) {
-            echo 'Books returned and accession records updated successfully.';
-        } else {
-            echo 'Failed to return all books and update accession records.';
-        }
-    } else {
-        echo 'Invalid request data.';
+    // Check if essential fields are provided
+    if (!isset($data['book_id'], $data['category'], $data['user_type'], $data['user_id'], $data['accession_no'])) {
+        echo json_encode(['success' => false, 'message' => 'Required fields are missing.']);
+        exit;
     }
+
+    // Sanitize input data
+    $bookId = htmlspecialchars($data['book_id']);
+    $category = htmlspecialchars($data['category']);
+    $userId = htmlspecialchars($data['user_id']);
+    $userType = htmlspecialchars($data['user_type']);
+    $accessionNo = htmlspecialchars($data['accession_no']);
+
+    // Determine user column and binding type based on user type
+    $userColumn = '';
+    $bindType = ''; // Variable to determine the bind type for user_id
+    if ($userType === 'student') {
+        $userColumn = 'student_id';
+        $bindType = 'i'; // integer
+    } elseif ($userType === 'faculty') {
+        $userColumn = 'faculty_id';
+        $bindType = 'i'; // integer
+    } elseif ($userType === 'walk_in') {
+        $userColumn = 'walk_in_id';
+        $bindType = 's'; // string
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Invalid user type.']);
+        exit;
+    }
+
+    // Query to update the borrow status to "returned"
+    $updateBorrowQuery = "
+        UPDATE borrow 
+        SET status = 'replaced', Return_Date = NOW()
+        WHERE $userColumn = ? AND book_id = ? AND category = ? AND status = 'lost'";
+
+    $stmtBorrow = $conn->prepare($updateBorrowQuery);
+
+    // Bind the parameters based on the user type
+    if ($bindType === 'i') {
+        $stmtBorrow->bind_param('iis', $userId, $bookId, $category);
+    } else {
+        $stmtBorrow->bind_param('sis', $userId, $bookId, $category); // 's' for string in $userId
+    }
+
+    // Execute the borrow table update
+    if ($stmtBorrow->execute()) {
+        // Prepare the query to update the accession_records table
+        $updateAccessionQuery = "
+            UPDATE accession_records 
+            SET status = 'returned', available = 'yes' 
+            WHERE accession_no = ? AND borrower_id = ? AND book_id = ? AND book_category = ? AND status = 'lost'";
+
+        $stmtAccession = $conn->prepare($updateAccessionQuery);
+        
+        if ($stmtAccession === false) {
+            echo json_encode(['success' => false, 'message' => 'Error preparing the accession update statement.']);
+            $stmtBorrow->close();
+            $conn->close();
+            exit;
+        }
+
+        // Bind parameters for the accession records update
+        $stmtAccession->bind_param('siis', $accessionNo, $userId, $bookId, $category);
+        
+        // Execute the accession records update
+        if ($stmtAccession->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Book returned and accession record updated successfully.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to update the accession record: ' . $stmtAccession->error]);
+        }
+
+        // Close the accession statement
+        $stmtAccession->close();
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to update the return status.']);
+    }
+
+    // Close the borrow statement and the database connection
+    $stmtBorrow->close();
+    $conn->close();
 } else {
-    echo 'No action performed.';
+    echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
 }
 ?>
-
-
-// <?php
-    // include '../connection.php';
-    // include '../connection2.php'; 
-    //  Get data from the POST request
-    // $data = json_decode(file_get_contents('php://input'), true);
-
-    // if (!empty($data['books']) && (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['walk_in_id']))) {
-    //     $books = $data['books'];
-    //     $success = true;
-    //     $returnedDate = date('Y-m-d'); // Current date for return
-
-    //     // Determine user type and ID based on URL parameter
-    //     if (isset($_GET['student_id'])) {
-    //         $userId = $_GET['student_id'];
-    //         $userColumn = 'student_id';
-    //         $userRole = 'student';
-    //     } elseif (isset($_GET['faculty_id'])) {
-    //         $userId = $_GET['faculty_id'];
-    //         $userColumn = 'faculty_id';
-    //         $userRole = 'faculty';
-    //     } elseif (isset($_GET['walk_in_id'])) {
-    //         $userId = $_GET['walk_in_id'];
-    //         $userColumn = 'walk_in_id';
-    //         $userRole = 'walk-in';
-    //     } else {
-    //         echo json_encode(['success' => false, 'message' => 'User ID not specified.']);
-    //         exit;
-    //     }
-
-    //     // Prepare the borrow update query
-    //     $updateQuery = "UPDATE borrow 
-    //                     SET status = 'returned', Return_Date = ? 
-    //                     WHERE $userColumn = ? AND book_id = ? AND category = ? AND status = 'lost'";
-    //     $stmt = $conn->prepare($updateQuery);
-
-    //     // Prepare the accession_records update query
-    //     $updateAccessionQuery = "UPDATE accession_records 
-    //                              SET status = 'available', walk_in_id = NULL, user_id = NULL 
-    //                              WHERE accession_no = ? AND " . ($userRole === 'walk-in' ? "walk_in_id" : "user_id") . " = ? AND status = 'lost'";
-    //     $stmtAccession = $conn->prepare($updateAccessionQuery);
-
-    //     foreach ($books as $book) {
-    //         $book_id = $book['book_id'];
-    //         $category = $book['category'];
-    //         $accession_no = $book['accession_no'];
-
-    //         // Update the borrow table
-    //         if (!$stmt->bind_param('sisi', $returnedDate, $userId, $book_id, $category) || !$stmt->execute()) {
-    //             $success = false;
-    //             break;
-    //         }
-
-    //         // Update the accession_records table
-    //         if (!$stmtAccession->bind_param('si', $accession_no, $userId) || !$stmtAccession->execute()) {
-    //             $success = false;
-    //             break;
-    //         }
-
-    //         // Increment No_Of_Copies in the book's specific category table
-    //         $bookAdditionSql = "UPDATE `$category` SET No_Of_Copies = No_Of_Copies + 1 WHERE id = ?";
-    //         $stmtBookAddition = $conn2->prepare($bookAdditionSql);
-    //         if (!$stmtBookAddition->bind_param('i', $book_id) || !$stmtBookAddition->execute()) {
-    //             $success = false;
-    //             break;
-    //         }
-    //         $stmtBookAddition->close(); // Close to reset for each iteration
-    //     }
-
-    //     // Close the prepared statements
-    //     $stmt->close();
-    //     $stmtAccession->close();
-
-    //     if ($success) {
-    //         echo json_encode(['success' => true, 'message' => 'Books returned and accession records updated successfully.']);
-    //     } else {
-    //         echo json_encode(['success' => false, 'message' => 'Failed to return all books and update accession records.']);
-    //     }
-    // } else {
-    //     echo json_encode(['success' => false, 'message' => 'Invalid request data.']);
-    // }
-    // 
-    ?>

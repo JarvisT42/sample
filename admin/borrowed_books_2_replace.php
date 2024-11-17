@@ -27,14 +27,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accessionNo = htmlspecialchars($data['accession_no']);
     $expectedReplacementDate = htmlspecialchars($data['expected_replacement_date']);
 
-    // Determine the user column based on user type
+    // Determine the user column and binding type based on user type
     $userColumn = '';
+    $bindType = ''; // Variable to set the bind type for user_id
+
     if ($userType === 'student') {
         $userColumn = 'student_id';
+        $bindType = 'i'; // integer
     } elseif ($userType === 'faculty') {
         $userColumn = 'faculty_id';
+        $bindType = 'i'; // integer
     } elseif ($userType === 'walk_in') {
         $userColumn = 'walk_in_id';
+        $bindType = 's'; // string
     } else {
         echo json_encode(['success' => false, 'message' => 'Invalid user type.']);
         exit;
@@ -47,15 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         WHERE $userColumn = ? AND book_id = ? AND category = ? AND status = 'borrowed'
     ";
 
-    // Prepare and execute the statement for updating borrow
     $stmtBorrow = $conn->prepare($updateBorrowQuery);
     if ($stmtBorrow === false) {
         echo json_encode(['success' => false, 'message' => 'Error preparing the borrow update statement.']);
         exit;
     }
 
-    // Bind parameters and execute the borrow update
-    $stmtBorrow->bind_param('dssss', $fineAmount, $expectedReplacementDate, $userId, $bookId, $category);
+    // Bind parameters for the borrow update based on user type
+    if ($bindType === 'i') {
+        $stmtBorrow->bind_param('dsiis', $fineAmount, $expectedReplacementDate, $userId, $bookId, $category);
+    } else {
+        $stmtBorrow->bind_param('dsssi', $fineAmount, $expectedReplacementDate, $userId, $bookId, $category);
+    }
 
     // Prepare the query to update the accession table
     $updateAccessionQuery = "
@@ -64,17 +72,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         WHERE accession_no = ? AND borrower_id = ? AND book_id = ? AND status = 'borrowed'
     ";
 
-    // Prepare and execute the statement for updating accession records
     $stmtAccession = $conn->prepare($updateAccessionQuery);
     if ($stmtAccession === false) {
         echo json_encode(['success' => false, 'message' => 'Error preparing the accession update statement.']);
+        $stmtBorrow->close();
         exit;
     }
 
-    // Bind parameters for accession update
+    // Bind parameters and execute the accession update
     $stmtAccession->bind_param('sii', $accessionNo, $userId, $bookId);
 
-    // Execute both statements
+    // Execute both statements and check success
     if ($stmtBorrow->execute() && $stmtAccession->execute()) {
         echo json_encode(['success' => true, 'message' => 'Replacement processed successfully.']);
     } else {
