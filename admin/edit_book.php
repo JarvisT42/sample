@@ -311,6 +311,7 @@ if ($result->num_rows > 0) {
 
                                 <div id="accessionNumberContainer" class="space-y-2"></div>
                                 <div id="warningContainer" class="text-red-600 mt-2"></div>
+                                <div id="warningContainer" class="text-red-600 hidden"></div>
 
                                 <!-- Publisher Name -->
                                 <div class="grid grid-cols-3 items-center gap-4">
@@ -354,7 +355,45 @@ if ($result->num_rows > 0) {
                                 </div>
                             </form>
 
+<script>
+    document.addEventListener("input", function(event) {
+    if (event.target.name === "accession_no[]") {
+        const accessionNo = event.target.value.trim();
+        const warningContainer = document.getElementById("warningContainer");
 
+        if (accessionNo) {
+            // Make an AJAX request to validate the accession number
+            fetch("check_duplicate_accession.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `accession_no=${encodeURIComponent(accessionNo)}`,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.exists) {
+                        // Display a warning if the accession number exists
+                        warningContainer.textContent = `Accession number ${accessionNo} already exists.`;
+                        warningContainer.classList.remove("hidden");
+                    } else {
+                        // Clear the warning if the accession number is unique
+                        warningContainer.textContent = "";
+                        warningContainer.classList.add("hidden");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error validating accession number:", error);
+                });
+        } else {
+            // Clear the warning if the input is empty
+            warningContainer.textContent = "";
+            warningContainer.classList.add("hidden");
+        }
+    }
+});
+
+</script>
                             <script>
                                 function archiveAccession(accessionNo) {
                                     if (confirm('Are you sure you want to archive this accession number?')) {

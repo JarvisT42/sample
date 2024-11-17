@@ -26,46 +26,46 @@
 <body id="home">
 
 
-<header id="header">
-  <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="banner">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <button
-          type="button"
-          class="navbar-toggle collapsed"
-          data-toggle="collapse"
-          data-target="#navbar-content"
-          aria-expanded="false">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
+  <header id="header">
+    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="banner">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button
+            type="button"
+            class="navbar-toggle collapsed"
+            data-toggle="collapse"
+            data-target="#navbar-content"
+            aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
 
-        <!-- Logo and Title -->
-        <a class="navbar-brand" href="index.html" style="display: flex; align-items: center">
-          <img src="./src/assets/images/library.png" alt="logo" />
-          <span class="navbar-title">Gensantos Foundation College, Inc. Library</span>
-        </a>
+          <!-- Logo and Title -->
+          <a class="navbar-brand" href="index.html" style="display: flex; align-items: center">
+            <img src="./src/assets/images/library.png" alt="logo" />
+            <span class="navbar-title">Gensantos Foundation College, Inc. Library</span>
+          </a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-content">
+          <ul class="nav navbar-nav navbar-right">
+            <li class="scroll active"><a href="#home">Home</a></li>
+            <li class="scroll"><a href="#services">Features</a></li>
+            <li class="scroll"><a href="#about">About</a></li>
+            <li class="scroll"><a href="#contact-us">Contact</a></li>
+
+            <!-- Centered Login Button -->
+            <li class="scroll center-login">
+              <a href="login.php" class="btn btn-login">Login</a>
+            </li>
+          </ul>
+
+        </div>
       </div>
-
-      <div class="collapse navbar-collapse" id="navbar-content">
-      <ul class="nav navbar-nav navbar-right">
-  <li class="scroll active"><a href="#home">Home</a></li>
-  <li class="scroll"><a href="#services">Features</a></li>
-  <li class="scroll"><a href="#about">About</a></li>
-  <li class="scroll"><a href="#contact-us">Contact</a></li>
-  
-  <!-- Centered Login Button -->
-  <li class="scroll center-login">
-    <a href="login.php" class="btn btn-login">Login</a>
-  </li>
-</ul>
-
-      </div>
-    </div>
-  </nav>
-</header>
+    </nav>
+  </header>
 
 
 
@@ -118,7 +118,7 @@
       class="slide"
       style="background-image: url('./src/assets/images/mainlib3.upd.png')"></div>
 
-      <!-- style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  url('./src/assets/images/mainlib.upd.png')"> -->
+    <!-- style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  url('./src/assets/images/mainlib.upd.png')"> -->
 
     <div
       class="slide"
@@ -321,37 +321,41 @@
 
 
   <section id="about" style="font-family: Arial, sans-serif; line-height: 1.8;">
-    <div class="container" style="max-width: 900px; margin: 0 auto; padding: 20px;">
-      <div class="section-header" style="text-align: center; margin-bottom: 20px;">
-        <h2 class="section-title wow fadeInDown" style="font-size: 2.5em; font-weight: bold; margin-bottom: 10px;">About Us</h2>
-        <p class="wow fadeInDown" style="font-size: 1.3em; ">
-          Welcome to the Gensantos Foundation College, Inc. Library – a center of knowledge, learning, and innovation designed to support the academic and personal growth of our students and faculty.
-        </p>
-      </div>
-
-      <div class="row" style="display: flex; flex-wrap: wrap; gap: 20px;">
-        <!-- Left Column -->
-        <div class="col-sm-6 wow fadeInLeft" style="flex: 1; min-width: 300px;">
-          <h3 class="column-title" style="font-size: 2em; font-weight: bold; ">Our Mission & Vision</h3>
-          <p style="font-size: 1.3em; ">
-            Our mission is to foster a love for learning by providing easy access to a wide range of resources and supporting lifelong learning for all members of GFI. We envision our library as a cornerstone of knowledge, empowering students, faculty, and staff to excel academically and personally.
-          </p>
+    <div class="container" style="max-width: 1200px; margin: 0 auto; ">
+        <div class="section-header" style="text-align: center; margin-bottom: 20px;">
+            <h2 class="section-title wow fadeInDown" style="font-size: 2.5em; font-weight: bold; margin-bottom: 10px;">About Us</h2>
+            <p class="wow fadeInDown" style="font-size: 1.3em;">
+                Welcome to the Gensantos Foundation College, Inc. Library – a center of knowledge, learning, and innovation designed to support the academic and personal growth of our students and faculty.
+            </p>
         </div>
 
-        <!-- Right Column -->
-        <div class="col-sm-6 wow fadeInRight" style="flex: 1; min-width: 300px;">
-          <h3 class="column-title" style="font-size: 2em; font-weight: bold; ">What We Offer</h3>
-          <ul class="listarrow" style="list-style: none; padding: 0; font-size: 1.3em; color: #555;">
-            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Extensive Collection: Books, journals, and digital resources across multiple disciplines.</li>
-            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Modern Borrowing System: Reserve and borrow books online for added convenience.</li>
-            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Personalized Services: Manage borrowing history, track due dates, and receive tailored services.</li>
-            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Digital Library Access: 24/7 access to e-books, research articles, and other digital materials.</li>
-            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Community Engagement: Events, book clubs, and more to promote knowledge-sharing.</li>
-          </ul>
+        <div class="row" style="display: flex; flex-wrap: wrap; gap: 20px;">
+            <!-- Left Column -->
+            <div class="col-sm-6 wow fadeInLeft" style="flex: 1; min-width: 300px;">
+                <h3 class="column-title" style="font-size: 2em; font-weight: bold;">Our Mission & Vision</h3>
+                <p style="font-size: 1.3em;">
+                    <strong>VISION</strong><br>
+                    GFI Library envisions becoming a leading College Learning Resource Center in all types of information sources in the fields of Accountancy, Business and Management, Education, and Information and Communication Technology. It aims for reliable, rapid access, easy retrieval, and transfer of relevant information to its users, establishing linkages with other academic libraries globally.<br><br>
+                    <strong>MISSION</strong><br>
+                    The College Library exists to support the vision and mission of Gensantos Foundation College Inc. and the goals and objectives of its various curricular programs, providing excellent library services in support of instruction, research, and other scholarly activities.
+                </p>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-sm-6 wow fadeInRight" style="flex: 1; min-width: 300px;">
+                <h3 class="column-title" style="font-size: 2em; font-weight: bold;">What We Offer</h3>
+                <ul class="listarrow" style="list-style: none; padding: 0; font-size: 1.3em; color: #555;">
+                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Extensive Collection: Books, journals, and digital resources across multiple disciplines.</li>
+                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Modern Borrowing System: Reserve and borrow books online for added convenience.</li>
+                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Personalized Services: Manage borrowing history, track due dates, and receive tailored services.</li>
+                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Digital Library Access: 24/7 access to e-books, research articles, and other digital materials.</li>
+                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Community Engagement: Events, book clubs, and more to promote knowledge-sharing.</li>
+                </ul>
+            </div>
         </div>
-      </div>
     </div>
-  </section>
+</section>
+
 
   <!--/#about-->
 

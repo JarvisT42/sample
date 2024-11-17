@@ -1,0 +1,166 @@
+@startuml
+' Define database name
+database "gfi_library_database" {
+
+' Define tables
+entity "accession_records" as accession_records {
+    accession_no : varchar(250)
+    call_number : varchar(250)
+    book_id : int(11)
+    book_category : varchar(250)
+    borrower_id : varchar(250)
+    status : varchar(250)
+    damage_description : varchar(250)
+    damage : enum('yes', 'no')
+    repair_description : varchar(250)
+    repaired : enum('yes', 'no')
+    available : enum('yes', 'no', 'reserved')
+    archive : enum('yes', 'no')
+}
+
+entity "book_replacement" as book_replacement {
+    replacement_id : int(11)
+    accession_no : varchar(250)
+    book_id : int(11)
+    category : varchar(250)
+    status : varchar(250)
+}
+
+entity "most_borrowed_books" as most_borrowed_books {
+    id : int(11)
+    book_id : varchar(250)
+    category : varchar(250)
+    date : date
+}
+
+entity "calendar_appointment" as calendar_appointment {
+    appointment_id : int(11)
+    calendar : varchar(250)
+    morning : int(11)
+    afternoon : int(11)
+}
+
+entity "library_fines" as library_fines {
+    id : int(11)
+    fines : decimal(10,2)
+}
+
+entity "borrow" as borrow {
+    borrow_id : int(11)
+    student_id : int(11)
+    faculty_id : int(11)
+    walk_in_id : varchar(250)
+    role : varchar(250)
+    accession_no : varchar(250)
+    book_id : int(11)
+    category : varchar(250)
+    No_Of_Copies : int(11)
+    appointment_id : int(11)
+    date_to_claim : varchar(250)
+    Time : varchar(255)
+    Queue : varchar(255)
+    Issued : varchar(250)
+    issued_date : date
+    due_date : date
+    renew : enum('yes', 'no')
+    expected_replacement_date : date
+    Return_Date : date
+    Damage_Description : varchar(250)
+    Over_Due_Fines : decimal(10,2)
+    Book_Fines : decimal(10,2)
+    total_fines : decimal(10,2)
+    book_replaced : enum('yes', 'no')
+    Way_Of_Borrow : varchar(250)
+    status : varchar(250)
+}
+
+entity "course" as course {
+    course_id : int(11)
+    course : varchar(250)
+}
+
+entity "students" as students {
+    Student_Id : int(11)
+    First_Name : varchar(50)
+    Middle_Initial : varchar(6)
+    Last_Name : varchar(50)
+    Suffix_Name : varchar(250)
+    Email_Address : varchar(100)
+    S_Gender : varchar(6)
+    date_of_joining : date
+    course_id : int(11)
+    mobile_number : varchar(11)
+    Year_Level : varchar(250)
+    profile_picture : longblob
+    Password : varchar(100)
+    status : enum('active', 'inactive', 'banned')
+}
+
+entity "students_ids" as students_ids {
+    student_id : int(11)
+    status : varchar(250)
+    created_at : timestamp
+}
+
+entity "faculty" as faculty {
+    Faculty_Id : int(11)
+    First_Name : varchar(50)
+    Middle_Initial : varchar(6)
+    Last_Name : varchar(50)
+    Suffix_Name : varchar(250)
+    Email_Address : varchar(100)
+    S_Gender : varchar(6)
+    date_of_joining : date
+    S_Course : varchar(100)
+    employment_status : varchar(250)
+    mobile_number : varchar(11)
+    profile_picture : longblob
+    Password : varchar(100)
+    status : enum('active', 'inactive', 'banned')
+}
+
+entity "faculty_ids" as faculty_ids {
+    faculty_id : int(11)
+    status : varchar(250)
+    created_at : timestamp
+}
+
+entity "admin_account" as admin_account {
+    id : int(11)
+    Username : varchar(250)
+    Full_Name : varchar(250)
+    Email : varchar(250)
+    Password : varchar(250)
+    role_id : int(11)
+    Default_Account : varchar(250)
+}
+
+entity "roles" as roles {
+    role_id : int(11)
+    role_name : varchar(250)
+}
+
+entity "walk_in_borrowers" as walk_in_borrowers {
+    walk_in_id : varchar(250)
+    full_name : varchar(250)
+    role : varchar(250)
+}
+
+' Define relationships
+accession_records ||--o book_replacement : linked by accession_no
+accession_records ||--o most_borrowed_books : contains book_id
+borrow ||--o accession_records : refers to accession_no
+borrow ||--o students : references student_id
+borrow ||--o faculty : references faculty_id
+borrow ||--o walk_in_borrowers : references walk_in_id
+borrow ||--o calendar_appointment : associated with appointment_id
+students ||--o course : belongs to course_id
+students_ids ||--o{ students : "references student_id"
+
+faculty ||--o course : associated with S_Course
+faculty_ids ||--o{ faculty : "references faculty_id"
+
+admin_account ||--o roles : assigned by role_id
+
+}
+@enduml

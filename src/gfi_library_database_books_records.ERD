@@ -1,0 +1,50 @@
+@startuml
+database "gfi_library_database_books_records" {
+
+entity "e-books" as ebooks {
+    id : int(11)
+    title : varchar(250)
+    author : varchar(250)
+    subject : varchar(250)
+    link : varchar(250)
+    record_cover : longblob
+}
+
+entity "classic_books" as classic_books {
+    id : int(11)
+    Call_Number : varchar(250)
+    isbn : varchar(250)
+    Department : varchar(250)
+    Title : varchar(250)
+    Author : varchar(250)
+    Publisher : varchar(250)
+    Date_Of_Publication_Copyright : varchar(250)
+    No_Of_Copies : int(11)
+    Date_Encoded : timestamp
+    Subjects : varchar(250)
+    record_cover : longblob
+    Status : varchar(250)
+    Available_To_Borrow : varchar(250)
+    archive : enum('yes', 'no')
+}
+
+entity "sam" as sam {
+    id : int(11)
+    Call_Number : varchar(250)
+    ISBN : varchar(250)
+    Department : varchar(250)
+    Title : varchar(250)
+    Author : varchar(250)
+    Publisher : varchar(250)
+    Date_Of_Publication_Copyright : varchar(250)
+    No_Of_Copies : int(11)
+    Date_Encoded : timestamp
+    Subjects : varchar(250)
+    record_cover : longblob
+    Status : varchar(250)
+    Available_To_Borrow : varchar(250)
+    archive : enum('yes', 'no')
+}
+
+}
+@enduml

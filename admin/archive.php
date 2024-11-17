@@ -329,7 +329,7 @@ include '../connection.php'; // Ensure you have your database connection
 
                             function redirectToArchive(bookId, category) {
     // Show an alert with the book ID and table name
-    alert(`Book ID: ${bookId}, Table: ${category}`);
+    // alert(`Book ID: ${bookId}, Table: ${category}`);
 
    
         window.location.href = `archive_2.php?id=${bookId}&table=${encodeURIComponent(category)}`;

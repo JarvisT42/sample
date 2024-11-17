@@ -278,51 +278,101 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['faculty_register'])) {
             </div>
 
             <div class="col-md-9 login-right">
-                <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                        <form id="loginForm" class="student" method="POST" action="">
-                            <h3 class="login-heading">Login Account</h3>
-                            <div class="row login-form">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                            </div>
-                                            <input type="email" name="email" class="form-control" placeholder="Your Email *" required />
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                            </div>
-                                            <input type="password" name="password" class="form-control" placeholder="Your Password *" required />
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="input-group d-flex justify-content-between">
-                                            <label class="form-check-label">
-                                                <input type="checkbox" id="rememberMe" name="rememberMe" />
-                                                Remember Me
-                                            </label>
-                                            <div class="">
-                                                <a id="forgot_password" href="#" role="tab" aria-controls="ForgotPassword" aria-selected="false">Forgot Password?</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="alert alert-danger" style="display: <?php echo $loginError ? 'block' : 'none'; ?>;">
-                                        <?php echo isset($loginMessage) ? $loginMessage : ''; ?>
-                                    </div>
-
-                                    <input type="submit" class="btnlogin" name="student_login" value="Login" />
-
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <form id="loginForm" class="student" method="POST" action="">
+                <h3 class="login-heading">Login Account</h3>
+                <div class="row login-form">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                </div>
+                                <input type="email" name="email" class="form-control" placeholder="Your Email *" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                </div>
+                                <input type="password" id="password" name="password" class="form-control" placeholder="Your Password *" required />
+                                <div class="input-group-append">
+                                    <span class="input-group-text" onclick="togglePasswordVisibility()">
+                                        <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                                    </span>
                                 </div>
                             </div>
-                        </form>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group d-flex justify-content-between">
+                                <label class="form-check-label">
+                                    <input type="checkbox" id="rememberMe" name="rememberMe" onclick="handleRememberMe()" />
+                                    Remember Me
+                                </label>
+                                <div class="">
+                                    <a id="forgot_password" href="#" role="tab" aria-controls="ForgotPassword" aria-selected="false">Forgot Password?</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-danger" style="display: <?php echo $loginError ? 'block' : 'none'; ?>;">
+                            <?php echo isset($loginMessage) ? $loginMessage : ''; ?>
+                        </div>
+
+                        <input type="submit" class="btnlogin" name="student_login" value="Login" />
+
                     </div>
                 </div>
-            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('togglePasswordIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+
+    function handleRememberMe() {
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+
+        if (rememberMeCheckbox.checked) {
+            // Save email and password to localStorage for simplicity (avoid for sensitive data)
+            const email = document.querySelector('input[name="email"]').value;
+            const password = document.querySelector('input[name="password"]').value;
+
+            localStorage.setItem('rememberMe', 'true');
+            localStorage.setItem('email', email);
+            localStorage.setItem('password', password);
+        } else {
+            // Clear localStorage if "Remember Me" is unchecked
+            localStorage.removeItem('rememberMe');
+            localStorage.removeItem('email');
+            localStorage.removeItem('password');
+        }
+    }
+
+    // Populate email and password if "Remember Me" was previously checked
+    window.onload = function () {
+        if (localStorage.getItem('rememberMe') === 'true') {
+            document.getElementById('rememberMe').checked = true;
+            document.querySelector('input[name="email"]').value = localStorage.getItem('email') || '';
+            document.querySelector('input[name="password"]').value = localStorage.getItem('password') || '';
+        }
+    };
+</script>
 
             <div class="col-md-9 forgot-password-right" style="display: none;">
                 <form id="forgotPassword">
