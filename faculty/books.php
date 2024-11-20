@@ -45,10 +45,9 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                     <h1 class="text-3xl font-semibold">Books</h1> <!-- Adjusted text size -->
                     <!-- Button beside the title -->
                 </div>
-
                 <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-                    The Borrow Page is your gateway to accessing and managing book loans efficiently. On this page, you can search for and borrow books from our collection with ease. Simply browse or search for the titles you wish to borrow, select your preferred books, and follow the streamlined borrowing process. The page also provides a clear overview of the available books and their details.
-                </div>
+    The Books Page allows users to view the books available in our collection. On this page, you can search for specific titles, explore available books, and access detailed information about each one.
+</div>
 
 
                 <!-- Main Content Box -->
@@ -236,7 +235,10 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                                 <div class="text-sm text-gray-600">${record.publicationDate}</div>
                                 <div class="text-sm text-gray-600">copies ${record.copies}</div>
                             </div>
-                            <div class="text-sm text-gray-600 mb-2">Book Status: ${record.status}</div>
+                            
+                    <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
+                        ${record.table}
+                    </div>
                         </div>
                         <div class="flex-shrink-0">
                             ${record.copies <= 1

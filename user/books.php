@@ -26,15 +26,17 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             /* Example for light mode */
             color: #000;
         }
+
         .preview-image img {
-    outline: none; /* Remove outline for images */
-}
+            outline: none;
+            /* Remove outline for images */
+        }
 
-.preview-image:focus,
-.preview-image img:focus {
-    outline: none; /* Remove outline when focused */
-}
-
+        .preview-image:focus,
+        .preview-image img:focus {
+            outline: none;
+            /* Remove outline when focused */
+        }
     </style>
 </head>
 
@@ -57,8 +59,10 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                 </div>
 
                 <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-                    The Borrow Page is your gateway to accessing and managing book loans efficiently. On this page, you can search for and borrow books from our collection with ease. Simply browse or search for the titles you wish to borrow, select your preferred books, and follow the streamlined borrowing process. The page also provides a clear overview of the available books and their details.
+                    The Books Page allows users to view the books available in our collection. On this page, you can search for specific titles, explore available books, and access detailed information about each one.
                 </div>
+
+
 
 
                 <!-- Main Content Box -->
@@ -91,26 +95,26 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
                                 <!-- Dropdown menu -->
                                 <div id="dropdownAction" class="z-10 hidden absolute mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600">
-    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
-        <!-- Default "All fields" option -->
-        <li>
-            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a>
-        </li>
-        <?php
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_array()) {
-                $tableName = htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8');
-                // Exclude the 'e-books' table
-                if ($tableName !== 'e-books') {
-                    echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . $tableName . '">' . $tableName . '</a></li>';
-                }
-            }
-        } else {
-            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
-        }
-        ?>
-    </ul>
-</div>
+                                    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
+                                        <!-- Default "All fields" option -->
+                                        <li>
+                                            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a>
+                                        </li>
+                                        <?php
+                                        if ($result->num_rows > 0) {
+                                            while ($row = $result->fetch_array()) {
+                                                $tableName = htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8');
+                                                // Exclude the 'e-books' table
+                                                if ($tableName !== 'e-books') {
+                                                    echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . $tableName . '">' . $tableName . '</a></li>';
+                                                }
+                                            }
+                                        } else {
+                                            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
+                                        }
+                                        ?>
+                                    </ul>
+                                </div>
                             </div>
 
                             <!-- Checkbox -->
@@ -246,14 +250,18 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                                 <div class="text-sm text-gray-600">${record.publicationDate}</div>
                                 <div class="text-sm text-gray-600">copies ${record.copies}</div>
                             </div>
-                            <div class="text-sm text-gray-600 mb-2">Book Status: ${record.status}</div>
+                                  <div class="bg-blue-200 p-2 rounded-lg shadow-md text-left mt-auto inline-block border border-blue-300">
+                        ${record.table}
+                    </div>
                         </div>
+                        
                         <div class="flex-shrink-0">
                             ${record.copies <= 1
                                 ? `<span class="text-red-600">Not Available</span>`
                                 : `<a href="#" class="text-green-600 hover:underline">Available</a>`
                             }
                         </div>
+                        
                         <div class="flex-shrink-0">
                             <a href="#" class="preview-image">
                                 <img src="${record.coverImage}" alt="Book Cover" class="w-28 h-40 border-2 border-gray-400 rounded-lg object-cover">

@@ -179,38 +179,52 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                         <div class="scrollable-table-container relative overflow-x-auto shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
                             <?php
 
-
+                            include("../connection.php");
+                            include("../connection2.php");
 
                             // Sanitize the student ID to prevent SQL injection
                             $id = intval($_SESSION["Faculty_Id"]);
 
                             // Fetch the category and book_id based on the student_id
-                            $categoryQuery = "SELECT Category, book_id, Date_To_Claim, Issued_Date, due_date, status 
-                            FROM borrow 
-                            WHERE faculty_id = ? 
-                            AND status IN ('failed-to-claim', 'borrowed', 'pending', 'lost')";
+                            $categoryQuery = "SELECT Category, book_id, accession_no, Date_To_Claim, Issued_Date, due_date, status 
+                  FROM borrow 
+                  WHERE faculty_id = ? 
+                  AND status IN ('failed-to-claim', 'borrowed', 'pending', 'lost')";
                             $stmt = $conn->prepare($categoryQuery);
                             $stmt->bind_param('i', $id); // Assuming student_id is an integer
                             $stmt->execute();
                             $result = $stmt->get_result();
 
+                            // Prepare the SQL to fetch book_condition from `accession_records`
+                            $accessionQuery = "SELECT book_condition FROM `accession_records` WHERE accession_no = ? AND borrower_id = ? AND available = 'no'";
+                            $stmt3 = $conn->prepare($accessionQuery);
+
                             // Initialize an array to hold the fetched book records
                             $books = [];
 
                             // Fetch all rows (there may be multiple books borrowed by the same student)
-                            // Fetch all rows (there may be multiple books borrowed by the same student)
-                            // Fetch all rows (there may be multiple books borrowed by the same student)
                             while ($row = $result->fetch_assoc()) {
                                 $category = $row['Category'];
                                 $bookId = $row['book_id'];
+                                $accessionNo = $row['accession_no']; // Retrieve accession_no from borrow table
                                 $dateToClaim = $row['Date_To_Claim'];
                                 $issuedDate = $row['Issued_Date'];
                                 $dueDate = $row['due_date']; // Retrieve due_date from database
                                 $status = $row['status'];
+                                $bookCondition = "N/A"; // Default value if no condition is found
+
+                                // Fetch the book condition from `accession_records`
+                                if ($stmt3) {
+                                    $stmt3->bind_param('si', $accessionNo, $id); // Bind accession_no and borrower_id
+                                    $stmt3->execute();
+                                    $accessionResult = $stmt3->get_result();
+                                    if ($accessionRow = $accessionResult->fetch_assoc()) {
+                                        $bookCondition = $accessionRow['book_condition'];
+                                    }
+                                }
 
                                 // Prepare the SQL to fetch book details from the category-specific table
                                 $query = "SELECT Title, Author FROM `$category` WHERE id = ?";
-
                                 $bookStmt = $conn2->prepare($query);
                                 $bookStmt->bind_param('i', $bookId);
                                 $bookStmt->execute();
@@ -225,17 +239,18 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                                         'Date_To_Claim' => $dateToClaim,
                                         'Issued_Date' => $issuedDate,
                                         'Due_Date' => $dueDate, // Store the due date in the array
-                                        'status' => $status
+                                        'status' => $status,
+                                        'book_condition' => $bookCondition // Include the book condition
                                     ];
                                 }
 
                                 $bookStmt->close();
                             }
 
-
-
                             $stmt->close();
+                            $stmt3->close();
                             ?>
+
 
                             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -285,12 +300,11 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                                                 <button
                                                     type="button"
                                                     class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                                                    onclick="openModal('<?php echo htmlspecialchars($row['Title']); ?>', '<?php echo htmlspecialchars($row['Category']); ?>', '<?php echo htmlspecialchars($row['status']); ?>', '<?php echo htmlspecialchars($row['Date_To_Claim']); ?>', '<?php echo htmlspecialchars($row['Issued_Date']); ?>', '<?php echo htmlspecialchars($row['Due_Date']); ?>')">
+                                                    onclick="openModal('<?php echo htmlspecialchars($row['Title']); ?>', '<?php echo htmlspecialchars($row['Category']); ?>', '<?php echo htmlspecialchars($row['status']); ?>', '<?php echo htmlspecialchars($row['Date_To_Claim']); ?>', '<?php echo htmlspecialchars($row['Issued_Date']); ?>', '<?php echo htmlspecialchars($row['Due_Date']); ?>', '<?php echo htmlspecialchars($row['book_condition'] ?? 'N/A'); ?>')">
                                                     View
                                                 </button>
-
-
                                             </td>
+
 
 
 
@@ -312,26 +326,53 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                     </div>
 
 
-                    <div id="bookModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm" onclick="closeOnOutsideClick(event)">
-                        <div class="bg-white rounded-lg shadow-lg dark:bg-gray-800 w-1/3" onclick="event.stopPropagation()">
-                            <div class="flex justify-between items-center border-b p-4">
-                                <h5 class="text-lg font-bold text-gray-800 dark:text-white">Book Details</h5>
-                                <button type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" onclick="closeModal()">
-                                    <span class="text-xl">&times;</span>
+                    <div id="bookModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-md" onclick="closeOnOutsideClick(event)">
+                        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg mx-4 md:mx-0" onclick="event.stopPropagation()">
+                            <!-- Header Section -->
+                            <div class="flex items-center justify-between p-5 rounded-t-lg bg-gray-800 text-white">
+                                <h5 class="text-xl font-semibold">Book Details</h5>
+                                <button type="button" class="text-white hover:text-gray-200" onclick="closeModal()">
+                                    <span class="text-2xl font-bold">&times;</span>
                                 </button>
                             </div>
-                            <div class="p-4">
-                                <p><strong>Title:</strong> <span id="modalTitle"></span></p>
-                                <p><strong>Category:</strong> <span id="modalCategory"></span></p>
-                                <p><strong>Status:</strong> <span id="modalStatus"></span></p>
-                                <p><strong>Date To Claim:</strong> <span id="modalDateToClaim">N/A</span></p>
-                                <span id="dueDateContainer" style="display: none;">
-                                    <p><strong>Due Date:</strong> <span id="modalDueDate"></span></p>
-                                </span>
+
+                            <!-- Content Section -->
+                            <div class="p-6 text-gray-700">
+                                <div class="mb-4">
+                                    <p class="font-medium text-gray-600">Title:</p>
+                                    <p id="modalTitle" class="pl-2 text-gray-800">N/A</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="font-medium text-gray-600">Category:</p>
+                                    <p id="modalCategory" class="pl-2 text-gray-800">N/A</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="font-medium text-gray-600">Status:</p>
+                                    <p id="modalStatus" class="pl-2 text-gray-800">N/A</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="font-medium text-gray-600">Date to Claim:</p>
+                                    <p id="modalDateToClaim" class="pl-2 text-gray-800">N/A</p>
+                                </div>
+                                <div id="dueDateContainer" class="mb-4 hidden">
+                                    <p class="font-medium text-gray-600">Due Date:</p>
+                                    <p id="modalDueDate" class="pl-2 text-gray-800">N/A</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="font-medium text-gray-600">Book Condition:</p>
+                                    <p id="modalBookCondition" class="pl-2 text-gray-800">N/A</p>
+                                </div>
                             </div>
 
+
+                            <!-- Footer Section -->
+                            <div class="flex justify-end p-4 rounded-b-lg bg-gray-800">
+                                <button type="button" class="bg-gray-600 text-white font-medium px-4 py-2 rounded-md hover:bg-gray-500" onclick="closeModal()">Close</button>
+                            </div>
                         </div>
                     </div>
+
+
 
 
 
@@ -350,20 +391,16 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                         }
 
                         // Optional: Function to open the modal
-                        function openModal(title, category, status, dateToClaim, issuedDate, dueDate) {
+                        function openModal(title, category, status, dateToClaim, issuedDate, dueDate, bookCondition) {
                             document.getElementById('modalTitle').textContent = title;
                             document.getElementById('modalCategory').textContent = category;
                             document.getElementById('modalStatus').textContent = status;
+                            document.getElementById('modalDateToClaim').textContent = dateToClaim;
+                            document.getElementById('modalBookCondition').textContent = bookCondition || 'N/A';
 
-                            // Conditionally display Date To Claim and Due Date based on status
-                            const dateToClaimElement = document.getElementById('modalDateToClaim');
                             const dueDateContainer = document.getElementById('dueDateContainer');
-                            const dueDateElement = document.getElementById('modalDueDate');
-
-                            dateToClaimElement.textContent = dateToClaim;
-
                             if (status === 'borrowed') {
-                                dueDateElement.textContent = dueDate; // Show actual Due Date
+                                document.getElementById('modalDueDate').textContent = dueDate; // Show actual Due Date
                                 dueDateContainer.style.display = 'block'; // Show Due Date section
                             } else {
                                 dueDateContainer.style.display = 'none'; // Hide Due Date section

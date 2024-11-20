@@ -94,55 +94,86 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
 
                             </thead>
                             <tbody>
-                            <?php
-include '../connection.php';  // Database connection for main DB
-include '../connection2.php';  // Additional connection if needed
+                                <?php
+                                include '../connection.php';  // Database connection for main DB
+                                include '../connection2.php';  // Additional connection if needed
 
-// Get today's date
-$today = date('Y-m-d');
+                                // Get today's date
+                                $today = date('Y-m-d');
 
-// Update the status to 'failed-to-claim' for borrow entries that exceed 3 days
-$updateSql = "UPDATE borrow
-    SET status = 'failed-to-claim'
-    WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
-$conn->query($updateSql);
 
-// Query to get student records
-$studentSql = "SELECT s.First_Name, b.role, s.Middle_Initial, s.Last_Name, c.course, b.student_id, b.Time, 
-    COUNT(b.student_id) AS borrow_count, MIN(b.Date_To_Claim) AS nearest_date 
-    FROM borrow b 
-    JOIN students s ON b.student_id = s.Student_Id  
-    JOIN course c ON s.course_id = c.course_id  
-    WHERE b.status = 'pending' 
-    GROUP BY b.student_id";
-$studentResult = $conn->query($studentSql);
+                                // Query to fetch accession_no of records that need to be updated
+                                $accessionQuery = "SELECT accession_no 
+FROM borrow 
+WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
+                                $accessionResult = $conn->query($accessionQuery);
 
-// Query to get faculty records
-$facultySql = "SELECT f.First_Name, b.role, f.Middle_Initial, f.Last_Name, b.faculty_id, b.Time, 
-    COUNT(b.faculty_id) AS borrow_count, MIN(b.Date_To_Claim) AS nearest_date 
-    FROM borrow b 
-    JOIN faculty f ON b.faculty_id = f.Faculty_Id  
-    WHERE b.status = 'pending' 
-    GROUP BY b.faculty_id";
-$facultyResult = $conn->query($facultySql);
+                                // Update the `borrow` table status to 'failed-to-claim'
+                                $updateSql = "UPDATE borrow
+SET status = 'failed-to-claim'
+WHERE Date_To_Claim < DATE_SUB('$today', INTERVAL 3 DAY) AND status = 'pending'";
+                                $conn->query($updateSql);
 
-// Array to store combined records
-$records = [];
-if ($studentResult->num_rows > 0) {
-    while ($row = $studentResult->fetch_assoc()) {
-        $row['user_type'] = 'student'; // Mark as student
-        $records[] = $row;
-    }
-}
-if ($facultyResult->num_rows > 0) {
-    while ($row = $facultyResult->fetch_assoc()) {
-        $row['user_type'] = 'faculty'; // Mark as faculty
-        $records[] = $row;
-    }
-}
+                                // Update the `accession_records` table for affected rows
+                                if ($accessionResult->num_rows > 0) {
+                                    while ($row = $accessionResult->fetch_assoc()) {
+                                        $accessionNo = $row['accession_no'];
+                                        $updateAccessionSql = "UPDATE accession_records 
+            SET available = 'yes', borrower_id = NULL 
+            WHERE accession_no = ?";
+                                        $stmt = $conn->prepare($updateAccessionSql);
+                                        $stmt->bind_param('s', $accessionNo);
+                                        $stmt->execute();
+                                        $stmt->close();
+                                    }
+                                }
 
-// You can now use $records for further processing, display, or other logic
-?>
+                                // Query to get student records
+                                $studentSql = "SELECT s.First_Name, b.role, s.Middle_Initial, s.Last_Name, c.course, b.student_id, b.Time, 
+COUNT(b.student_id) AS borrow_count, MIN(b.Date_To_Claim) AS nearest_date 
+FROM borrow b 
+JOIN students s ON b.student_id = s.Student_Id  
+JOIN course c ON s.course_id = c.course_id  
+WHERE b.status = 'pending' 
+GROUP BY b.student_id";
+                                $studentResult = $conn->query($studentSql);
+
+                                // Query to get student records
+                                $studentSql = "SELECT s.First_Name, b.role, s.Middle_Initial, s.Last_Name, c.course, b.student_id, b.Time, 
+                                COUNT(b.student_id) AS borrow_count, MIN(b.Date_To_Claim) AS nearest_date 
+                                FROM borrow b 
+                                JOIN students s ON b.student_id = s.Student_Id  
+                                JOIN course c ON s.course_id = c.course_id  
+                                WHERE b.status = 'pending' 
+                                GROUP BY b.student_id";
+                                $studentResult = $conn->query($studentSql);
+
+                                // Query to get faculty records
+                                $facultySql = "SELECT f.First_Name, b.role, f.Middle_Initial, f.Last_Name, b.faculty_id, b.Time, 
+                                COUNT(b.faculty_id) AS borrow_count, MIN(b.Date_To_Claim) AS nearest_date 
+                                FROM borrow b 
+                                JOIN faculty f ON b.faculty_id = f.Faculty_Id  
+                                WHERE b.status = 'pending' 
+                                GROUP BY b.faculty_id";
+                                $facultyResult = $conn->query($facultySql);
+
+                                // Array to store combined records
+                                $records = [];
+                                if ($studentResult->num_rows > 0) {
+                                    while ($row = $studentResult->fetch_assoc()) {
+                                        $row['user_type'] = 'student'; // Mark as student
+                                        $records[] = $row;
+                                    }
+                                }
+                                if ($facultyResult->num_rows > 0) {
+                                    while ($row = $facultyResult->fetch_assoc()) {
+                                        $row['user_type'] = 'faculty'; // Mark as faculty
+                                        $records[] = $row;
+                                    }
+                                }
+
+                                // You can now use $records for further processing, display, or other logic
+                                ?>
 
 
                                 <?php if (!empty($records)): ?>

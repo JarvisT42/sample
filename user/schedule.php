@@ -51,8 +51,17 @@ if ($result->num_rows > 0) {
   <?php include './src/components/sidebar.php'; ?>
 
   <main id="content" class="">
+
+
+
+
     <div class="p-4 sm:ml-64">
       <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+
+        <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+          This page allows users to view and select appointment days to visit the admin and claim their reserved books. Users can choose a convenient date and time slot for their appointment from the available options.
+        </div>
+
         <div class="container">
           <div class="calendar">
             <div class="header flex flex-col sm:flex-row justify-between items-center mb-5 pb-5 border-b-2 border-gray-300">

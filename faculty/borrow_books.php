@@ -29,54 +29,49 @@ if (!empty($bookBag)) {
         $way_of_borrow = 'online';
 
         // Query to check the number of copies
-        $checkCopiesSql = "SELECT No_Of_Copies FROM `$table` WHERE id = ?";
+        
+        $selectAccessionSql = "SELECT accession_no FROM accession_records 
+        WHERE book_id = ? AND book_category = ? AND available = 'yes' 
+        LIMIT 1";
 
-        if ($stmtCheck = $conn2->prepare($checkCopiesSql)) {
-            $stmtCheck->bind_param("i", $book_id);
-            $stmtCheck->execute();
-            $stmtCheck->bind_result($noOfCopies);
-            $stmtCheck->fetch();
-            $stmtCheck->close();
+        if ($stmtSelect = $conn->prepare($selectAccessionSql)) {
+            $stmtSelect->bind_param("is", $book_id, $table);
+            $stmtSelect->execute();
+            $stmtSelect->bind_result($accession_no);
 
-            // Check if there are sufficient copies available
-            if ($noOfCopies <= 1) {
-                // Alert the user if the book has no available copies
-                $_SESSION['error_message'] = "Someone borrowed this book: " . htmlspecialchars($book['title']);
-                continue; // Skip the insert for this book
-            }
-        } else {
-            $_SESSION['error_message'] = 'Error preparing book check query: ' . $conn->error;
-            continue;
-        }
+            if ($stmtSelect->fetch()) {
+                // Close the select statement before executing the next query
+                $stmtSelect->close();
 
-        // Proceed with the insert if copies are available
-        $sql = "INSERT INTO borrow (role, faculty_id, book_id, Category, appointment_id, Date_to_claim, time, Way_Of_Borrow, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        if ($stmt = $conn->prepare($sql)) {
-            $stmt->bind_param("siisissss", $role, $id, $book_id, $table, $appointment_id, $selectedDate, $selectedTime, $way_of_borrow, $status);
-
-            // Execute the query
-            if ($stmt->execute()) {
-                // Now set the available status to reserved in the accession_records table for one entry
+                // Step 2: Mark the accession as reserved
                 $accessionUpdateSql = "UPDATE accession_records SET available = 'reserved', borrower_id = ? 
-                WHERE book_id = ? AND book_category = ? AND available = 'yes' 
-                LIMIT 1";
+                WHERE accession_no = ?";
 
-                if ($stmt4 = $conn->prepare($accessionUpdateSql)) {
-                    $stmt4->bind_param("iis", $id, $book_id, $table);
-                    if (!$stmt4->execute()) {
-                        $_SESSION['error_message'] = 'Error updating accession record: ' . $stmt4->error;
+                if ($stmtUpdate = $conn->prepare($accessionUpdateSql)) {
+                    $stmtUpdate->bind_param("is", $id, $accession_no);
+                    $stmtUpdate->execute();
+                    $stmtUpdate->close();
+
+                    // Step 3: Insert borrow record
+                    $insertBorrowSql = "INSERT INTO borrow (role, faculty_id, book_id, Category, accession_no, appointment_id, Date_to_claim, time, Way_Of_Borrow, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                    if ($stmtInsert = $conn->prepare($insertBorrowSql)) {
+                        $stmtInsert->bind_param("siisssssss", $role, $id, $book_id, $table, $accession_no, $appointment_id, $selectedDate, $selectedTime, $way_of_borrow, $status);
+                        $stmtInsert->execute();
+                        $stmtInsert->close();
+                    } else {
+                        $_SESSION['error_message'] = 'Error preparing borrow insert query: ' . $conn->error;
                     }
-                    $stmt4->close();
                 } else {
                     $_SESSION['error_message'] = 'Error preparing accession update query: ' . $conn->error;
                 }
             } else {
-                $_SESSION['error_message'] = 'Error saving borrow record: ' . $stmt->error;
+                $_SESSION['error_message'] = 'No available copies for book ID: ' . $book_id;
+                $stmtSelect->close();
             }
-
-            $stmt->close();
+        } else {
+            $_SESSION['error_message'] = 'Error preparing accession select query: ' . $conn->error;
         }
     }
 

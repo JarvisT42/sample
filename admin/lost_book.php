@@ -239,25 +239,35 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
                                                     </div>
                                                 </div>
                                                 <div class="bg-blue-100 p-4 rounded-lg">
-                                                    <div class="flex justify-between space-x-4 mt-4">
+                                                    <div class="flex justify-between items-center space-x-4 mt-4">
                                                         <!-- Return Date label and value -->
                                                         <div class="flex items-center">
                                                             <label for="return_date" class="text-sm font-bold text-gray-600 mr-2">Return Date:</label>
                                                             <p id="return_date" class="text-sm text-gray-500"><?php echo htmlspecialchars($book['expected_replacement_date']); ?></p> <!-- Replace with the actual return date variable -->
                                                         </div>
 
-                                                        <!-- Replace Button -->
-                                                        <button class="bg-gray-300 text-gray-700 rounded px-2 py-1 text-sm return-button"
-                                                            data-index="<?php echo $overall_index; ?>"
-                                                            onclick="console.log('Replace clicked'); openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo htmlspecialchars($book_id); ?>', '<?php echo htmlspecialchars($book['accession_no']); ?>', '<?php echo $user_type; ?>', '<?php echo $user_id; ?>')">
-                                                            Replace
-                                                        </button>
+                                                        <!-- Buttons: Replace and Report -->
+                                                        <div class="flex space-x-2">
+                                                            <!-- Replace Button -->
+                                                            <button class="bg-gray-300 text-gray-700 rounded px-3 py-1 text-sm return-button"
+                                                                data-index="<?php echo $overall_index; ?>"
+                                                                onclick="console.log('Replace clicked'); openReturnModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo htmlspecialchars($book_id); ?>', '<?php echo htmlspecialchars($book['accession_no']); ?>', '<?php echo $user_type; ?>', '<?php echo $user_id; ?>')">
+                                                                Replace
+                                                            </button>
 
-
+                                                            <!-- Report Button -->
+                                                            <button class="bg-red-500 text-white rounded px-3 py-1 text-sm report-button"
+                                                                data-index="<?php echo $overall_index; ?>"
+                                                                onclick="console.log('Report clicked'); openReportModal('<?php echo htmlspecialchars($title); ?>', '<?php echo htmlspecialchars($author); ?>', '<?php echo htmlspecialchars($category); ?>', '<?php echo htmlspecialchars($book_id); ?>', '<?php echo htmlspecialchars($book['accession_no']); ?>', '<?php echo $user_type; ?>', '<?php echo $user_id; ?>')">
+                                                                Report
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </li>
+
+
 
 
 
@@ -295,7 +305,15 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
         <!-- Modal Structure -->
         <!-- Modal Structure -->
         <!-- Modal Structure -->
-        <div id="replaceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+
+
+
+
+
+
+
+
+        <div id="replaceModal" class="fixed inset-0 hidden backdrop-blur-sm bg-black bg-opacity-30 z-50 flex items-center justify-center">
             <div class="bg-white rounded-lg p-6 w-full max-w-md">
                 <h2 class="text-2xl font-bold mb-4">Replace Book</h2>
                 <p><strong>Title:</strong> <span id="replacementModalTitle"></span></p>
@@ -314,72 +332,190 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
             </div>
         </div>
 
+        <div id="reportModal" class="fixed inset-0 hidden backdrop-blur-sm bg-black bg-opacity-30 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4">Report Book</h2>
+        <p><strong>Title:</strong> <span id="reportModalTitle"></span></p>
+        <p><strong>Author:</strong> <span id="reportModalAuthor"></span></p>
+        <p><strong>Category:</strong> <span id="reportModalCategory"></span></p>
+        <p><strong>Accession No:</strong> <span id="reportModalAccessionNo"></span></p>
+        <p><strong>Book ID:</strong> <span id="reportModalBookId"></span></p>
+        <p><strong>User Type:</strong> <span id="reportModalUserType"></span></p>
+        <p><strong>User ID:</strong> <span id="reportModalUserId"></span></p>
+        
+        <!-- Reason for Reporting -->
+        <p class="mt-4">
+            <label for="reportReason" class="block font-semibold mb-1">Reason for Reporting:</label>
+            <textarea id="reportReason" class="w-full border rounded p-2" placeholder="Describe the issue here..." rows="4"></textarea>
+        </p>
+        
+        <!-- Fine Input -->
+        <p class="mt-4">
+            <label for="reportFine" class="block font-semibold mb-1">Fine (PHP):</label>
+            <input 
+                id="reportFine" 
+                type="number" 
+                class="w-full border rounded p-2" 
+                placeholder="Enter the fine amount (e.g., 50.00)"
+                min="0" 
+                step="0.01">
+        </p>
+
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeReportModal()" class="bg-gray-300 text-gray-700 rounded px-4 py-2">Cancel</button>
+            <button onclick="confirmReport()" class="bg-red-600 text-white rounded px-4 py-2">Submit Report</button>
+        </div>
+    </div>
+</div>
 
 
 
 
         <script>
-    // Function to open the modal with dynamic content
-    function openReturnModal(title, author, category, bookId, accessionNo, userType, userId) {
-        // Set the modal content dynamically
-        document.getElementById('replacementModalTitle').textContent = title;
-        document.getElementById('replacementModalAuthor').textContent = author;
-        document.getElementById('replacementModalCategory').textContent = category;
-        document.getElementById('replacementModalAccessionNo').textContent = accessionNo;
-
-        document.getElementById('replacementModalBookId').textContent = bookId; // Set the book ID
-        document.getElementById('replacementModalUserType').textContent = userType; // Set the user type
-        document.getElementById('replacementModalUserId').textContent = userId; // Set the user ID
+            // Function to open the Report Modal with dynamic content
+    function openReportModal(title, author, category, bookId, accessionNo, userType, userId) {
+        // Populate modal fields with dynamic content
+        document.getElementById('reportModalTitle').textContent = title;
+        document.getElementById('reportModalAuthor').textContent = author;
+        document.getElementById('reportModalCategory').textContent = category;
+        document.getElementById('reportModalAccessionNo').textContent = accessionNo;
+        document.getElementById('reportModalBookId').textContent = bookId;
+        document.getElementById('reportModalUserType').textContent = userType;
+        document.getElementById('reportModalUserId').textContent = userId;
 
         // Show the modal
-        document.getElementById('replaceModal').classList.remove('hidden');
+        document.getElementById('reportModal').classList.remove('hidden');
     }
 
-    // Function to close the modal
-    function closeModal() {
-        document.getElementById('replaceModal').classList.add('hidden'); // Hide the modal
+    // Function to close the Report Modal
+    function closeReportModal() {
+        document.getElementById('reportModal').classList.add('hidden');
     }
 
-    // Function to handle replacement confirmation and send data to lost_book_save.php
-    function confirmReplacement() {
-    console.log('Confirm Replacement function called'); // Debugging log
+    // Function to handle report confirmation and send data to the server
+    function confirmReport() {
+        console.log('Confirm Report function called'); // Debugging log
 
-    const category = document.getElementById('replacementModalCategory').textContent;
-    const bookId = document.getElementById('replacementModalBookId').textContent;
-    const accessionNo = document.getElementById('replacementModalAccessionNo').textContent;
-    const userType = document.getElementById('replacementModalUserType').textContent;
-    const userId = document.getElementById('replacementModalUserId').textContent;
+        const title = document.getElementById('reportModalTitle').textContent;
+        const author = document.getElementById('reportModalAuthor').textContent;
+        const category = document.getElementById('reportModalCategory').textContent;
+        const bookId = document.getElementById('reportModalBookId').textContent;
+        const accessionNo = document.getElementById('reportModalAccessionNo').textContent;
+        const userType = document.getElementById('reportModalUserType').textContent;
+        const userId = document.getElementById('reportModalUserId').textContent;
+        const reason = document.getElementById('reportReason').value.trim();
+        const fine = parseFloat(document.getElementById('reportFine').value); // Get the fine amount
 
-    // Prepare the data to send
-    fetch('lost_book_save.php', { // Adjust to the correct PHP file
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        book_id: bookId,
-        category: category,
-        user_type: userType,
-        user_id: userId,
-        accession_no: accessionNo
-                    }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        location.reload(); // Reload the page to update the status of the damaged book
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+        // Validate the reason and fine fields
+        if (!reason) {
+            alert('Please provide a reason for reporting.');
+            return;
         }
 
+        if (isNaN(fine) || fine < 0) {
+            alert('Please enter a valid fine amount.');
+            return;
+        }
+
+        // Prepare the data to send
+        fetch('report_book_save.php', { // Adjust to the correct PHP file for handling reports
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: title,
+                    author: author,
+                    category: category,
+                    book_id: bookId,
+                    accession_no: accessionNo,
+                    user_type: userType,
+                    user_id: userId,
+                    reason: reason,
+                    fine: fine, // Include fine in the payload
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Report submitted successfully!');
+                    closeReportModal(); // Close the modal
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
 
 
 
-</script>
+
+
+
+
+
+
+
+
+
+
+            // Function to open the modal with dynamic content
+            function openReturnModal(title, author, category, bookId, accessionNo, userType, userId) {
+                // Set the modal content dynamically
+                document.getElementById('replacementModalTitle').textContent = title;
+                document.getElementById('replacementModalAuthor').textContent = author;
+                document.getElementById('replacementModalCategory').textContent = category;
+                document.getElementById('replacementModalAccessionNo').textContent = accessionNo;
+
+                document.getElementById('replacementModalBookId').textContent = bookId; // Set the book ID
+                document.getElementById('replacementModalUserType').textContent = userType; // Set the user type
+                document.getElementById('replacementModalUserId').textContent = userId; // Set the user ID
+
+                // Show the modal
+                document.getElementById('replaceModal').classList.remove('hidden');
+            }
+
+            // Function to close the modal
+            function closeModal() {
+                document.getElementById('replaceModal').classList.add('hidden'); // Hide the modal
+            }
+
+            // Function to handle replacement confirmation and send data to lost_book_save.php
+            function confirmReplacement() {
+                console.log('Confirm Replacement function called'); // Debugging log
+
+                const category = document.getElementById('replacementModalCategory').textContent;
+                const bookId = document.getElementById('replacementModalBookId').textContent;
+                const accessionNo = document.getElementById('replacementModalAccessionNo').textContent;
+                const userType = document.getElementById('replacementModalUserType').textContent;
+                const userId = document.getElementById('replacementModalUserId').textContent;
+
+                // Prepare the data to send
+                fetch('lost_book_save.php', { // Adjust to the correct PHP file
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            book_id: bookId,
+                            category: category,
+                            user_type: userType,
+                            user_id: userId,
+                            accession_no: accessionNo
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            location.reload(); // Reload the page to update the status of the damaged book
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        </script>
 
 
 

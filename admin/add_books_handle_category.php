@@ -22,6 +22,9 @@ try {
         $book_copies = $_POST['book_copies'] ?? 1;
         $publisher_name = $_POST['publisher_name'] ?? '';
         $subject = $_POST['subject'] ?? '';
+        $price = $_POST['price'] ?? '';
+
+
         $status = $_POST['status'] ?? '';
         $image = $_FILES['image'] ?? null;
         $available_to_borrow = isset($_POST['available_to_borrow']) ? 'Yes' : 'No';
@@ -53,6 +56,8 @@ try {
                     Subjects VARCHAR(250) NOT NULL,
                     record_cover LONGBLOB,
                     Status VARCHAR(250) NOT NULL,
+                    price DECIMAL(10,2) NOT NULL,
+
                     Available_To_Borrow VARCHAR(250) NOT NULL,
                     archive ENUM('yes', 'no') DEFAULT 'no'
                 )";
@@ -78,12 +83,14 @@ try {
 
             // Insert main book data
             $insert_sql = "INSERT INTO `$table` 
-            (Call_Number, ISBN, Department, Title, Author, Publisher, Date_Of_Publication_Copyright, No_Of_Copies, Subjects, Status, record_cover, Available_To_Borrow) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            (Call_Number, ISBN, Department, Title, Author, Publisher, Date_Of_Publication_Copyright, No_Of_Copies, Subjects,  Status, price,  record_cover, Available_To_Borrow) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+
 
             $stmt = $conn2->prepare($insert_sql);
             if ($stmt) {
-                $stmt->bind_param("ssssssssssss", $call_number, $isbn, $department, $book_title, $author, $publisher_name, $date_of_publication_copyright, $book_copies, $subject, $status, $imageData, $available_to_borrow);
+                $stmt->bind_param("sssssssssssss", $call_number, $isbn, $department, $book_title, $author, $publisher_name, $date_of_publication_copyright, $book_copies, $subject, $status, $price, $imageData, $available_to_borrow);
 
                 if ($stmt->execute()) {
                     $book_id = $stmt->insert_id;

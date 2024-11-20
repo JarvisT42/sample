@@ -150,6 +150,18 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                 </div>
 
                                 <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="price" class="text-left">PRICE:</label>
+                                    <input
+                                        id="price"
+                                        name="price"
+                                        placeholder="Price (in PHP)"
+                                        type="number"
+                                        step="0.01"
+                                        class="col-span-2 border rounded px-3 py-2"
+                                        required />
+                                </div>
+
+                                <div class="grid grid-cols-3 items-center gap-4">
                                     <label for="image" class="text-left">UPLOAD IMAGE:</label>
                                     <input type="file" id="image" name="image" accept="image/*" class="col-span-2 border rounded" />
                                 </div>

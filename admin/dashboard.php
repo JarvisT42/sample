@@ -95,7 +95,7 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                 <h3 class="text-2xl font-bold"><?php echo $total; ?></h3> <!-- Example number for registered students -->
                             </div>
                             <div class="mt-4 flex items-center justify-between">
-                                <a href="#" class="text-sm font-medium text-primary hover:underline">View pending requests</a>
+                                <a href="book_request.php" class="text-sm font-medium text-primary hover:underline">View pending requests</a>
                                 <div class="bg-green-400 h-12 w-12 flex items-center justify-center rounded-full"> <!-- Circle background with fixed width and height -->
                                     <i class="fas fa-book  text-white"></i> <!-- Icon size -->
                                 </div>
@@ -132,7 +132,7 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                 <h3 class="text-2xl font-bold"><?php echo $total; ?></h3> <!-- Display total count of students -->
                             </div>
                             <div class="mt-4 flex items-center justify-between">
-                                <a href="#" class="text-sm font-medium text-primary hover:underline">View student details</a>
+                                <a href="students.php" class="text-sm font-medium text-primary hover:underline">View student details</a>
                                 <div class="bg-yellow-400 h-12 w-12 flex items-center justify-center rounded-full"> <!-- Circle background with fixed width and height -->
                                     <i class="fas fa-user-graduate text-white text-xl"></i> <!-- Icon for students -->
                                 </div>
@@ -180,7 +180,7 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                 <h3 class="text-2xl font-bold"><?php echo $total; ?></h3> <!-- Display total count of rows in all tables -->
                             </div>
                             <div class="mt-4 flex items-center justify-between">
-                                <a href="#" class="text-sm font-medium text-primary hover:underline">View inventory</a>
+                                <a href="books.php" class="text-sm font-medium text-primary hover:underline">View inventory</a>
                                 <div class="bg-blue-400 h-12 w-12 flex items-center justify-center rounded-full">
                                     <i class="fas fa-book-open text-white text-xl"></i> <!-- Icon for inventory -->
                                 </div>
@@ -479,15 +479,20 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
 
                                 <div class="space-y-6">
                                     <!-- Due Soon -->
-                                    <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
-                                        <div class="flex items-start">
-                                            <span class="bg-green-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
-                                            <p class="text-lg font-medium">Due Soon</p>
-                                        </div>
-                                        <span class="text-md text-gray-500"><?php echo $total_due_soon; ?> Books Due</span>
-                                    </div>
+                                    <a href="borrowed_books.php" class="block">
+    <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
+        <div class="flex items-start">
+            <span class="bg-green-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
+            <p class="text-lg font-medium">Due Soon</p>
+        </div>
+        <span class="text-md text-gray-500"><?php echo $total_due_soon; ?> Books Due</span>
+    </div>
+</a>
+
 
                                     <!-- Due Today -->
+                                    <a href="borrowed_books.php" class="block">
+
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-red-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
@@ -495,8 +500,11 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                         </div>
                                         <span class="text-md text-gray-500"><?php echo $total_due_today; ?> Books Due</span>
                                     </div>
+                                    </a>
 
                                     <!-- Due Later -->
+                                    <a href="borrowed_books.php" class="block">
+
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-blue-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
@@ -504,6 +512,8 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                         </div>
                                         <span class="text-md text-gray-500"><?php echo $total_due_later; ?> Books Due</span>
                                     </div>
+                                    </a>
+
                                 </div>
                             </div>
 
@@ -558,6 +568,10 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
 
                                 <div class="space-y-6">
                                     <!-- To Borrow Tomorrow -->
+
+
+                                    <a href="book_request.php" class="block">
+
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-green-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
@@ -565,8 +579,12 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                         </div>
                                         <span class="text-md text-gray-500"><?php echo $total_requests_tomorrow; ?> Requests</span>
                                     </div>
+                                    </a>
 
                                     <!-- To Borrow Today -->
+
+                                    <a href="book_request.php" class="block">
+
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-red-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
@@ -574,8 +592,11 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                         </div>
                                         <span class="text-md text-gray-500"><?php echo $total_requests_today; ?> Requests</span>
                                     </div>
+                                    </a>
 
                                     <!-- To Borrow Later -->
+                                    <a href="book_request.php" class="block">
+
                                     <div class="flex justify-between items-center hover:bg-gray-100 p-3 rounded-lg transition duration-200">
                                         <div class="flex items-start">
                                             <span class="bg-blue-500 w-4 h-4 rounded-full mt-1.5 mr-3 flex-shrink-0"></span>
@@ -583,6 +604,8 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                         </div>
                                         <span class="text-md text-gray-500"><?php echo $total_requests_later; ?> Requests</span>
                                     </div>
+                                    </a>
+
                                 </div>
                             </div>
 

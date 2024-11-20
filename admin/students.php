@@ -118,9 +118,9 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
                                 }
                             } else {
                                 ?>
-                                <tr>
+                                <!-- <tr>
                                     <td colspan="8" class="px-6 py-4 text-center">No students found.</td>
-                                </tr>
+                                </tr> -->
                             <?php
                             }
                             ?>
@@ -145,141 +145,141 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
 
                 <!-- Modal with Dark Background Overlay -->
 
-      <!-- Dark Background (Overlay) -->
+                <!-- Dark Background (Overlay) -->
 
-      <div id="modalOverlay" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" onclick="closeOnOutsideClickReturned(event)">
-  
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-lg mx-4 md:mx-0" >
-      <!-- Header Section -->
-      <div class="bg-red-800 text-white rounded-t-lg text-center">
-          <h2 class="text-lg font-semibold p-4">Please Enter Details Below</h2>
-      </div>
+                <div id="modalOverlay" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" onclick="closeOnOutsideClickReturned(event)">
 
-      <!-- Content Section -->
-      <div class="p-6 text-gray-800">
-          <form id="studentForm" class="space-y-4" method="POST">
-              <div class="grid grid-cols-3 items-center gap-4 mt-3">
-                  <label for="name" class="text-left">Name:</label>
-                  <input id="name" name="name" class="col-span-2 border rounded px-3 py-2" readonly />
-              </div>
+                    <div class="bg-white rounded-lg shadow-lg w-full max-w-lg mx-4 md:mx-0">
+                        <!-- Header Section -->
+                        <div class="bg-red-800 text-white rounded-t-lg text-center">
+                            <h2 class="text-lg font-semibold p-4">Please Enter Details Below</h2>
+                        </div>
 
-              <div class="grid grid-cols-3 items-center gap-4">
-                  <label for="gender" class="text-left">Gender:</label>
-                  <input id="gender" name="gender" class="col-span-2 border rounded px-3 py-2" readonly />
-              </div>
+                        <!-- Content Section -->
+                        <div class="p-6 text-gray-800">
+                            <form id="studentForm" class="space-y-4" method="POST">
+                                <div class="grid grid-cols-3 items-center gap-4 mt-3">
+                                    <label for="name" class="text-left">Name:</label>
+                                    <input id="name" name="name" class="col-span-2 border rounded px-3 py-2" readonly />
+                                </div>
 
-              <div class="grid grid-cols-3 items-center gap-4">
-                  <label for="email" class="text-left">Email:</label>
-                  <input id="email" name="email" class="col-span-2 border rounded px-3 py-2" readonly />
-              </div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="gender" class="text-left">Gender:</label>
+                                    <input id="gender" name="gender" class="col-span-2 border rounded px-3 py-2" readonly />
+                                </div>
 
-              <div class="grid grid-cols-3 items-center gap-4">
-                  <label for="contact" class="text-left">Contact:</label>
-                  <input id="contact" name="contact" class="col-span-2 border rounded px-3 py-2" readonly />
-              </div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="email" class="text-left">Email:</label>
+                                    <input id="email" name="email" class="col-span-2 border rounded px-3 py-2" readonly />
+                                </div>
 
-              <div class="grid grid-cols-3 items-center gap-4">
-                  <label for="year_level" class="text-left">Year Level:</label>
-                  <input id="year_level" name="year_level" class="col-span-2 border rounded px-3 py-2" readonly />
-              </div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="contact" class="text-left">Contact:</label>
+                                    <input id="contact" name="contact" class="col-span-2 border rounded px-3 py-2" readonly />
+                                </div>
 
-              <div class="grid grid-cols-3 items-center gap-4">
-                  <label for="status" class="text-left">Status:</label>
-                  <select id="status" name="status" class="col-span-2 border rounded px-3 py-2">
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="banned">Banned</option>
-                  </select>
-              </div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="year_level" class="text-left">Year Level:</label>
+                                    <input id="year_level" name="year_level" class="col-span-2 border rounded px-3 py-2" readonly />
+                                </div>
 
-              <div class="grid grid-cols-3 items-center gap-4">
-                  <label for="course" class="text-left">Course:</label>
-                  <input id="course" name="course" class="col-span-2 border rounded px-3 py-2" readonly />
-              </div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="status" class="text-left">Status:</label>
+                                    <select id="status" name="status" class="col-span-2 border rounded px-3 py-2">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="banned">Banned</option>
+                                    </select>
+                                </div>
 
-              <!-- Hidden field for student ID -->
-              <input type="hidden" id="student_id" name="student_id" />
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label for="course" class="text-left">Course:</label>
+                                    <input id="course" name="course" class="col-span-2 border rounded px-3 py-2" readonly />
+                                </div>
 
-              <div class="flex justify-end space-x-4">
-                  <button type="button" onclick="closeModal()" class="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700">
-                      Close
-                  </button>
-                  <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                      Save
-                  </button>
-              </div>
-          </form>
-      </div>
+                                <!-- Hidden field for student ID -->
+                                <input type="hidden" id="student_id" name="student_id" />
 
-      <!-- Footer Section -->
-  
-  </div>
-</div>
+                                <div class="flex justify-end space-x-4">
+                                    <button type="button" onclick="closeModal()" class="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700">
+                                        Close
+                                    </button>
+                                    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Footer Section -->
+
+                    </div>
+                </div>
 
 
-<script>
-    // Close modal if clicked outside the modal content area
-    function closeOnOutsideClickReturned(event) {
-        const modalContent = document.querySelector("#modalOverlay > div");
-        if (!modalContent.contains(event.target)) {
-            closeModal();
-        }
-    }
+                <script>
+                    // Close modal if clicked outside the modal content area
+                    function closeOnOutsideClickReturned(event) {
+                        const modalContent = document.querySelector("#modalOverlay > div");
+                        if (!modalContent.contains(event.target)) {
+                            closeModal();
+                        }
+                    }
 
-    // Open the modal and populate fields with data
-    function openModal(studentId, name, gender, email, contact, yearLevel, status, course) {
-        document.getElementById('student_id').value = studentId;
-        document.getElementById('name').value = name;
-        document.getElementById('gender').value = gender;
-        document.getElementById('email').value = email;
-        document.getElementById('contact').value = contact;
-        document.getElementById('year_level').value = yearLevel;
-        document.getElementById('status').value = status;
-        document.getElementById('course').value = course;
+                    // Open the modal and populate fields with data
+                    function openModal(studentId, name, gender, email, contact, yearLevel, status, course) {
+                        document.getElementById('student_id').value = studentId;
+                        document.getElementById('name').value = name;
+                        document.getElementById('gender').value = gender;
+                        document.getElementById('email').value = email;
+                        document.getElementById('contact').value = contact;
+                        document.getElementById('year_level').value = yearLevel;
+                        document.getElementById('status').value = status;
+                        document.getElementById('course').value = course;
 
-        // Show the modal
-        document.getElementById('modalOverlay').classList.remove('hidden');
-    }
+                        // Show the modal
+                        document.getElementById('modalOverlay').classList.remove('hidden');
+                    }
 
-    // Close the modal
-    function closeModal() {
-        document.getElementById('modalOverlay').classList.add('hidden');
-    }
+                    // Close the modal
+                    function closeModal() {
+                        document.getElementById('modalOverlay').classList.add('hidden');
+                    }
 
-    // Save form data when 'Save' button is clicked
-    document.getElementById('studentForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent form submission default action
+                    // Save form data when 'Save' button is clicked
+                    document.getElementById('studentForm').addEventListener('submit', function(event) {
+                        event.preventDefault(); // Prevent form submission default action
 
-        const studentId = this.getAttribute('data-id'); // Get the student ID from the data attribute
-        const formData = {
-            id: studentId, // Include the student ID
-            status: document.getElementById('status').value // Include the status
-        };
+                        const studentId = this.getAttribute('data-id'); // Get the student ID from the data attribute
+                        const formData = {
+                            id: studentId, // Include the student ID
+                            status: document.getElementById('status').value // Include the status
+                        };
 
-        // Perform the POST request to save the data
-        fetch('student_edit.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Status updated successfully!');
-                    closeModal(); // Close the modal if save was successful
-                    location.reload(); // Reload the page to reflect changes
-                } else {
-                    alert('Failed to update status');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while saving the status');
-            });
-    });
-</script>
+                        // Perform the POST request to save the data
+                        fetch('student_edit.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(formData),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert('Status updated successfully!');
+                                    closeModal(); // Close the modal if save was successful
+                                    location.reload(); // Reload the page to reflect changes
+                                } else {
+                                    alert('Failed to update status');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred while saving the status');
+                            });
+                    });
+                </script>
 
 
 
@@ -310,7 +310,7 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
 
     <script src="./src/components/header.js"></script>
 
-    
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 

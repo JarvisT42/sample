@@ -83,7 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $no_of_copies = intval($_POST['book_copies']);
         $date_of_publication = htmlspecialchars($_POST['date_of_publication_copyright']);
         $subjects = htmlspecialchars($_POST['subject']);
-        $status = htmlspecialchars($_POST['status']);
         $available_to_borrow = isset($_POST['available_to_borrow']) ? 'Yes' : 'No';
 
         $cover_image = null;
@@ -92,14 +91,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         $sql = $cover_image
-            ? "UPDATE `$category` SET isbn = ?, Call_Number = ?, Department = ?, Title = ?, Author = ?, Publisher = ?, No_Of_Copies = ?, Date_Of_Publication_Copyright = ?, Subjects = ?, Status = ?, Available_To_Borrow = ?, record_cover = ? WHERE id = ?"
-            : "UPDATE `$category` SET isbn = ?, Call_Number = ?, Department = ?, Title = ?, Author = ?, Publisher = ?, No_Of_Copies = ?, Date_Of_Publication_Copyright = ?, Subjects = ?, Status = ?, Available_To_Borrow = ? WHERE id = ?";
+            ? "UPDATE `$category` SET isbn = ?, Call_Number = ?, Department = ?, Title = ?, Author = ?, Publisher = ?, No_Of_Copies = ?, Date_Of_Publication_Copyright = ?, Subjects = ?,  Available_To_Borrow = ?, record_cover = ? WHERE id = ?"
+            : "UPDATE `$category` SET isbn = ?, Call_Number = ?, Department = ?, Title = ?, Author = ?, Publisher = ?, No_Of_Copies = ?, Date_Of_Publication_Copyright = ?, Subjects = ?,  Available_To_Borrow = ? WHERE id = ?";
 
         $stmt = $conn2->prepare($sql);
         if ($stmt) {
             $bind_params = $cover_image
-                ? [$isbn, $call_number, $department, $title, $author, $publisher, $no_of_copies, $date_of_publication, $subjects, $status, $available_to_borrow, $cover_image, $book_id]
-                : [$isbn, $call_number, $department, $title, $author, $publisher, $no_of_copies, $date_of_publication, $subjects, $status, $available_to_borrow, $book_id];
+                ? [$isbn, $call_number, $department, $title, $author, $publisher, $no_of_copies, $date_of_publication, $subjects, $available_to_borrow, $cover_image, $book_id]
+                : [$isbn, $call_number, $department, $title, $author, $publisher, $no_of_copies, $date_of_publication, $subjects, $available_to_borrow, $book_id];
 
             $stmt->bind_param(str_repeat("s", count($bind_params)), ...$bind_params);
             if ($stmt->execute()) {
@@ -332,15 +331,7 @@ if ($result->num_rows > 0) {
                                 </div>
 
                                 <!-- Status -->
-                                <div class="grid grid-cols-3 items-center gap-4">
-                                    <label for="status" class="text-left">STATUS:</label>
-                                    <select id="status" name="status" class="col-span-2 border rounded px-3 py-2">
-                                        <option value="" disabled>Select status</option>
-                                        <option value="new" <?php echo $status == 'new' ? 'selected' : ''; ?>>New</option>
-                                        <option value="old" <?php echo $status == 'old' ? 'selected' : ''; ?>>Old</option>
-                                        <option value="damage" <?php echo $status == 'damage' ? 'selected' : ''; ?>>Damage</option>
-                                    </select>
-                                </div>
+                               
 
                                 <!-- Submit Button -->
                                 <div class="flex justify-end gap-4">

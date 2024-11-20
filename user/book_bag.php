@@ -52,12 +52,15 @@ $bookBagCount = count($bookBag);
     <?php include './src/components/sidebar.php'; ?>
 
 
+    <main id="content" class="">
+
 
 
 
     <div class="p-4 sm:ml-64 custom-container">
         <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 flex flex-col gap-4">
 
+    
 
             <div class="scrollable-table-container border border-gray-200 dark:border-gray-700">
                 <div class="container mx-auto px-4 py-6">
@@ -166,7 +169,7 @@ $bookBagCount = count($bookBag);
     </script>
 
 
-
+</main>
 
 </body>
 

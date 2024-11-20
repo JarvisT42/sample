@@ -80,8 +80,9 @@
       style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('./src/assets/images/background.png');">
       <div class="slide-content">
         <h2>Stronger than <b>EVER</b></h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-        <a href="#">Start Now</a>
+        
+        <p>Access our vast collection of books, research materials, and resources online. Learn, explore, and grow from anywhere, anytime.</p>
+        <a href="login.php">Start Now</a>
       </div>
     </div>
 
@@ -112,7 +113,9 @@
 
     <div
       class="slide"
-      style="background-image: url('./src/assets/images/mainlib2.upd.png')"></div>
+      style="background-image: url('./src/assets/images/mainlib2.upd.png')">
+    
+    </div>
 
     <div
       class="slide"
@@ -155,7 +158,7 @@
   <section id="search-engine">
     <div class="container text-center d-flex justify-content-center">
       <div class="section-header">
-      <h2 class="section-title wow fadeInDown" style="color: #9C1414;">
+        <h2 class="section-title wow fadeInDown" style="color: #9C1414;">
 
           Search Our Library
         </h2>
@@ -165,28 +168,31 @@
         </p>
       </div>
 
-      <form class="search-form d-flex mx-auto">
-        <!-- Dropdown for category selection -->
-        <select class="form-select" aria-label="Category">
-          <option selected>All Fields</option>
-          <option value="title">Title</option>
-          <option value="author">Author</option>
-          <option value="keyword">Keyword</option>
-          <option value="isbn">ISBN</option>
+      <form class="search-form d-flex mx-auto" action="search.php" method="GET">
+        <select class="form-select" name="table" aria-label="Category">
+          <option value="All fields" selected>All Fields</option>
+          <!-- Dynamically populate tables -->
+          <?php
+          include 'connection2.php';
+          $sql = "SHOW TABLES FROM gfi_library_database_books_records";
+          $result = $conn2->query($sql);
+          $excludedTable = "e-books";
+
+          if ($result->num_rows > 0) {
+            while ($row = $result->fetch_array()) {
+              if ($row[0] !== $excludedTable) {
+                echo '<option value="' . htmlspecialchars($row[0]) . '">' . htmlspecialchars($row[0]) . '</option>';
+              }
+            }
+          }
+          ?>
         </select>
-
-        <!-- Search input field -->
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Search by Title, Author, Keyword or ISBN"
-          aria-label="Search" />
-
-        <!-- Search button -->
-        <button class="btn btn-primary" type="submit">
-          <i class="fa fa-search"></i>
-        </button>
+        <input type="text" name="search" class="form-control" placeholder="Search by Title, Author, Keyword or ISBN" required>
+        <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
       </form>
+
+
+
     </div>
   </section>
 
@@ -323,39 +329,39 @@
 
   <section id="about" style="font-family: Arial, sans-serif; line-height: 1.8;">
     <div class="container" style="max-width: 1200px; margin: 0 auto; ">
-        <div class="section-header" style="text-align: center; margin-bottom: 20px;">
-            <h2 class="section-title wow fadeInDown" style="font-size: 2.5em; font-weight: bold; margin-bottom: 10px;">About Us</h2>
-            <p class="wow fadeInDown" style="font-size: 1.3em;">
-                Welcome to the Gensantos Foundation College, Inc. Library – a center of knowledge, learning, and innovation designed to support the academic and personal growth of our students and faculty.
-            </p>
+      <div class="section-header" style="text-align: center; margin-bottom: 20px;">
+        <h2 class="section-title wow fadeInDown" style="font-size: 2.5em; font-weight: bold; margin-bottom: 10px;">About Us</h2>
+        <p class="wow fadeInDown" style="font-size: 1.3em;">
+          Welcome to the Gensantos Foundation College, Inc. Library – a center of knowledge, learning, and innovation designed to support the academic and personal growth of our students and faculty.
+        </p>
+      </div>
+
+      <div class="row" style="display: flex; flex-wrap: wrap; gap: 20px;">
+        <!-- Left Column -->
+        <div class="col-sm-6 wow fadeInLeft" style="flex: 1; min-width: 300px;">
+          <h3 class="column-title" style="font-size: 2em; font-weight: bold;">Our Mission & Vision</h3>
+          <p style="font-size: 1.3em;">
+            <strong>VISION</strong><br>
+            GFI Library envisions becoming a leading College Learning Resource Center in all types of information sources in the fields of Accountancy, Business and Management, Education, and Information and Communication Technology. It aims for reliable, rapid access, easy retrieval, and transfer of relevant information to its users, establishing linkages with other academic libraries globally.<br><br>
+            <strong>MISSION</strong><br>
+            The College Library exists to support the vision and mission of Gensantos Foundation College Inc. and the goals and objectives of its various curricular programs, providing excellent library services in support of instruction, research, and other scholarly activities.
+          </p>
         </div>
 
-        <div class="row" style="display: flex; flex-wrap: wrap; gap: 20px;">
-            <!-- Left Column -->
-            <div class="col-sm-6 wow fadeInLeft" style="flex: 1; min-width: 300px;">
-                <h3 class="column-title" style="font-size: 2em; font-weight: bold;">Our Mission & Vision</h3>
-                <p style="font-size: 1.3em;">
-                    <strong>VISION</strong><br>
-                    GFI Library envisions becoming a leading College Learning Resource Center in all types of information sources in the fields of Accountancy, Business and Management, Education, and Information and Communication Technology. It aims for reliable, rapid access, easy retrieval, and transfer of relevant information to its users, establishing linkages with other academic libraries globally.<br><br>
-                    <strong>MISSION</strong><br>
-                    The College Library exists to support the vision and mission of Gensantos Foundation College Inc. and the goals and objectives of its various curricular programs, providing excellent library services in support of instruction, research, and other scholarly activities.
-                </p>
-            </div>
-
-            <!-- Right Column -->
-            <div class="col-sm-6 wow fadeInRight" style="flex: 1; min-width: 300px;">
-                <h3 class="column-title" style="font-size: 2em; font-weight: bold;">What We Offer</h3>
-                <ul class="listarrow" style="list-style: none; padding: 0; font-size: 1.3em; color: #555;">
-                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Extensive Collection: Books, journals, and digital resources across multiple disciplines.</li>
-                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Modern Borrowing System: Reserve and borrow books online for added convenience.</li>
-                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Personalized Services: Manage borrowing history, track due dates, and receive tailored services.</li>
-                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Digital Library Access: 24/7 access to e-books, research articles, and other digital materials.</li>
-                    <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Community Engagement: Events, book clubs, and more to promote knowledge-sharing.</li>
-                </ul>
-            </div>
+        <!-- Right Column -->
+        <div class="col-sm-6 wow fadeInRight" style="flex: 1; min-width: 300px;">
+          <h3 class="column-title" style="font-size: 2em; font-weight: bold;">What We Offer</h3>
+          <ul class="listarrow" style="list-style: none; padding: 0; font-size: 1.3em; color: #555;">
+            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Extensive Collection: Books, journals, and digital resources across multiple disciplines.</li>
+            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Modern Borrowing System: Reserve and borrow books online for added convenience.</li>
+            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Personalized Services: Manage borrowing history, track due dates, and receive tailored services.</li>
+            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Digital Library Access: 24/7 access to e-books, research articles, and other digital materials.</li>
+            <li style="margin-bottom: 10px;"><i class="fa fa-angle-double-right" style="margin-right: 8px; color: #007bff;"></i>Community Engagement: Events, book clubs, and more to promote knowledge-sharing.</li>
+          </ul>
         </div>
+      </div>
     </div>
-</section>
+  </section>
 
 
   <!--/#about-->

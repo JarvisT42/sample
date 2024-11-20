@@ -60,7 +60,7 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
 
 
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-4 mb-4 flex items-center justify-start space-x-4">
-                    <label for="full_name" class="text-left">ROLE:&nbsp;&nbsp;&nbsp;</label>
+                    <label for="full_name" class="text-left">USER CATEGORY:&nbsp;&nbsp;&nbsp;</label>
                     <select id="role" name="role" class="col-span-2 border rounded px-3 py-2">
                         <option value="">Select Role</option>
                         <option value="Student">Student</option>

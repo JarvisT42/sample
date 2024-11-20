@@ -151,8 +151,8 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                                                 <label class="text-sm font-medium text-gray-700">Accession Numbers:</label>
                                                                 <div class="ml-2 border border-gray-300 rounded-md p-1 inline-block max-w-xs text-sm">
                                                                     <?php
-                                                                    // Query to fetch accession numbers for the given book_id, category, and borrower_id with available set to 'reserved'
-                                                                    $accessionQuery = "SELECT accession_no FROM `accession_records` WHERE book_id = ? AND book_category = ? AND borrower_id = ? AND available = 'reserved'";
+                                                                    // Query to fetch accession numbers and book conditions for the given book_id, category, and borrower_id with available set to 'reserved'
+                                                                    $accessionQuery = "SELECT accession_no, book_condition FROM `accession_records` WHERE book_id = ? AND book_category = ? AND borrower_id = ? AND available = 'reserved'";
                                                                     $stmt3 = $conn->prepare($accessionQuery);
 
                                                                     if ($stmt3) {
@@ -162,10 +162,15 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
 
                                                                         if ($accessionResult->num_rows > 0) {
                                                                             while ($accessionRow = $accessionResult->fetch_assoc()) {
-                                                                                $accession_no = $accessionRow['accession_no'];
-                                                                                echo '<div class="">' . htmlspecialchars($accession_no) . '</div>';
+                                                                                $accession_no = htmlspecialchars($accessionRow['accession_no']);
+                                                                                $book_condition = htmlspecialchars($accessionRow['book_condition']); // Sanitize the condition text
+                                                                                echo '<div class="flex items-center space-x-2">';
+                                                                                echo '<span>' . $accession_no . '</span>';
                                                                                 // Hidden input to send accession_no to the server
-                                                                                echo '<input type="hidden" name="accession_no[' . $book_id . '][]" value="' . htmlspecialchars($accession_no) . '">';
+                                                                                echo '<input type="hidden" name="accession_no[' . $book_id . '][]" value="' . $accession_no . '">';
+                                                                                // "View Book Condition" link
+                                                                                echo '<button type="button" class="text-blue-500 underline text-sm" onclick="showBookConditionModal(`' . $book_condition . '`)">View Book Condition</button>';
+                                                                                echo '</div>';
                                                                             }
                                                                         } else {
                                                                             echo '<p class="text-gray-500">No reserved accession numbers found.</p>';
@@ -177,6 +182,56 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id'])) {
                                                                     ?>
                                                                 </div>
                                                             </div>
+
+                                                            <!-- Modal for Book Condition -->
+                                                            <div id="bookConditionModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" onclick="closeOnOutsideClick(event)">
+                                                                <div class="bg-gray-50 rounded-lg shadow-lg w-full max-w-md mx-4 md:mx-0" onclick="event.stopPropagation()">
+                                                                    <!-- Header Section -->
+                                                                    <div class="flex items-center justify-between p-4 rounded-t-lg bg-gray-800 text-gray-100">
+                                                                        <h5 class="text-lg font-bold">Book Condition</h5>
+                                                                        <button type="button" class="text-gray-300 hover:text-gray-200" onclick="closeModal()">
+                                                                            <span class="text-2xl font-bold">&times;</span>
+                                                                        </button>
+                                                                    </div>
+
+                                                                    <!-- Content Section -->
+                                                                    <div class="p-6 text-gray-800">
+                                                                        <p class="font-semibold text-gray-700">Condition:</p>
+                                                                        <p id="modalBookConditionText" class="pl-2 text-gray-900">N/A</p>
+                                                                    </div>
+
+                                                                    <!-- Footer Section -->
+                                                                    <div class="flex justify-end p-4 rounded-b-lg bg-gray-800">
+                                                                        <button type="button" class="bg-gray-600 text-gray-100 font-semibold px-4 py-2 rounded-lg hover:bg-gray-500" onclick="closeModal()">Close</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <script>
+                                                                // Function to show the modal with book condition text
+                                                                function showBookConditionModal(condition) {
+                                                                    document.getElementById('modalBookConditionText').textContent = condition;
+                                                                    document.getElementById('bookConditionModal').classList.remove('hidden');
+                                                                }
+
+                                                                // Function to close the modal
+                                                                function closeModal() {
+                                                                    document.getElementById('bookConditionModal').classList.add('hidden');
+                                                                }
+
+                                                                // Function to close the modal on outside click
+                                                                function closeOnOutsideClick(event) {
+                                                                    if (event.target.id === 'bookConditionModal') {
+                                                                        closeModal();
+                                                                    }
+                                                                }
+                                                            </script>
+
+
+
+
+
+
                                                         </h2>
 
                                                         <!-- Display other book information -->
