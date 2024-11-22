@@ -32,23 +32,24 @@
                 </a>
             </li>
             <li>
-                <a href="e-books.php" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group active-e-books">
-                    <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M5 3h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm0 2v12h10V5H5zM8 6h4v2H8V6zm0 3h4v2H8V9z" />
-                    </svg>
-                    <span class="flex-1 ms-3 whitespace-nowrap">E-Books</span>
-                </a>
-            </li>
+    <a href="e-books.php" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group active-e-books">
+        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h6zM4 4v10h6V4H4zm7 0h6a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-6V4z" />
+        </svg>
+        <span class="flex-1 ms-3 whitespace-nowrap">E-Books</span>
+    </a>
+</li>
 
 
-            <li>
-                <a href="books.php" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group active-books_first">
-                    <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M5 3h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm0 2v12h10V5H5zM8 6h4v2H8V6zm0 3h4v2H8V9z" />
-                    </svg>
-                    <span class="flex-1 ms-3 whitespace-nowrap">Books</span>
-                </a>
-            </li>
+
+<li>
+    <a href="books.php" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group active-books_first">
+        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M4 2a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2zm1 1v14h10V3H5zM7 4h6v2H7V4z" />
+        </svg>
+        <span class="flex-1 ms-3 whitespace-nowrap">Books</span>
+    </a>
+</li>
 
 
             <li>
@@ -62,17 +63,17 @@
 
 
 
-            <li>
-                <a href="activity_log.php" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group active-activity-logs">
-                    <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M8 2h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm0 2v12h4V4H8z" />
-                    </svg>
-                    <span class="flex-1 ms-3 whitespace-nowrap">Activity Log</span>
-                </a>
-            </li>
-
-            
            
+            
+            <li>
+    <a href="activity_log.php" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group active-activity-logs">
+        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M12 2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h8zm0 2H4v12h8V4zm4 4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2v2h-2v-2H8v2H6v-2H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h2V6h2v2h2V9h2a1 1 0 0 1 1 1z" />
+        </svg>
+        <span class="flex-1 ms-3 whitespace-nowrap">Activity Log</span>
+    </a>
+</li>
+
             <!-- <li>
                 <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                     <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -96,14 +97,15 @@
 
     <div class="px-3 py-4 border-t border-gray-200 bg-gray-50 dark:border-gray-700">
         <ul class="space-y-2 font-medium">
-            <li>
-                <a href="settings.php" class="flex items-center p-2 text-gray-900 transition duration-75 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group active-settings">
-                    <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 8.5c-1.5 0-2.9.7-3.8 1.8l-1.4-1.4C6.5 8.4 7.1 7 8 6.4V5c0-1.1.9-2 2-2s2 .9 2 2v1.4c.9.6 1.5 1.7 1.2 2.7l-1.4 1.4c-.9-.8-2.3-1.3-3.2-1.3zm-1 3.8c.6-.6 1.5-.9 2.3-.6.8.2 1.4.8 1.6 1.6.2.8 0 1.7-.6 2.3-.7.6-1.6.9-2.4.6-3.4-.3-.8-1.1-1.5-2-1.5-1.1 0-2 .9-2 2s.9 2 2 2c.4 0 .8-.1 1.1-.3.5.3.9.8 1.1 1.4.1.4.2.9.1 1.4-.3.7-1.2 1.3-1.7 2.2-.3.7-.4 1.5-.3 2.2s.3 1.5.8 2.1c.7.7 1.7 1.2 2.6 1.2s2-1.1 2-2.5c0-1.4-1-2.5-2.5-2.5-.4 0-.8.1-1.2.2-.5-.4-1-1-1.3-1.7-.4-1.2.1-2.4 1.2-2.8zm-3.6 3.8c-.1.6-.4 1.1-.8 1.5s-1 .6-1.5.6c-1.1 0-2-.9-2-2s.9-2 2-2c.5 0 1.1.2 1.5.6.4.4.7.9.8 1.5zm4.6-.8c.1.3.1.6.1 1s-.1.7-.1 1.1c-1.6-.5-2.9-2.1-2.9-3.8 0-1.8 1.2-3.3 2.9-3.8-.1.4-.1.8-.1 1.1s.1.7.1 1.1c1.6-.5 2.9-2.1 2.9-3.8 0-1.8-1.2-3.3-2.9-3.8.1.3.1.7.1 1.1s-.1.7-.1 1.1c-1.6-.5-2.9-2.1-2.9-3.8s1.2-3.3 2.9-3.8c.1.3.1.7.1 1.1s-.1.7-.1 1.1c-1.6-.5-2.9-2.1-2.9-3.8 0-1.8 1.2-3.3 2.9-3.8z" />
-                    </svg>
-                    <span class="ms-3">Settings</span>
-                </a>
-            </li>
+        <li>
+    <a href="settings.php" class="flex items-center p-2 text-gray-900 transition duration-75 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group active-settings">
+        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 8.5c-1.5 0-2.9.7-3.8 1.8l-1.4-1.4C6.5 8.4 7.1 7 8 6.4V5c0-1.1.9-2 2-2s2 .9 2 2v1.4c.9.6 1.5 1.7 1.2 2.7l-1.4 1.4c-.9-.8-2.3-1.3-3.2-1.3zm-1 3.8c.6-.6 1.5-.9 2.3-.6.8.2 1.4.8 1.6 1.6.2.8 0 1.7-.6 2.3-.7.6-1.6.9-2.4.6-3.4-.3-.8-1.1-1.5-2-1.5-1.1 0-2 .9-2 2s.9 2 2 2c.4 0 .8-.1 1.1-.3.5.3.9.8 1.1 1.4.1.4.2.9.1 1.4-.3.7-1.2 1.3-1.7 2.2-.3.7-.4 1.5-.3 2.2s.3 1.5.8 2.1c.7.7 1.7 1.2 2.6 1.2s2-1.1 2-2.5c0-1.4-1-2.5-2.5-2.5-.4 0-.8.1-1.2.2-.5-.4-1-1-1.3-1.7-.4-1.2.1-2.4 1.2-2.8zm-3.6 3.8c-.1.6-.4 1.1-.8 1.5s-1 .6-1.5.6c-1.1 0-2-.9-2-2s.9-2 2-2c.5 0 1.1.2 1.5.6.4.4.7.9.8 1.5zm4.6-.8c.1.3.1.6.1 1s-.1.7-.1 1.1c-1.6-.5-2.9-2.1-2.9-3.8 0-1.8 1.2-3.3 2.9-3.8-.1.4-.1.8-.1 1.1s.1.7.1 1.1c1.6-.5 2.9-2.1 2.9-3.8 0-1.8-1.2-3.3-2.9-3.8.1.3.1.7.1 1.1s-.1.7-.1 1.1c-1.6-.5-2.9-2.1-2.9-3.8s1.2-3.3 2.9-3.8c.1.3.1.7.1 1.1s-.1.7-.1 1.1c-1.6-.5-2.9-2.1-2.9-3.8 0-1.8 1.2-3.3 2.9-3.8z" />
+        </svg>
+        <span class="ms-3">Settings</span>
+    </a>
+</li>
+
 
             <!-- <li>
                 <a href="#" class="flex items-center p-2 text-gray-900 transition duration-75 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">

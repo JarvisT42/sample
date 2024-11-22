@@ -1057,12 +1057,17 @@ if (isset($_GET['student_id']) || isset($_GET['faculty_id']) || isset($_GET['wal
 
                     // Prepare data based on wayOfBorrow and role
                     const data = {
-                        way_of_borrow: wayOfBorrow,
-                        role: role,
-                        due_date: formattedDueDate,
-                        book_id: bookId,
-                        category: category
-                    };
+    way_of_borrow: wayOfBorrow,
+    role: role,
+    due_date: formattedDueDate,
+    book_id: bookId,
+    category: category
+};
+
+// Alert the data object as a string
+alert("Data object: " + JSON.stringify(data, null, 2));
+
+
 
                     // Add the specific user ID based on role
                     if (role === 'Student' && wayOfBorrow === 'online') data.student_id = studentId;

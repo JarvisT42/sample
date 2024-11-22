@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 20, 2024 at 08:54 AM
+-- Generation Time: Nov 20, 2024 at 02:13 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -47,11 +47,11 @@ CREATE TABLE `accession_records` (
 --
 
 INSERT INTO `accession_records` (`accession_no`, `call_number`, `book_id`, `book_category`, `borrower_id`, `status`, `damage_description`, `damage`, `book_condition`, `repaired`, `available`, `archive`) VALUES
-('gfi-01', 'Fil 001.3 H88 2003 aaaaaaa', 39, 'classic books', 'w-5', 'lost', '', 'no', '', NULL, 'yes', 'no'),
-('gfi-02', 'Fil 001.3 H88 2003 aaaaaaa', 39, 'classic books', 'w-6', 'borrowed', '', 'no', '', NULL, 'yes', 'no'),
+('gfi-01', 'Fil 001.3 H88 2003 aaaaaaa', 39, 'classic books', '1', 'lost', '', 'no', '', NULL, 'reserved', 'no'),
+('gfi-02', 'Fil 001.3 H88 2003 aaaaaaa', 39, 'classic books', '1', 'borrowed', '', 'no', '', NULL, 'reserved', 'no'),
 ('gfi-03', 'Fil 001.3 H88 2003 aaaaaaa', 39, 'classic books', 'w-7', 'lost', '', 'no', '', NULL, 'yes', 'no'),
 ('gfi-06', 'Fil 001.3 H88 2003 aaaaaaa', 39, 'classic books', NULL, '', '', 'no', '', NULL, 'yes', 'no'),
-('gfi-08', 'Fil 001.4 H88 2003 ', 43, 'classic books', '11', 'lost', '', 'no', '', NULL, 'yes', 'no'),
+('gfi-08', 'Fil 001.4 H88 2003 ', 43, 'classic books', '1', 'lost', '', 'no', '', NULL, 'reserved', 'no'),
 ('gfi-09', 'Fil 001.4 H88 2003 ', 43, 'classic books', '1', 'lost', '', 'no', 'page 66 gisi', NULL, 'yes', 'no'),
 ('gfi-10', 'Fil 001.4 H88 2003 ', 43, 'classic books', NULL, '', '', 'no', '', NULL, 'yes', 'no'),
 ('gfi-11', '819-3223-4212', 48, 'classic books', NULL, '', '', 'no', '', NULL, 'yes', 'no'),
@@ -156,7 +156,7 @@ CREATE TABLE `borrow` (
   `Time` varchar(255) NOT NULL,
   `Queue` varchar(255) NOT NULL,
   `Issued` varchar(250) NOT NULL,
-  `issued_date` date NOT NULL,
+  `issued_date` date DEFAULT NULL,
   `due_date` date NOT NULL,
   `renew` enum('yes','no') DEFAULT 'no',
   `expected_replacement_date` date DEFAULT NULL,
@@ -175,7 +175,7 @@ CREATE TABLE `borrow` (
 --
 
 INSERT INTO `borrow` (`borrow_id`, `student_id`, `faculty_id`, `walk_in_id`, `role`, `accession_no`, `book_id`, `Category`, `No_Of_Copies`, `appointment_id`, `date_to_claim`, `Time`, `Queue`, `Issued`, `issued_date`, `due_date`, `renew`, `expected_replacement_date`, `Return_Date`, `Damage_Description`, `Over_Due_Fines`, `Book_Fines`, `total_fines`, `book_replaced`, `Way_Of_Borrow`, `status`) VALUES
-(1447, NULL, NULL, 'w-7', 'Student', 'gfi-03', 39, 'classic books', 0, NULL, '2024-11-20', '', '', '', '2024-11-20', '2024-11-22', 'no', '2024-11-29', '0000-00-00', '', NULL, NULL, 0.00, NULL, 'Walk-in', 'reported');
+(1450, 1, NULL, NULL, 'Student', 'gfi-02', 39, 'classic books', 0, 2461, '2024-11-22', 'afternoon', '', '', '0000-00-00', '0000-00-00', 'no', NULL, '0000-00-00', '', NULL, NULL, 0.00, NULL, 'online', 'pending');
 
 -- --------------------------------------------------------
 
@@ -232,7 +232,7 @@ INSERT INTO `calendar_appointment` (`appointment_id`, `calendar`, `morning`, `af
 (2458, '2024-11-19', 2, 7),
 (2459, '2024-11-20', -1, 0),
 (2460, '2024-11-21', 1, 1),
-(2461, '2024-11-22', 1, 5);
+(2461, '2024-11-22', 1, 3);
 
 -- --------------------------------------------------------
 
@@ -625,7 +625,7 @@ ALTER TABLE `admin_account`
 -- AUTO_INCREMENT for table `borrow`
 --
 ALTER TABLE `borrow`
-  MODIFY `borrow_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1448;
+  MODIFY `borrow_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1451;
 
 --
 -- AUTO_INCREMENT for table `calendar_appointment`

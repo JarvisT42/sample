@@ -20,12 +20,12 @@ if (isset($_POST['mark_as_repaired'])) {
     $book_id = $_POST['book_id'];
     $category = $_POST['category'];
     $accession_no = $_POST['accession_no'];
-    $repair_description = $_POST['repair_description'];
+    $book_condition = $_POST['book_condition'];
 
     // Update the accession record with the repair status and description
-    $repair_sql = "UPDATE accession_records SET repaired = 'yes', repair_description = ?, available = 'yes' WHERE accession_no = ? AND book_id = ? AND book_category = ?";
+    $repair_sql = "UPDATE accession_records SET repaired = 'yes', book_condition = ?, available = 'yes' WHERE accession_no = ? AND book_id = ? AND book_category = ?";
     $repair_stmt = $conn->prepare($repair_sql);
-    $repair_stmt->bind_param("ssis", $repair_description, $accession_no, $book_id, $category);
+    $repair_stmt->bind_param("ssis", $book_condition, $accession_no, $book_id, $category);
     $repair_stmt->execute();
 
     // Redirect to the current page with success message
@@ -73,7 +73,7 @@ if (isset($_POST['mark_as_repaired'])) {
         <div class="col-span-2 border rounded px-3 py-2 bg-gray-50 space-y-2">
             <?php
             // Query to fetch accession numbers and repair descriptions based on book_id and category
-            $accession_sql = "SELECT accession_no, repair_description FROM accession_records WHERE book_id = ? AND book_category = ? AND repaired != 'yes'";
+            $accession_sql = "SELECT accession_no, book_condition FROM accession_records WHERE book_id = ? AND book_category = ? AND repaired != 'yes'";
             $accession_stmt = $conn->prepare($accession_sql);
 
             if ($accession_stmt) {
@@ -85,7 +85,7 @@ if (isset($_POST['mark_as_repaired'])) {
                     // Display each accession number with a "Repair" button and repair description textarea
                     while ($accession_row = $accession_result->fetch_assoc()) {
                         $accession_no = htmlspecialchars($accession_row['accession_no']);
-                        $repair_description = htmlspecialchars($accession_row['repair_description']); // Get the repair description
+                        $book_condition = htmlspecialchars($accession_row['book_condition']); // Get the repair description
 
                         echo "<div class='flex flex-col gap-2'>";
                         
@@ -93,7 +93,7 @@ if (isset($_POST['mark_as_repaired'])) {
                         echo "<input type='text' name='accession_no[]' value='$accession_no' class='w-full border rounded px-2 py-1' readonly />";
                         
                         // Repair Description Textarea - pre-fill with the existing description if available
-                        echo "<textarea name='repair_description[]' placeholder='Enter repair description here...' class='w-full border rounded px-2 py-1'>$repair_description</textarea>";
+                        echo "<textarea name='book_condition[]' placeholder='Enter Book Condition here...' class='w-full border rounded px-2 py-1'>$book_condition</textarea>";
                         
                         // Repair Button
                         echo "<button type='button' onclick='markAsRepaired(\"$accession_no\")' class='px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600'>Repair</button>";
@@ -136,7 +136,7 @@ if (isset($_POST['mark_as_repaired'])) {
     function markAsRepaired(accessionNo) {
         if (confirm('Are you sure you want to mark this book as being repaired?')) {
             // Get the corresponding repair description
-            const repairDescription = document.querySelector(`textarea[name='repair_description[]']`).value;
+            const repairDescription = document.querySelector(`textarea[name='book_condition[]']`).value;
 
             // Perform the AJAX request to mark the book as repaired
             var bookId = <?php echo json_encode($book_id); ?>; // Use PHP to get the current book_id
@@ -148,7 +148,7 @@ if (isset($_POST['mark_as_repaired'])) {
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
             // Prepare the data to send
-            var data = 'mark_as_repaired=true&book_id=' + bookId + '&category=' + category + '&accession_no=' + accessionNo + '&repair_description=' + repairDescription;
+            var data = 'mark_as_repaired=true&book_id=' + bookId + '&category=' + category + '&accession_no=' + accessionNo + '&book_condition=' + repairDescription;
 
             // Send the data
             xhr.send(data);

@@ -45,7 +45,7 @@ try {
                 $sql = "CREATE TABLE `$add_category_sanitized` (
                     id INT(11) AUTO_INCREMENT PRIMARY KEY,
                     Call_Number VARCHAR(250) NOT NULL,
-                    ISBN VARCHAR(20),
+                    isbn VARCHAR(20),
                     Department VARCHAR(250) NOT NULL,
                     Title VARCHAR(250) NOT NULL,
                     Author VARCHAR(250) NOT NULL,

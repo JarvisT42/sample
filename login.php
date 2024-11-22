@@ -190,7 +190,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_register'])) {
         $updateStmt->bind_param("s", $validated_student_id);
 
         if ($updateStmt->execute()) {
-            echo "<script>alert('Student registered successfully and status updated!');</script>";
+            echo "<script>alert('Student registered successfully ');</script>";
         } else {
             echo "Error updating student status: " . $updateStmt->error;
         }

@@ -88,33 +88,33 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
                                 <!-- Dropdown menu -->
                                 <div id="dropdownAction" class="z-10 hidden absolute mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600">
-    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
-        <!-- Default "All fields" option -->
-        <li>
-            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a>
-        </li>
-        <?php
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_array()) {
-                $tableName = htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8');
-                // Exclude the 'e-books' table
-                if ($tableName !== 'e-books') {
-                    echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . $tableName . '">' . $tableName . '</a></li>';
-                }
-            }
-        } else {
-            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
-        }
-        ?>
-    </ul>
-</div>
+                                    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
+                                        <!-- Default "All fields" option -->
+                                        <li>
+                                            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="All fields">All fields</a>
+                                        </li>
+                                        <?php
+                                        if ($result->num_rows > 0) {
+                                            while ($row = $result->fetch_array()) {
+                                                $tableName = htmlspecialchars($row[0], ENT_QUOTES, 'UTF-8');
+                                                // Exclude the 'e-books' table
+                                                if ($tableName !== 'e-books') {
+                                                    echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-table="' . $tableName . '">' . $tableName . '</a></li>';
+                                                }
+                                            }
+                                        } else {
+                                            echo '<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">No tables found</a></li>';
+                                        }
+                                        ?>
+                                    </ul>
+                                </div>
                             </div>
 
                             <!-- Checkbox -->
-                            <div class="flex items-center space-x-2">
+                            <!-- <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="checkboxOption" name="checkboxGroup" class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded-lg focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-500 transition-transform transform hover:scale-105">
                                 <label for="checkboxOption" class="text-sm text-gray-900 dark:text-gray-300">Available</label>
-                            </div>
+                            </div> -->
                         </div>
                         <!-- Search Input and Button -->
                         <div class="relative flex items-center">

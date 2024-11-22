@@ -45,6 +45,12 @@
                             <label for="amount">TOTAL AMOUNT TO BE PAID:</label>
                             <p id="amount" class="w-full"><?php echo htmlspecialchars($_GET['amount']); ?></p>
                         </div>
+
+                        <div class="p-4 mt-6 text-center">
+                        <div class="border-t border-gray-500 w-1/2 mx-auto"></div>
+                        <p class="mt-2 font-semibold">Librarian's Signature</p>
+                    </div>
+
                     </div>
                 </div>
             </div>

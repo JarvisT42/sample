@@ -80,30 +80,35 @@ if (!isset($_SESSION['logged_Admin']) || $_SESSION['logged_Admin'] !== true) {
 
 
                             <form id="categoryForm" class="space-y-4" method="POST" enctype="multipart/form-data">
-                                <div class="grid grid-cols-7 items-center gap-4 mt-3">
-                                    <label for="category" class="text-left">CATEGORY:</label>
-                                    <?php
-                                    include("../connection.php");
-                                    $sql = "SHOW TABLES FROM gfi_library_database_books_records";
-                                    $result = mysqli_query($conn, $sql);
-                                    ?>
-                                    <select id="category" class="col-span-2 border rounded px-3 py-2" name="table" required>
-                                        <option value="" disabled selected>Select Category</option>
-                                        <?php
-                                        if ($result->num_rows > 0) {
-                                            while ($row = $result->fetch_array()) {
-                                                $tableName = $row[0];
-                                                echo '<option value="' . htmlspecialchars($tableName) . '">' . htmlspecialchars($tableName) . '</option>';
-                                            }
-                                        }
-                                        ?>
-                                    </select>
-                                    <div class="flex items-center col-span-2">
-                                        <input type="checkbox" id="checkbox_id" name="add_category_checkbox" class="mr-2" />
-                                        <label for="checkbox_id" class="text-left">ADD CATEGORY:</label>
-                                    </div>
-                                    <input id="add_category" name="add_category" placeholder="Add Category" class="col-span-2 border rounded px-3 py-2" disabled />
-                                </div>
+                            <div class="grid grid-cols-7 items-center gap-4 mt-3">
+    <label for="category" class="text-left">CATEGORY:</label>
+    <?php
+    include("../connection.php");
+
+    $excludedTable = "e-books";
+    $sql = "SHOW TABLES FROM gfi_library_database_books_records";
+    $result = mysqli_query($conn, $sql);
+    ?>
+    <select id="category" class="col-span-2 border rounded px-3 py-2" name="table" required>
+        <option value="" disabled selected>Select Category</option>
+        <?php
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_array()) {
+                $tableName = $row[0];
+                if ($tableName !== $excludedTable) {
+                    echo '<option value="' . htmlspecialchars($tableName) . '">' . htmlspecialchars($tableName) . '</option>';
+                }
+            }
+        }
+        ?>
+    </select>
+    <div class="flex items-center col-span-2">
+        <input type="checkbox" id="checkbox_id" name="add_category_checkbox" class="mr-2" />
+        <label for="checkbox_id" class="text-left">ADD CATEGORY:</label>
+    </div>
+    <input id="add_category" name="add_category" placeholder="Add Category" class="col-span-2 border rounded px-3 py-2" disabled />
+</div>
+
 
                                 <div class="grid grid-cols-3 items-center gap-4">
                                     <label for="available_to_borrow" class="text-left">AVAILABLE TO BORROW:</label>
